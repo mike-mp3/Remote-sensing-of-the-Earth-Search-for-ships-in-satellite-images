@@ -4,4 +4,4 @@
 * Цель:
     Создать веб-приложение для нахождения и классификации судов в акватории Черного моря
 
-![MAI](https://mai.ru/press/brand/download/Default/RU/Default.svg) 
+![MAI](https://mai.ru/press/brand/download/Default/RU/Default.svg width="300" height="300") 
