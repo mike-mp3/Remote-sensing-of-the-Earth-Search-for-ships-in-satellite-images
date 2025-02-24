@@ -4,7 +4,7 @@
     const imagesContainer = [document.querySelector](document.querySelector('.images-container'));
     let uploadedImages = [];
 
-    // Обработчик события отправки формы
+    // Обработчик события отправки формы ToDo
     [form.addEventListener](form.addEventListener('submit'), (event) => {
         [event.preventDefault()](event.preventDefault());
 
