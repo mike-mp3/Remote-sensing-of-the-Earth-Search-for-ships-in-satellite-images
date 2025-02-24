@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Загрузка изображений</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Подключаем файл стилей -->
+</head>
+<body>
+    <div class="container">
+        <h1>Загрузите изображение</h1>
+        
+        <!-- Форма для загрузки файла -->
+        <form id="upload-form" method="post" enctype="multipart/form-data">
+            <input type="file" id="file-input" accept="image/*" multiple>
+            <button type="submit">Отправить</button>
+        </form>
+
+        <!-- Блок для отображения изображений -->
+        <h2>Примеры работы</h2>
+        <div class="images-container">
+            <img src="/Frontend/img/photo_2025-02-23_23-25-46.jpg" alt="Image 1" class="uploaded-image">
+            <img src="/Frontend/img/photo_2025-02-23_23-25-49.jpg" alt="Image 2" class="uploaded-image">
+            <img src="/Frontend/img/photo_2025-02-23_23-25-50.jpg" alt="Image 3" class="uploaded-image">
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2025 Все права не защищены.</p>
+        <ul>
+            <li><a href="#">Made by Orion team</a></li>
+            <li><a href="#">in progress</a></li>
+            <li><a href="#">Сделано с любовью</a></li>
+        </ul>
+    </footer>
+
+
+    <script src="app.js"></script> <!-- Подключение скрипта -->
+</body>
+</html>
