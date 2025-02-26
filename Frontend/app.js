@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {//тут что-то объ
                     img.classList.add('uploaded-image'); //говорим в какакой класс закинуть 
                     imagesContainer.appendChild(img);
                     uploadedImages.push(img); // Сохраняем ссылку на добавленное изображение
-                    console.log(uploadedImages.push(img))
+                    console.log(img)
                 };
                 reader.readAsDataURL(fileInput.files[i]); // Читаем файл
             }
