@@ -1,4 +1,4 @@
-FROM postgres:13.1
+FROM postgres:16
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends dos2unix
