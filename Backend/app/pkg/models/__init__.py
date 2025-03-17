@@ -1,6 +1,22 @@
 """Business models."""
 # ruff: noqa
 
+
+from app.pkg.models.app.user_roles import (
+    UserRoleID,
+    UserRoleName,
+)
+
+from app.pkg.models.app.user import (
+    User,
+    CreateUserRequest,
+    CreateUserCommand,
+    CreateUserResponse
+)
+
+
+
+
 from app.pkg.models.app.city import (
     City,
     CreateCityCommand,
