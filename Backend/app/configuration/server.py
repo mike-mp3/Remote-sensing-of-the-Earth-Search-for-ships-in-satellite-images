@@ -6,14 +6,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.configuration.events import on_shutdown, on_startup
-from app.configuration.logger import EndpointFilter
 from app.internal.pkg.middlewares.handle_http_exceptions import (
     handle_api_exceptions,
     handle_drivers_exceptions,
     handle_internal_exception,
 )
-from app.internal.pkg.middlewares.metrics import metrics
-from app.internal.pkg.middlewares.prometheus import PrometheusMiddleware
 from app.internal.routes import __routes__
 from app.pkg.models.base import BaseAPIException
 from app.pkg.models.types.fastapi import FastAPITypes
@@ -103,8 +100,7 @@ class Server:
         """
 
         app.add_exception_handler(BaseAPIException, handle_api_exceptions)
-        app.add_exception_handler(BaseAPIException, handle_drivers_exceptions)
-        app.add_exception_handler(BaseAPIException, handle_internal_exception)
+        app.add_exception_handler(Exception, handle_internal_exception)
 
     @staticmethod
     def __register_cors_origins(app: FastAPITypes.instance) -> None:
@@ -132,41 +128,6 @@ class Server:
             allow_headers=["*"],
         )
 
-    def __register_prometheus(self, app: FastAPITypes.instance) -> None:
-        """Register prometheus middleware.
-
-        Args:
-            app:
-                ``FastAPI`` application instance.
-
-        Returns:
-            None
-        """
-
-        app.add_middleware(
-            PrometheusMiddleware,
-            app_name=self.__app_name,
-        )
-
-        self.__register_metrics_collector(app=app)
-
-    def __register_metrics_collector(
-        self,
-        app: FastAPITypes.instance,
-    ) -> None:
-        """Expose internal aggregated metrics to public endpoint.
-
-        Args:
-            app:
-                ``FastAPI`` application instance.
-
-        Returns:
-            None
-        """
-
-        metrics_endpoint = "/metrics"
-        app.add_route(metrics_endpoint, metrics)
-        self.__filter_logs(metrics_endpoint)
 
     def _register_middlewares(self, app) -> None:
         """Apply routes middlewares.
@@ -180,17 +141,4 @@ class Server:
         """
 
         self.__register_cors_origins(app)
-        self.__register_prometheus(app)
 
-    @staticmethod
-    def __filter_logs(endpoint: str) -> None:
-        """Filter ignore /metrics in uvicorn logs.
-
-        Args:
-            endpoint: Specific endpoint to filter logs.
-
-        Returns:
-            None
-        """
-
-        logging.getLogger("uvicorn.access").addFilter(EndpointFilter(endpoint=endpoint))

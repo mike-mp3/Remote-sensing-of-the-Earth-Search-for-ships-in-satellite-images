@@ -1,4 +1,4 @@
-"""
+'''"""
 cities
 """
 
@@ -14,7 +14,7 @@ steps = [
                 country_id int not null references countries,
                 name text not null unique,
                 code text not null unique,
-                
+
                 constraint unique_country_and_city_code unique (country_id, code)
             );
         """,
@@ -23,3 +23,4 @@ steps = [
         """
     )
 ]
+'''

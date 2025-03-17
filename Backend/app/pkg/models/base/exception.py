@@ -55,18 +55,3 @@ class BaseAPIException(HTTPException):
             self.message = str(message)
 
         super().__init__(status_code=self.status_code, detail=self.message)
-
-    @classmethod
-    def generate_openapi(cls):
-        return {
-            cls.status_code: {
-                "description": cls.message,
-                "content": {
-                    "application/json": {
-                        "example": {
-                            "message": cls.message,
-                        },
-                    },
-                },
-            },
-        }

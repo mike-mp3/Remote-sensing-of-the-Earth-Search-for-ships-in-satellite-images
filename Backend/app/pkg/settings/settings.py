@@ -57,15 +57,10 @@ class _Settings(BaseSettings):
 class Postgresql(_Settings):
     """Postgresql settings."""
 
-    #: str: Postgresql host.
     HOST: str = "localhost"
-    #: PositiveInt: positive int (x > 0) port of postgresql.
     PORT: PositiveInt = 5432
-    #: str: Postgresql user.
     USER: str = "postgres"
-    #: SecretStr: Postgresql password.
     PASSWORD: SecretStr = SecretStr("postgres")
-    #: str: Postgresql database name.
     DATABASE_NAME: str = "postgres"
 
     #: PositiveInt: Min count of connections in one pool to postgresql.
@@ -105,7 +100,7 @@ class Postgresql(_Settings):
             password=f"{urllib.parse.quote_plus(values.PASSWORD.get_secret_value())}",
             host=f"{values.HOST}",
             port=int(f"{values.PORT}"),
-            path=f"/{values.DATABASE_NAME}",
+            path=f"{values.DATABASE_NAME}",
         )
         return values
 
@@ -134,11 +129,8 @@ class APIServer(_Settings):
     """API settings."""
 
     # --- API SETTINGS ---
-    #: str: Name of API service
     INSTANCE_APP_NAME: str = "project_name"
-    #: str: API host.
-    HOST: str = "localhost"
-    #: PositiveInt: positive int (x > 0) port of API.
+    HOST: str = "project_host"
     PORT: PositiveInt = 5000
 
     # --- SECURITY SETTINGS ---
@@ -149,14 +141,6 @@ class APIServer(_Settings):
     #: Logging: Logging settings.
     LOGGER: Logging
 
-
-class Centrifugo(_Settings):
-    """Centrifugo settings."""
-
-    #: str: Centrifugo host.
-    HOST: str = "localhost"
-    #: PositiveInt: positive int (x > 0) port of centrifugo.
-    PORT: PositiveInt = 8001
 
 
 class Settings(_Settings):
@@ -178,5 +162,4 @@ class Settings(_Settings):
 @lru_cache
 def get_settings(env_file: str = ".env") -> Settings:
     """Create settings instance."""
-
     return Settings(_env_file=find_dotenv(env_file))

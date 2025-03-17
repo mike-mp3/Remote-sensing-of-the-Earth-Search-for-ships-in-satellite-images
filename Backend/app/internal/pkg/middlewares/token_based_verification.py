@@ -11,7 +11,6 @@ __all__ = ["token_based_verification"]
 x_api_key_header = APIKeyHeader(name="X-ACCESS-TOKEN")
 
 
-# TODO: Add X_API_TOKEN to settings
 async def token_based_verification(
     api_key_header: str = Security(x_api_key_header),
 ):

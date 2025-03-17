@@ -75,7 +75,7 @@ def collect_response(fn):
         if not response:
             raise EmptyResult
 
-        return pydantic.parse_obj_as(
+        return pydantic.validate_python(
             (ann := fn.__annotations__["return"]),
             await __convert_response(response=response, annotations=str(ann)),
         )

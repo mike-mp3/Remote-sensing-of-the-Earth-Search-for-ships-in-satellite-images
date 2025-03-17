@@ -1,4 +1,4 @@
-"""Routes for city module."""
+'''"""Routes for city module."""
 
 
 from typing import List
@@ -88,3 +88,4 @@ async def delete_city(
     city_service: CityService = Depends(Provide[Services.city_service]),
 ):
     return await city_service.delete_city(cmd=models.DeleteCityCommand(id=city_id))
+'''

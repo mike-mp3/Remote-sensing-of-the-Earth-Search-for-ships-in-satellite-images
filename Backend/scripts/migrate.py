@@ -62,8 +62,7 @@ def run(
     Returns:
         None
     """
-
-    backend = get_backend(settings.POSTGRES.DSN)
+    backend = get_backend(str(settings.POSTGRES.DSN))
     migrations = read_migrations("migrations")
     action(backend, migrations)
 

@@ -20,7 +20,7 @@ class Postgresql(BaseAsyncResource):
             Created connection pool.
         """
 
-        return await aiopg.create_pool(dsn=dsn, *args, **kwargs)
+        return await aiopg.create_pool(dsn=str(dsn), *args, **kwargs)
 
     async def shutdown(self, resource: aiopg.Pool):
         """Close connection.

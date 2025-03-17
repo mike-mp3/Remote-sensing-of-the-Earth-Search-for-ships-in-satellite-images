@@ -5,15 +5,5 @@ from enum import Enum
 __all__ = ["BaseEnum"]
 
 
-class BaseEnum(Enum):
+class BaseEnum(str, Enum):
     """Base ENUM model."""
-
-    def __repr__(self) -> str:
-        """Return string representation of enum value."""
-
-        return self.__str__()
-
-    def __str__(self) -> str:
-        """Return string representation of enum value."""
-
-        return str(self.value)
