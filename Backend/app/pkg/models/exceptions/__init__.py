@@ -8,3 +8,7 @@ Examples:
         ...     message = "My message"
         ...     status_code = status.HTTP_400_BAD_REQUEST
 """
+
+from app.pkg.models.exceptions.user import (
+    UserAlreadyExists
+)
