@@ -156,7 +156,7 @@ footer {
 /* Навигационные кнопки */
 .nav-buttons {
     position: fixed;
-    top: 20px;
+    top: 90px;
     right: 20px;
     z-index: 1000;
 }
