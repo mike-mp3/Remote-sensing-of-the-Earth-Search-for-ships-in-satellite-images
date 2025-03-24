@@ -24,3 +24,49 @@ document.addEventListener('DOMContentLoaded', () => {//тут что-то объ
         }
     });
 })
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Получаем элементы
+    const authBtn = document.getElementById('auth-btn');
+    const modal = document.getElementById('auth-modal');
+    const closeBtn = document.querySelector('.close-btn');
+    const loginForm = document.getElementById('login-form');
+
+    // Открываем модальное окно при клике на кнопку авторизации
+    authBtn.addEventListener('click', function() {
+        modal.style.display = 'block';
+    });
+
+    // Закрываем модальное окно при клике на крестик
+    closeBtn.addEventListener('click', function() {
+        modal.style.display = 'none';
+    });
+
+    // Закрываем модальное окно при клике вне его
+    window.addEventListener('click', function(event) {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    // Обработка формы авторизации
+    loginForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        
+        // Здесь можно добавить логику проверки авторизации
+        console.log('Логин:', username, 'Пароль:', password);
+        
+        // Закрываем модальное окно после отправки формы
+        modal.style.display = 'none';
+        
+        // Меняем текст кнопки на "Выйти" после авторизации
+        authBtn.textContent = 'Выйти';
+        authBtn.addEventListener('click', function() {
+            // Логика выхода
+            authBtn.textContent = 'Войти';
+        });
+    });
+});
