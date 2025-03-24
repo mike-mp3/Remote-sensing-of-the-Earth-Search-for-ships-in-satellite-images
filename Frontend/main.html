@@ -4,22 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Загрузка изображений</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Подключаем файл стилей -->
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Кнопка авторизации в правом верхнем углу -->
-    <button id="auth-btn" class="auth-button">Войти</button>
+    <!-- Кнопка авторизации/регистрации -->
+    <button id="auth-btn" class="auth-button">Войти / Регистрация</button>
 
     <div class="container">
         <h1>Загрузите изображение</h1>
         
-        <!-- Форма для загрузки файла -->
         <form id="upload-form" method="post" enctype="multipart/form-data">
             <input type="file" id="file-input" accept="image/*" multiple>
             <button type="submit">Отправить</button>
         </form>
 
-        <!-- Блок для отображения изображений -->
         <h2>Примеры работы</h2>
         <div class="images-container">
             <img src="/Frontend/img/photo_2025-02-23_23-25-46.jpg" alt="Image 1" class="uploaded-image">
@@ -28,12 +26,20 @@
         </div>
     </div>
 
-    <!-- Модальное окно авторизации (изначально скрыто) -->
+    <!-- Модальное окно -->
     <div id="auth-modal" class="modal">
         <div class="modal-content">
             <span class="close-btn">&times;</span>
-            <h2>Авторизация</h2>
-            <form id="login-form">
+            
+            <!-- Переключатель между формами -->
+            <div class="form-switcher">
+                <button id="show-login" class="active">Вход</button>
+                <button id="show-register">Регистрация</button>
+            </div>
+            
+            <!-- Форма авторизации -->
+            <form id="login-form" class="auth-form">
+                <h2>Авторизация</h2>
                 <div class="form-group">
                     <label for="username">Логин:</label>
                     <input type="text" id="username" name="username" required>
@@ -43,6 +49,24 @@
                     <input type="password" id="password" name="password" required>
                 </div>
                 <button type="submit">Войти</button>
+            </form>
+            
+            <!-- Форма регистрации -->
+            <form id="register-form" class="auth-form" style="display:none;">
+                <h2>Регистрация</h2>
+                <div class="form-group">
+                    <label for="reg-username">Логин:</label>
+                    <input type="text" id="reg-username" name="reg-username" required>
+                </div>
+                <div class="form-group">
+                    <label for="reg-password">Пароль:</label>
+                    <input type="password" id="reg-password" name="reg-password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">Подтвердите пароль:</label>
+                    <input type="password" id="confirm-password" name="confirm-password" required>
+                </div>
+                <button type="submit">Зарегистрироваться</button>
             </form>
         </div>
     </div>
@@ -56,6 +80,6 @@
         </ul>
     </footer>
 
-    <script src="app.js"></script> <!-- Подключение скрипта -->
+    <script src="app.js"></script>
 </body>
 </html>
