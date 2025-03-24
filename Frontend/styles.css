@@ -122,3 +122,34 @@ footer {
 #login-form button:hover {
     background-color: #45a049;
 }
+
+/* Стили для переключателя форм */
+.form-switcher {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.form-switcher button {
+    flex: 1;
+    padding: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    border-bottom: 2px solid transparent;
+}
+
+.form-switcher button.active {
+    border-bottom: 2px solid #4CAF50;
+    font-weight: bold;
+}
+
+/* Стили для форм */
+.auth-form {
+    display: none;
+}
+
+.auth-form.active {
+    display: block;
+}
