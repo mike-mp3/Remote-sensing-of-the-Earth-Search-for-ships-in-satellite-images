@@ -7,16 +7,17 @@
     <link rel="stylesheet" href="styles.css"> <!-- Подключаем файл стилей -->
 </head>
 <body>
+    <!-- Кнопка авторизации в правом верхнем углу -->
+    <button id="auth-btn" class="auth-button">Войти</button>
+
     <div class="container">
         <h1>Загрузите изображение</h1>
         
         <!-- Форма для загрузки файла -->
-        <!-- ToDo --><!-- ToDo -->
         <form id="upload-form" method="post" enctype="multipart/form-data">
             <input type="file" id="file-input" accept="image/*" multiple>
             <button type="submit">Отправить</button>
         </form>
-        <!-- ToDo --><!-- ToDo -->
 
         <!-- Блок для отображения изображений -->
         <h2>Примеры работы</h2>
@@ -24,6 +25,25 @@
             <img src="/Frontend/img/photo_2025-02-23_23-25-46.jpg" alt="Image 1" class="uploaded-image">
             <img src="/Frontend/img/photo_2025-02-23_23-25-49.jpg" alt="Image 2" class="uploaded-image">
             <img src="/Frontend/img/photo_2025-02-23_23-25-50.jpg" alt="Image 3" class="uploaded-image">
+        </div>
+    </div>
+
+    <!-- Модальное окно авторизации (изначально скрыто) -->
+    <div id="auth-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Авторизация</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username">Логин:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Пароль:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit">Войти</button>
+            </form>
         </div>
     </div>
 
@@ -35,7 +55,6 @@
             <li><a href="#">Сделано с любовью</a></li>
         </ul>
     </footer>
-
 
     <script src="app.js"></script> <!-- Подключение скрипта -->
 </body>
