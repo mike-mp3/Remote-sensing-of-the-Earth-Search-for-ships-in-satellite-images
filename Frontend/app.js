@@ -26,47 +26,81 @@ document.addEventListener('DOMContentLoaded', () => {//тут что-то объ
 })
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Получаем элементы
+    // Элементы
     const authBtn = document.getElementById('auth-btn');
     const modal = document.getElementById('auth-modal');
     const closeBtn = document.querySelector('.close-btn');
     const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    const showLoginBtn = document.getElementById('show-login');
+    const showRegisterBtn = document.getElementById('show-register');
 
-    // Открываем модальное окно при клике на кнопку авторизации
+    // Открытие модального окна
     authBtn.addEventListener('click', function() {
         modal.style.display = 'block';
+        // По умолчанию показываем форму входа
+        showLoginForm();
     });
 
-    // Закрываем модальное окно при клике на крестик
-    closeBtn.addEventListener('click', function() {
-        modal.style.display = 'none';
-    });
-
-    // Закрываем модальное окно при клике вне его
+    // Закрытие модального окна
+    closeBtn.addEventListener('click', closeModal);
     window.addEventListener('click', function(event) {
-        if (event.target === modal) {
-            modal.style.display = 'none';
-        }
+        if (event.target === modal) closeModal();
     });
 
-    // Обработка формы авторизации
+    // Переключение между формами
+    showLoginBtn.addEventListener('click', showLoginForm);
+    showRegisterBtn.addEventListener('click', showRegisterForm);
+
+    // Обработка формы входа
     loginForm.addEventListener('submit', function(e) {
         e.preventDefault();
-        
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
         
-        // Здесь можно добавить логику проверки авторизации
-        console.log('Логин:', username, 'Пароль:', password);
+        // Здесь должна быть проверка авторизации
+        console.log('Вход:', username, password);
         
-        // Закрываем модальное окно после отправки формы
-        modal.style.display = 'none';
-        
-        // Меняем текст кнопки на "Выйти" после авторизации
+        closeModal();
         authBtn.textContent = 'Выйти';
-        authBtn.addEventListener('click', function() {
-            // Логика выхода
-            authBtn.textContent = 'Войти';
-        });
+        // Добавьте здесь логику выхода при повторном клике
     });
+
+    // Обработка формы регистрации
+    registerForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const username = document.getElementById('reg-username').value;
+        const password = document.getElementById('reg-password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+        
+        if (password !== confirmPassword) {
+            alert('Пароли не совпадают!');
+            return;
+        }
+        
+        // Здесь должна быть логика регистрации
+        console.log('Регистрация:', username, password);
+        
+        alert('Регистрация успешна! Теперь вы можете войти.');
+        showLoginForm();
+    });
+
+    // Функции
+    function closeModal() {
+        modal.style.display = 'none';
+    }
+
+    function showLoginForm() {
+        loginForm.style.display = 'block';
+        registerForm.style.display = 'none';
+        showLoginBtn.classList.add('active');
+        showRegisterBtn.classList.remove('active');
+    }
+
+    function showRegisterForm() {
+        loginForm.style.display = 'none';
+        registerForm.style.display = 'block';
+        showLoginBtn.classList.remove('active');
+        showRegisterBtn.classList.add('active');
+    }
 });
