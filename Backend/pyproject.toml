@@ -2,6 +2,7 @@
 name = "Ships"
 version = "2.1.0"
 authors = ["alg3bra@mail.ru"]
+package-mode=false
 
 [tool.poetry.dependencies]
 python = "^3.13"
@@ -13,8 +14,9 @@ yoyo-migrations = "^8.1.0"
 aiopg = "^1.3.0"
 bcrypt = "^4.0.1"
 setuptools = ">=68.0.0"
-
 pydantic-settings = "^2.6.1"
+httpx= "^0.28.1"
+aiosmtplib="^4.0.0"
 
 [tool.poetry.group.dev.dependencies]
 MarkupSafe = "^2.1.0"

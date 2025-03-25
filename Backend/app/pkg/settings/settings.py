@@ -125,6 +125,20 @@ class Logging(_Settings):
         return v
 
 
+class SMTP(_Settings):
+    """SMTP settings."""
+
+    # --- SMTP SETTINGS ---
+    HOST: str
+    PORT: int = 587
+    USE_TLS: bool = True
+
+    # --- SENDER ACCOUNT SETTINGS --
+    USERNAME: str
+    PASSWORD: SecretStr
+
+
+
 class APIServer(_Settings):
     """API settings."""
 
@@ -134,11 +148,9 @@ class APIServer(_Settings):
     PORT: PositiveInt = 5000
 
     # --- SECURITY SETTINGS ---
-    #: SecretStr: Secret key for token auth.
     X_ACCESS_TOKEN: SecretStr = SecretStr("secret")
 
     # --- OTHER SETTINGS ---
-    #: Logging: Logging settings.
     LOGGER: Logging
 
 
@@ -155,6 +167,9 @@ class Settings(_Settings):
 
     #: Postgresql: Postgresql settings.
     POSTGRES: Postgresql
+
+    #: SMTP: SMTP settings.
+    SMTP: SMTP
 
 
 # TODO: Возможно даже lru_cache не стоит использовать. Стоит использовать meta sigleton.

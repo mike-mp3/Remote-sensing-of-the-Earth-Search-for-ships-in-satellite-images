@@ -23,3 +23,14 @@ async def create_user(
     user_service: UserService = Depends(Provide[Services.user_service])
 ):
     return await user_service.create_user(cmd)
+
+
+# не используемая ручка. просто потыкать для теста
+@router.post(
+    "/send-email"
+)
+@inject
+async def create_user(
+    user_service: UserService = Depends(Provide[Services.user_service])
+):
+    return await user_service.mock()
