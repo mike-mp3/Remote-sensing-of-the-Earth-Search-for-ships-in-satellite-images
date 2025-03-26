@@ -17,6 +17,7 @@ __all__ = [
     "CreateUserRequest",
     "CreateUserCommand",
     "CreateUserResponse",
+    "CreateUserConfirmationCode"
 ]
 
 class UserFields:
@@ -43,23 +44,26 @@ class UserFields:
         max_length=64,
         examples=["SecurePass123"],
     )
-
-    #
+    #todo: добавить поля в Field encrypted_password
     encrypted_password = Field(
         description="Encrypted user password"
     )
-
     is_activated = Field(
         description="Has user confirmed his email",
         examples=["True", "False"],
     )
-
+    confirmation_code = Field(
+        description="Confirmation email code",
+        min_length=6,
+        max_length=6,
+        examples=["357298"],
+    )
 
 class BaseUser(BaseModel):
     """User base model"""
 
 
-# Commands
+# Representation layer
 class CreateUserRequest(BaseUser):
     email: EmailStr = UserFields.email
     password: SecretStr = UserFields.unencrypted_password
@@ -77,13 +81,12 @@ class CreateUserRequest(BaseUser):
 
         return v
 
-
-# Commands (DataBase)
-class CreateUserCommand(BaseUser):
+class CreateUserResponse(BaseUser):
     email: EmailStr = UserFields.email
-    password: SecretBytes = UserFields.encrypted_password
+    role_name: UserRoleName = UserRoleEnum.DEFAULT.name
 
-#
+
+# Commands - SQL
 class User(BaseUser):
     id: PositiveInt = UserFields.id
     email: EmailStr = UserFields.email
@@ -91,8 +94,12 @@ class User(BaseUser):
     is_activated: bool = UserFields.is_activated
     password: SecretStr = UserFields.encrypted_password
 
-
-# Responses
-class CreateUserResponse(BaseUser):
+class CreateUserCommand(BaseUser):
     email: EmailStr = UserFields.email
-    role_name: UserRoleName = UserRoleEnum.DEFAULT.name
+    password: SecretBytes = UserFields.encrypted_password
+
+
+# Commands - NoSQL
+class CreateUserConfirmationCode(BaseUser):
+    email: EmailStr = UserFields.email
+    confirmation_code: SecretStr = UserFields.confirmation_code

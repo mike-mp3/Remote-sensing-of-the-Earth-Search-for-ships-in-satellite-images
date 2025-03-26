@@ -11,10 +11,9 @@ from app.pkg.models.app.user import (
     User,
     CreateUserRequest,
     CreateUserCommand,
-    CreateUserResponse
+    CreateUserResponse,
+    CreateUserConfirmationCode,
 )
-
-
 
 
 from app.pkg.models.app.city import (

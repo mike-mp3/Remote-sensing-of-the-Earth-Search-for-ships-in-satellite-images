@@ -1,6 +1,6 @@
 services:
   ship__api:
-    container_name: ship__api
+    container_name: ${API__HOST}
     build:
       context: .
       dockerfile: docker/api/Dockerfile
@@ -10,8 +10,8 @@ services:
     env_file:
       - .env
     depends_on:
-      - ship__migrations
-      - ship__postgres
+      - ${POSTGRES__HOST}
+      - ${POSTGRES__HOST}__migrations
 #      - redis
     ports:
       - ${API__PORT}:5000
@@ -28,7 +28,7 @@ services:
       - ./app:/usr/src/app/app
 
   ship__postgres:
-    container_name: ship__postgres
+    container_name: ${POSTGRES__HOST}
     build:
       context: .
       dockerfile: docker/postgresql/Dockerfile
@@ -47,18 +47,18 @@ services:
     volumes:
       - ship__postgres_data:/var/lib/postgresql/data
 
-  ship__migrations:
-    container_name: ship__migrations
+  ship__postgres__migrations:
+    container_name: ${POSTGRES__HOST}__migrations
     build:
       context: .
       dockerfile: docker/migrations/Dockerfile
     env_file:
       - .env
     environment:
-      - POSTGRES__HOST=ship__postgres
+      - POSTGRES__HOST=${POSTGRES__HOST}
       - POSTGRES__PORT=5432
     depends_on:
-      - ship__postgres
+      - ${POSTGRES__HOST}
     command: [
         "bash", "./scripts/wait-for-server.sh", "ship__postgres:5432", "-t", "120",
         "--",

@@ -33,4 +33,4 @@ async def create_user(
 async def create_user(
     user_service: UserService = Depends(Provide[Services.user_service])
 ):
-    return await user_service.mock()
+    return await user_service.useless_mock()

@@ -1,6 +1,7 @@
 import logging
 
 from app.internal.repository.postgresql.connection import get_connection
+from app.internal.repository.postgresql.handlers.collect_response import collect_response
 from app.internal.repository.repository import Repository
 from app.pkg import models
 
@@ -12,6 +13,7 @@ logger = logging.getLogger(__name__)
 class UserRepository(Repository):
     """User repository implementation."""
 
+    @collect_response
     async def create(self, cmd: models.CreateUserCommand) -> models.User:
         q = """
             INSERT INTO users (email, password) 
