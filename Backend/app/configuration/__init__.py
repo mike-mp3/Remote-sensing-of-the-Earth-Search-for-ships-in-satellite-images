@@ -21,7 +21,7 @@ Examples:
 
 from app.internal.services import Services
 from app.pkg.clients import Clients
-from app.pkg.connectors import Connectors, PostgresSQL
+from app.pkg.connectors import Connectors, PostgresSQL, AsyncRedis
 from app.pkg.models.core import Container, Containers
 from app.pkg.models.core.containers import Resource
 
@@ -35,7 +35,10 @@ __containers__ = Containers(
         Container(container=Services),
         Resource(
             container=Connectors,
-            depends_on=[Container(container=PostgresSQL)],
+            depends_on=[
+                Container(container=PostgresSQL),
+                Container(container=AsyncRedis),
+            ],
         ),
     ],
 )

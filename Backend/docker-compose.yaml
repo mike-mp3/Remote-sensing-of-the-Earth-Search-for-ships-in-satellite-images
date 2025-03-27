@@ -65,6 +65,21 @@ services:
         "poetry", "run", "python", "-m", "scripts.migrate"
     ]
 
+  ship__redis:
+    container_name: ${REDIS__HOST}
+    build:
+      context: .
+      dockerfile: docker/redis/Dockerfile
+      args:
+        REDIS_PASSWORD: ${REDIS__PASSWORD}
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - ${REDIS__PORT}:6379
+    volumes:
+      - ship__redis_data:/data
+
 #  grafana:
 #    build:
 #      context: .
@@ -103,3 +118,4 @@ networks:
 
 volumes:
   ship__postgres_data:
+  ship__redis_data:

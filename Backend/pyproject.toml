@@ -17,6 +17,7 @@ setuptools = ">=68.0.0"
 pydantic-settings = "^2.6.1"
 httpx= "^0.28.1"
 aiosmtplib="^4.0.0"
+redis = "^4.6.0"
 
 [tool.poetry.group.dev.dependencies]
 MarkupSafe = "^2.1.0"

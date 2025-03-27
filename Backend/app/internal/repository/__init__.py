@@ -59,8 +59,7 @@ Examples:
 """
 
 from dependency_injector import containers, providers
-
-from app.internal.repository import postgresql
+from app.internal.repository import postgresql, async_redis
 
 __all__ = ["Repositories"]
 
@@ -76,4 +75,5 @@ class Repositories(containers.DeclarativeContainer):
         you **must** add it to this container.
     """
 
-    postgres = providers.Container(postgresql.Repositories)
+    postgresql_ = providers.Container(postgresql.Repositories)
+    async_redis_ = providers.Container(async_redis.AsyncRedisRepositories)

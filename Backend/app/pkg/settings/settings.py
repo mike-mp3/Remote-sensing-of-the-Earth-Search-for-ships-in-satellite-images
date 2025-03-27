@@ -6,7 +6,7 @@ import urllib.parse
 from functools import lru_cache
 
 from dotenv import find_dotenv
-from pydantic import PostgresDsn, model_validator, field_validator
+from pydantic import PostgresDsn, RedisDsn, model_validator, field_validator
 from pydantic.types import PositiveInt, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from app.pkg.models.core.logger import LoggerLevel
@@ -74,26 +74,6 @@ class Postgresql(_Settings):
 
     @model_validator(mode="after")
     def build_dsn(cls, values: "Postgresql"):  # pylint: disable=no-self-argument
-        """Build DSN for postgresql.
-
-        Args:
-            values: dict with all settings.
-
-        Notes:
-            This method is called before any other validation.
-            I use it to build DSN for postgresql.
-
-        See Also:
-            About validators:
-                https://pydantic-docs.helpmanual.io/usage/validators/#root-validators
-
-            About DSN:
-                https://pydantic-docs.helpmanual.io/usage/types/#postgresdsn
-
-        Returns:
-            dict with all settings and DSN.
-        """
-
         values.DSN = PostgresDsn.build(
             scheme="postgresql",
             username=f"{values.USER}",
@@ -101,6 +81,28 @@ class Postgresql(_Settings):
             host=f"{values.HOST}",
             port=int(f"{values.PORT}"),
             path=f"{values.DATABASE_NAME}",
+        )
+        return values
+
+
+class Redis(_Settings):
+    """Redis settings."""
+
+    HOST: str = "localhost"
+    PORT: PositiveInt = 6379
+    PASSWORD: SecretStr = SecretStr("redis")
+
+    #: str: Concatenation all settings for Redis in one string. (DSN)
+    #  Builds in `root_validator` method.
+    DSN: typing.Optional[str] = None
+
+    @model_validator(mode="after")
+    def build_dsn(cls, values: "Redis"):  # pylint: disable=no-self-argument
+        values.DSN = RedisDsn.build(
+            scheme="redis",
+            password=f"{urllib.parse.quote_plus(values.PASSWORD.get_secret_value())}",
+            host=f"{values.HOST}",
+            port=int(f"{values.PORT}"),
         )
         return values
 
@@ -167,6 +169,9 @@ class Settings(_Settings):
 
     #: Postgresql: Postgresql settings.
     POSTGRES: Postgresql
+
+    #: Redis: Redis settings.
+    REDIS: Redis
 
     #: SMTP: SMTP settings.
     SMTP: SMTP

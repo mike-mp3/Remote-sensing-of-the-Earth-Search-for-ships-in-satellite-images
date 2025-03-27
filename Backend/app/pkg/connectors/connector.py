@@ -6,6 +6,7 @@ Notes:
 """
 
 from abc import abstractmethod
+from contextlib import asynccontextmanager
 
 __all__ = ["BaseConnector"]
 
