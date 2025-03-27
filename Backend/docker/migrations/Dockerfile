@@ -15,7 +15,7 @@ RUN pip install poetry
 
 COPY poetry.lock pyproject.toml /usr/src/postgres_migrations/
 
-RUN poetry install --only main --no-root --no-cache
+RUN poetry install --only main --no-root
 
 COPY . /usr/src/postgres_migrations/
 
