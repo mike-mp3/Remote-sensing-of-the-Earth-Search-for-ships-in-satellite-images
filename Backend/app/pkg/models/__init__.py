@@ -13,6 +13,7 @@ from app.pkg.models.app.user import (
     CreateUserCommand,
     CreateUserResponse,
     CreateUserConfirmationCode,
+    ReadUserConfirmationCode,
 )
 
 

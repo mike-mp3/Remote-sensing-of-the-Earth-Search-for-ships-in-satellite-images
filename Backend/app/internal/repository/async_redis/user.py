@@ -14,6 +14,7 @@ class UserAsyncRedisRepository(Repository):
     async def create(self, cmd: models.CreateUserConfirmationCode) -> None:
         async with get_connection() as connect:
             return await connect.set(
-                str(cmd.email),
-                cmd.confirmation_code.get_secret_value()
+                name=str(cmd.email),
+                value=cmd.confirmation_code.get_secret_value(),
+                ex=cmd.ex_time,
             )

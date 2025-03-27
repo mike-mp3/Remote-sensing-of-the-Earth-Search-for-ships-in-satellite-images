@@ -17,7 +17,8 @@ __all__ = [
     "CreateUserRequest",
     "CreateUserCommand",
     "CreateUserResponse",
-    "CreateUserConfirmationCode"
+    "CreateUserConfirmationCode",
+    "ReadUserConfirmationCode"
 ]
 
 class UserFields:
@@ -57,6 +58,11 @@ class UserFields:
         min_length=6,
         max_length=6,
         examples=["357298"],
+    )
+    confirmation_code_ex_time = Field(
+        description="Confirmation code expiration time in seconds",
+        default=600,
+        le=1200
     )
 
 class BaseUser(BaseModel):
@@ -103,3 +109,7 @@ class CreateUserCommand(BaseUser):
 class CreateUserConfirmationCode(BaseUser):
     email: EmailStr = UserFields.email
     confirmation_code: SecretStr = UserFields.confirmation_code
+    ex_time: PositiveInt = UserFields.confirmation_code_ex_time
+
+class ReadUserConfirmationCode(BaseUser):
+    email: EmailStr = UserFields.email

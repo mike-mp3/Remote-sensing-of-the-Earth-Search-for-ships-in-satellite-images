@@ -34,6 +34,6 @@ class Services(containers.DeclarativeContainer):
         UserService,
         user_repository=repositories.user_repository,
         email_confirmation=clients.email.user_confirmation,
-        redis=redis_mock,
+        user_redis_repository=async_redis.user_repository,
     )
 

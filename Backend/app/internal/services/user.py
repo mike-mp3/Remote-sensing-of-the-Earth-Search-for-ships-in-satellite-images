@@ -1,11 +1,11 @@
 import psycopg2
 from pydantic import SecretBytes, SecretStr
 
-from app.internal.repository.postgresql import (
-    UserRepository,
-)
 from app.internal.repository.repository import BaseRepository
+from app.internal.repository.async_redis import UserAsyncRedisRepository
+from app.internal.repository.postgresql import UserRepository
 from app.internal.workers.background import background_worker
+
 from app.pkg import models
 from app.pkg.clients.email_client.base.template import BaseEmailTemplate
 from app.pkg.logger import get_logger
@@ -20,18 +20,18 @@ class UserService:
     """Service for manage users."""
 
     user_repository: UserRepository
+    user_redis_repository: UserAsyncRedisRepository
     email_confirmation: BaseEmailTemplate
-    redis: BaseRepository
 
     def __init__(
         self,
         user_repository: BaseRepository,
-        redis: BaseRepository,
+        user_redis_repository: BaseRepository,
         email_confirmation: BaseEmailTemplate,
     ):
         self.user_repository = user_repository
         self.email_confirmation = email_confirmation
-        self.redis = redis
+        self.user_redis_repository = user_redis_repository
 
     async def create_user(self, request: models.CreateUserRequest):
         encrypted_password: SecretBytes = hash_password(request.password)
@@ -47,27 +47,26 @@ class UserService:
 
         try:
             confirmation_code: SecretStr = generate_secure_code(digits=6)
-            self.redis.create(
+            await self.user_redis_repository.create(
                 models.CreateUserConfirmationCode(
-                    email=user.email,
+                    email=request.email,
                     confirmation_code=confirmation_code,
                 )
             )
             await background_worker.put(
                 self.email_confirmation.send,
-                user.email,
+                request.email,
                 confirmation_code,
             )
-
             logger.debug(
                 "Added email confirmation background "
-                "task for user %s", user.email
+                "task for user %s", request.email
             )
-            print(user)
+
             return user
         except Exception as err:
             logger.error("Failed to create user: %s", err)
-
+            
 
     async def useless_mock(self):
         logger.debug("Adding email task to background worker")
