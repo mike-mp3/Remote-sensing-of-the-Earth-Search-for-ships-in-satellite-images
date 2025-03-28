@@ -1,6 +1,3 @@
-import psycopg2
-from pydantic import SecretBytes, SecretStr
-
 from app.internal.repository.repository import BaseRepository
 from app.internal.repository.async_redis import UserAsyncRedisRepository
 from app.internal.repository.postgresql import UserRepository

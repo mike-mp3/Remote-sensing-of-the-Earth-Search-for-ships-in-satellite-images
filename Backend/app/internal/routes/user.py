@@ -5,10 +5,8 @@ from app.pkg import models
 from dependency_injector.wiring import Provide, inject
 from app.internal.services import Services
 from app.internal.services.user import UserService
-import psycopg2
 
 router = APIRouter(prefix="/user", tags=["user"])
-
 
 
 @router.post(
