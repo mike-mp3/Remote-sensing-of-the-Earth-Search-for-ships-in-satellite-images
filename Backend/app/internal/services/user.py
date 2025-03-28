@@ -10,8 +10,15 @@ from app.pkg import models
 from app.pkg.clients.email_client.base.template import BaseEmailTemplate
 from app.pkg.logger import get_logger
 from app.pkg.models.exceptions import UserAlreadyExists
-from app.pkg.utils.confirmation_code import generate_secure_code
+from app.pkg.models.exceptions.repository import EmptyResult, UniqueViolation
+from app.pkg.models.exceptions.user import CodeNotFound, IncorrectCode, TryToRegisterAgain
+from app.pkg.utils.confirmation_code import (
+    generate_secure_code,
+    verify_secure_code
+)
 from app.pkg.utils.password import hash_password
+
+from pydantic import SecretBytes, SecretStr, EmailStr
 
 
 logger = get_logger(__name__)
@@ -34,6 +41,7 @@ class UserService:
         self.user_redis_repository = user_redis_repository
 
     async def create_user(self, request: models.CreateUserRequest):
+        user = None
         encrypted_password: SecretBytes = hash_password(request.password)
         try:
             user = await self.user_repository.create(
@@ -42,36 +50,70 @@ class UserService:
                     password=encrypted_password,
                 )
             )
-        except psycopg2.errors.UniqueViolation:
+            await self.__send_confirmation_code(request.email)
+
+        except UniqueViolation:
             raise UserAlreadyExists
-
-        try:
-            confirmation_code: SecretStr = generate_secure_code(digits=6)
-            await self.user_redis_repository.create(
-                models.CreateUserConfirmationCode(
-                    email=request.email,
-                    confirmation_code=confirmation_code,
-                )
-            )
-            await background_worker.put(
-                self.email_confirmation.send,
-                request.email,
-                confirmation_code,
-            )
-            logger.debug(
-                "Added email confirmation background "
-                "task for user %s", request.email
-            )
-
-            return user
         except Exception as err:
             logger.error("Failed to create user: %s", err)
-            
+        return user
 
-    async def useless_mock(self):
-        logger.debug("Adding email task to background worker")
+
+    async def confirm_email(
+        self,
+        request: models.ConfirmUserEmailRequest
+    ) -> None:
+        real_code: SecretStr = await self.user_redis_repository.read(
+            cmd=models.ReadUserConfirmationCode(
+                email=request.email,
+            )
+        )
+        if not real_code.get_secret_value():
+            raise CodeNotFound
+        if not verify_secure_code(request.confirmation_code, real_code):
+            raise IncorrectCode
+        try:
+            await self.user_repository.update_user_status(
+                cmd=models.UpdateUserStatusCommand(
+                    email=request.email,
+                    is_activated=True,
+                )
+            )
+        except EmptyResult:
+            logger.warning("After user creation there is no user in database")
+            raise TryToRegisterAgain
+
+
+    # не надо в бд проверять
+    async def resend_confirmation_code(
+        self,
+        request: models.ResendUserConfirmationCodeRequest
+    ) -> None:
+        try:
+            await self.__send_confirmation_code(request.email)
+        except Exception as err:
+            logger.error("Failed to create user: %s", err)
+
+
+    async def __send_confirmation_code(
+        self,
+        email: EmailStr
+    ):
+        confirmation_code: SecretStr = generate_secure_code(digits=6)
+        await self.user_redis_repository.create(
+            cmd=models.CreateUserConfirmationCode(
+                email=email,
+                confirmation_code=confirmation_code,
+            )
+        )
         await background_worker.put(
             self.email_confirmation.send,
-            "agl-100@mail.ru",
-            SecretStr("111"),
-         )
+            email,
+            confirmation_code,
+        )
+        logger.debug(
+            "Added email confirmation background "
+            "task for user %s", email
+        )
+
+

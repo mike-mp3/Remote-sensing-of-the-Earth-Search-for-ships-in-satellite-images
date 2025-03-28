@@ -24,3 +24,19 @@ class UserRepository(Repository):
         async with get_connection() as cur:
             await cur.execute(q, cmd.to_dict(show_secrets=True))
             return await cur.fetchone()
+
+    @collect_response
+    async def update_user_status(
+        self,
+        cmd: models.UpdateUserStatusCommand
+    ) -> models.User:
+        q = """
+            UPDATE users
+                SET is_activated = %(is_activated)s
+            WHERE email = %(email)s AND is_activated <> %(is_activated)s
+            RETURNING 
+                id, email, role_id, is_activated, password;
+        """
+        async with get_connection() as cur:
+            await cur.execute(q, cmd.to_dict())
+            return await cur.fetchone()

@@ -19,18 +19,33 @@ router = APIRouter(prefix="/user", tags=["user"])
 )
 @inject
 async def create_user(
-    cmd: models.CreateUserRequest,
+    req: models.CreateUserRequest,
     user_service: UserService = Depends(Provide[Services.user_service])
 ):
-    return await user_service.create_user(cmd)
+    return await user_service.create_user(req)
 
 
-# не используемая ручка. просто потыкать для теста
 @router.post(
-    "/send-email"
+    "/confirm",
+    status_code=status.HTTP_200_OK,
+    description="Confirm user email after registration",
 )
 @inject
-async def create_user(
+async def confirm_user_email(
+    req: models.ConfirmUserEmailRequest,
     user_service: UserService = Depends(Provide[Services.user_service])
 ):
-    return await user_service.useless_mock()
+    return await user_service.confirm_email(req)
+
+
+@router.post(
+    "/confirm/resend-email",
+    status_code=status.HTTP_200_OK,
+    description="Confirm user email after registration",
+)
+@inject
+async def resend_user_email(
+    req: models.ResendUserConfirmationCodeRequest,
+    user_service: UserService = Depends(Provide[Services.user_service])
+):
+    return await user_service.resend_confirmation_code(req)

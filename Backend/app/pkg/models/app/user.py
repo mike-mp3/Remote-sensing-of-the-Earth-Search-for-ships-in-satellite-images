@@ -18,7 +18,10 @@ __all__ = [
     "CreateUserCommand",
     "CreateUserResponse",
     "CreateUserConfirmationCode",
-    "ReadUserConfirmationCode"
+    "ReadUserConfirmationCode",
+    "ConfirmUserEmailRequest",
+    "UpdateUserStatusCommand",
+    "ResendUserConfirmationCodeRequest",
 ]
 
 class UserFields:
@@ -91,6 +94,13 @@ class CreateUserResponse(BaseUser):
     email: EmailStr = UserFields.email
     role_name: UserRoleName = UserRoleEnum.DEFAULT.name
 
+class ConfirmUserEmailRequest(BaseUser):
+    email: EmailStr = UserFields.email
+    confirmation_code: SecretStr = UserFields.confirmation_code
+
+class ResendUserConfirmationCodeRequest(BaseUser):
+    email: EmailStr = UserFields.email
+
 
 # Commands - SQL
 class User(BaseUser):
@@ -103,6 +113,10 @@ class User(BaseUser):
 class CreateUserCommand(BaseUser):
     email: EmailStr = UserFields.email
     password: SecretBytes = UserFields.encrypted_password
+
+class UpdateUserStatusCommand(BaseUser):
+    email: EmailStr = UserFields.email
+    is_activated: bool = UserFields.is_activated
 
 
 # Commands - NoSQL

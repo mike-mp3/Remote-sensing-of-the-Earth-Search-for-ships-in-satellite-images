@@ -14,6 +14,9 @@ from app.pkg.models.app.user import (
     CreateUserResponse,
     CreateUserConfirmationCode,
     ReadUserConfirmationCode,
+    ConfirmUserEmailRequest,
+    UpdateUserStatusCommand,
+    ResendUserConfirmationCodeRequest
 )
 
 
