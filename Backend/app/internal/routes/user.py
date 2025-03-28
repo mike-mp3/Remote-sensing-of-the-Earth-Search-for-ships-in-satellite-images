@@ -26,7 +26,7 @@ async def create_user(
 @router.post(
     "/confirm",
     status_code=status.HTTP_200_OK,
-    description="Confirm user email after registration",
+    description="Confirm user email after registration with code",
 )
 @inject
 async def confirm_user_email(
@@ -39,7 +39,7 @@ async def confirm_user_email(
 @router.post(
     "/confirm/resend-email",
     status_code=status.HTTP_200_OK,
-    description="Confirm user email after registration",
+    description="Resend confirmation code to user email",
 )
 @inject
 async def resend_user_email(
