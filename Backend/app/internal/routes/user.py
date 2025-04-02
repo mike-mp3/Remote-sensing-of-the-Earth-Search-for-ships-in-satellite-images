@@ -1,13 +1,14 @@
 from fastapi import APIRouter, Depends, status
 
+from app.internal.pkg.handlers import with_errors
 from app.pkg import models
 
 from dependency_injector.wiring import Provide, inject
 from app.internal.services import Services
 from app.internal.services.user import UserService
+from app.pkg.models import exceptions as excs
 
-router = APIRouter(prefix="/user", tags=["user"])
-
+router = APIRouter(prefix="/user", tags=["User"])
 
 @router.post(
     "",

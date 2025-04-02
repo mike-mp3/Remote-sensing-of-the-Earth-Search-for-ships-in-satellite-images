@@ -30,5 +30,5 @@ class UserRoleName(str):
             cls, source_type: Any, handler: GetCoreSchemaHandler
     ) -> CoreSchema:
         return core_schema.no_info_after_validator_function(
-            lambda v: UserRoleEnum(v).name, schema=core_schema.str_schema()
+            lambda v: UserRoleEnum[v.upper()].name, schema=core_schema.str_schema()
         )

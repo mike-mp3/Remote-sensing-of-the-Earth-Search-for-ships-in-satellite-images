@@ -1,116 +1,129 @@
 services:
-  ship__api:
-    container_name: ${API__HOST}
-    build:
-      context: .
-      dockerfile: docker/api/Dockerfile
-
-    restart: unless-stopped
-
-    env_file:
-      - .env
-    depends_on:
-      - ${POSTGRES__HOST}
-      - ${POSTGRES__HOST}__migrations
-#      - redis
-    ports:
-      - ${API__PORT}:5000
-
-    command: [
-      "poetry", "run", "uvicorn", "app:create_app",
-      "--host", "0.0.0.0",
-      "--port", "5000",
-      "--log-level", "debug",
-      "--factory",
-      "--reload",
-    ]
-    volumes:
-      - ./app:/usr/src/app/app
-
-  ship__postgres:
-    container_name: ${POSTGRES__HOST}
-    build:
-      context: .
-      dockerfile: docker/postgresql/Dockerfile
-
-    restart: unless-stopped
-
-    env_file:
-      - .env
-    environment:
-      - PGDATA=/var/lib/postgresql/data/pgdata
-      - POSTGRES_PASSWORD=${POSTGRES__PASSWORD}
-      - POSTGRES_USER=${POSTGRES__USER}
-      - POSTGRES_DATABASES="test_${POSTGRES__DATABASE_NAME}","${POSTGRES__DATABASE_NAME}"
-    ports:
-      - ${POSTGRES__PORT}:5432
-    volumes:
-      - ship__postgres_data:/var/lib/postgresql/data
-
-  ship__postgres__migrations:
-    container_name: ${POSTGRES__HOST}__migrations
-    build:
-      context: .
-      dockerfile: docker/migrations/Dockerfile
-    env_file:
-      - .env
-    environment:
-      - POSTGRES__HOST=${POSTGRES__HOST}
-      - POSTGRES__PORT=5432
-    depends_on:
-      - ${POSTGRES__HOST}
-    command: [
-        "bash", "./scripts/wait-for-server.sh", "ship__postgres:5432", "-t", "120",
-        "--",
-        "poetry", "run", "python", "-m", "scripts.migrate"
-    ]
-
-  ship__redis:
-    container_name: ${REDIS__HOST}
-    build:
-      context: .
-      dockerfile: docker/redis/Dockerfile
-      args:
-        REDIS_PASSWORD: ${REDIS__PASSWORD}
-    restart: unless-stopped
-    env_file:
-      - .env
-    ports:
-      - ${REDIS__PORT}:6379
-    volumes:
-      - ship__redis_data:/data
-
-#  grafana:
+#  ship__api:
+#    container_name: ${API__HOST}
 #    build:
 #      context: .
-#      dockerfile: docker/grafana/Dockerfile
+#      dockerfile: docker/api/Dockerfile
+#
+#    restart: unless-stopped
+#
+#    env_file:
+#      - .env
+#    depends_on:
+#      - ship__postgres
+#      - ship__postgres__migrations
+#      - ship__redis
+#      - ship__minio
+#      - ship__minio__migrations
+#    ports:
+#      - ${API__PORT}:5000
+#
+#    command: [
+#      "poetry", "run", "uvicorn", "app:create_app",
+#      "--host", "0.0.0.0",
+#      "--port", "5000",
+#      "--log-level", "debug",
+#      "--factory",
+#      "--reload",
+#    ]
+#    volumes:
+#      - ./app:/usr/src/app/app
+#
+#  ship__postgres:
+#    container_name: ${POSTGRES__HOST}
+#    build:
+#      context: .
+#      dockerfile: docker/postgresql/Dockerfile
+#
+#    restart: unless-stopped
+#
 #    env_file:
 #      - .env
 #    environment:
-#      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+#      - PGDATA=/var/lib/postgresql/data/pgdata
+#      - POSTGRES_PASSWORD=${POSTGRES__PASSWORD}
+#      - POSTGRES_USER=${POSTGRES__USER}
+#      - POSTGRES_DATABASES="test_${POSTGRES__DATABASE_NAME}","${POSTGRES__DATABASE_NAME}"
 #    ports:
-#      - ${GRAFANA_PORT}:3000
-#    depends_on:
-#      - prometheus
-#
+#      - ${POSTGRES__PORT}:5432
 #    volumes:
-#      - ${GRAFANA_VOLUME}:/var/lib/grafana
-#      - ./docker/grafana/provisioning/:/etc/grafana/provisioning/
+#      - ship__postgres_data:/var/lib/postgresql/data
 #
-#  prometheus:
-#    image: prom/prometheus:latest
-#
-#    user: root
+#  ship__postgres__migrations:
+#    container_name: ${POSTGRES__HOST}__migrations
+#    build:
+#      context: .
+#      dockerfile: docker/migrations/Dockerfile
 #    env_file:
 #      - .env
-#    volumes:
-#      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-#      - ./src/prometheus:/prometheus
+#    environment:
+#      - POSTGRES__HOST=${POSTGRES__HOST}
+#      - POSTGRES__PORT=5432
 #    depends_on:
-#      - centrifugo
-#      - api
-#    command:
-#      - --config.file=/etc/prometheus/prometheus.yml
+#      - ship__postgres
+#    command: [
+#        "bash", "./scripts/wait-for-server.sh", "ship__postgres:5432", "-t", "120",
+#        "--",
+#        "poetry", "run", "python", "-m", "scripts.migrate"
+#    ]
+#
+#  ship__redis:
+#    container_name: ${REDIS__HOST}
+#    build:
+#      context: .
+#      dockerfile: docker/redis/Dockerfile
+#      args:
+#        REDIS_PASSWORD: ${REDIS__PASSWORD}
+#    restart: unless-stopped
+#    env_file:
+#      - .env
+#    ports:
+#      - ${REDIS__PORT}:6379
+#    volumes:
+#      - ship__redis_data:/data
+
+
+  ship__minio:
+    container_name: ${MINIO__HOST}
+    hostname: ${MINIO__HOST}
+    build:
+      context: .
+      dockerfile: docker/minio/Dockerfile
+
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - MINIO_ROOT_USER=${MINIO__ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO__ROOT_PASSWORD}
+    ports:
+      - ${MINIO__PORT}:9000
+      - ${MINIO__CONSOLE_PORT}:9001
+    volumes:
+      - ship__minio_data:/data
+    command: ["server", "/data", "--console-address", ":9001"]
+
+
+  ship__minio__migrations:
+    container_name: ${MINIO__HOST}__migrations
+    build:
+      context: .
+      dockerfile: docker/migrations_minio/Dockerfile
+    env_file:
+      - .env
+    environment:
+      - MINIO_HOST=http://${MINIO__HOST}:9000
+      - MINIO_ROOT_USER=${MINIO__ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO__ROOT_PASSWORD}
+      - MINIO_MIGRATION_DIR=./migrations_minio/
+    depends_on:
+      - ship__minio
+    command: [
+      "bash", "scripts/wait-for-server.sh", "ship__minio:9000", "-t", "120",
+      "--",
+      "python", "scripts/migrate_minio.py", "apply"
+    ]
+
 
 networks:
   default:

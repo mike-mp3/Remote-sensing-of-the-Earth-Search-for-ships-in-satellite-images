@@ -3,6 +3,7 @@
 
 
 from app.pkg.models.app.user_roles import (
+    UserRoleEnum,
     UserRoleID,
     UserRoleName,
 )

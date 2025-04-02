@@ -38,7 +38,7 @@ class UserService:
         user = None
         encrypted_password: SecretBytes = hash_password(request.password)
         try:
-            user = await self.user_repository.create(
+            user = await self.user_repository.upsert_inactive_user(
                 cmd=models.CreateUserCommand(
                     email=request.email,
                     password=encrypted_password,
@@ -46,7 +46,7 @@ class UserService:
             )
             await self.__send_confirmation_code(request.email)
 
-        except UniqueViolation:
+        except EmptyResult:
             raise UserAlreadyExists
         except Exception as err:
             logger.error("Failed to create user: %s", err)
@@ -75,7 +75,7 @@ class UserService:
             )
         except EmptyResult:
             logger.warning("After user creation there is no user in database")
-            raise TryToRegisterAgain
+            raise UserNotFound
 
 
     # не надо в бд проверять

@@ -1,7 +1,7 @@
 from unittest.mock import DEFAULT
 
 from app.pkg.models import UserRoleName
-from app.pkg.models.app.user_roles import UserRoleEnum
+from app.pkg.models.app.user_roles import UserRoleEnum, UserRoleID
 from app.pkg.models.base import BaseModel
 from pydantic import (
     Field,
@@ -52,7 +52,7 @@ class UserFields:
         max_length=64,
         examples=["SecurePass123"],
     )
-    #todo: добавить поля в Field encrypted_password
+    #todo: добавить поля в Field encrypted_password и вырезать unencrypted_password
     encrypted_password = Field(
         description="Encrypted user password"
     )
@@ -110,13 +110,16 @@ class ResendUserConfirmationCodeRequest(BaseUser):
 class User(BaseUser):
     id: PositiveInt = UserFields.id
     email: EmailStr = UserFields.email
-    role_id: PositiveInt = UserFields.role_id
+    role_id: UserRoleID = UserFields.role_id
     is_activated: bool = UserFields.is_activated
-    password: SecretStr = UserFields.encrypted_password
+    password: SecretBytes = UserFields.encrypted_password
 
 class CreateUserCommand(BaseUser):
     email: EmailStr = UserFields.email
     password: SecretBytes = UserFields.encrypted_password
+
+class ReadUserByEmailCommand(BaseUser):
+    email: EmailStr = UserFields.email
 
 class UpdateUserStatusCommand(BaseUser):
     email: EmailStr = UserFields.email
@@ -131,3 +134,10 @@ class CreateUserConfirmationCode(BaseUser):
 
 class ReadUserConfirmationCode(BaseUser):
     email: EmailStr = UserFields.email
+
+# Other
+class ActiveUser(BaseUser):
+    id: PositiveInt = UserFields.id
+    email: EmailStr = UserFields.email
+    role_name: UserRoleName = UserFields.role_name
+    is_activated: bool = UserFields.is_activated
