@@ -24,4 +24,4 @@ ENV PYTHONUNBUFFERED 1
 
 RUN chmod +x scripts/wait-for-server.sh
 
-RUN dos2unix scripts/*
+RUN dos2unix scripts/wait-for-server.sh scripts/migrate.py

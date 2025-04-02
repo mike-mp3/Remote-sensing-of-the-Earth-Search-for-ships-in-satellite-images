@@ -1,86 +1,86 @@
 services:
-#  ship__api:
-#    container_name: ${API__HOST}
-#    build:
-#      context: .
-#      dockerfile: docker/api/Dockerfile
-#
-#    restart: unless-stopped
-#
-#    env_file:
-#      - .env
-#    depends_on:
-#      - ship__postgres
-#      - ship__postgres__migrations
-#      - ship__redis
-#      - ship__minio
-#      - ship__minio__migrations
-#    ports:
-#      - ${API__PORT}:5000
-#
-#    command: [
-#      "poetry", "run", "uvicorn", "app:create_app",
-#      "--host", "0.0.0.0",
-#      "--port", "5000",
-#      "--log-level", "debug",
-#      "--factory",
-#      "--reload",
-#    ]
-#    volumes:
-#      - ./app:/usr/src/app/app
-#
-#  ship__postgres:
-#    container_name: ${POSTGRES__HOST}
-#    build:
-#      context: .
-#      dockerfile: docker/postgresql/Dockerfile
-#
-#    restart: unless-stopped
-#
-#    env_file:
-#      - .env
-#    environment:
-#      - PGDATA=/var/lib/postgresql/data/pgdata
-#      - POSTGRES_PASSWORD=${POSTGRES__PASSWORD}
-#      - POSTGRES_USER=${POSTGRES__USER}
-#      - POSTGRES_DATABASES="test_${POSTGRES__DATABASE_NAME}","${POSTGRES__DATABASE_NAME}"
-#    ports:
-#      - ${POSTGRES__PORT}:5432
-#    volumes:
-#      - ship__postgres_data:/var/lib/postgresql/data
-#
-#  ship__postgres__migrations:
-#    container_name: ${POSTGRES__HOST}__migrations
-#    build:
-#      context: .
-#      dockerfile: docker/migrations/Dockerfile
-#    env_file:
-#      - .env
-#    environment:
-#      - POSTGRES__HOST=${POSTGRES__HOST}
-#      - POSTGRES__PORT=5432
-#    depends_on:
-#      - ship__postgres
-#    command: [
-#        "bash", "./scripts/wait-for-server.sh", "ship__postgres:5432", "-t", "120",
-#        "--",
-#        "poetry", "run", "python", "-m", "scripts.migrate"
-#    ]
-#
-#  ship__redis:
-#    container_name: ${REDIS__HOST}
-#    build:
-#      context: .
-#      dockerfile: docker/redis/Dockerfile
-#      args:
-#        REDIS_PASSWORD: ${REDIS__PASSWORD}
-#    restart: unless-stopped
-#    env_file:
-#      - .env
-#    ports:
-#      - ${REDIS__PORT}:6379
-#    volumes:
-#      - ship__redis_data:/data
+  ship__api:
+    container_name: ${API__HOST}
+    build:
+      context: .
+      dockerfile: docker/api/Dockerfile
+
+    restart: unless-stopped
+
+    env_file:
+      - .env
+    depends_on:
+      - ship__postgres
+      - ship__postgres__migrations
+      - ship__redis
+      - ship__minio
+      - ship__minio__migrations
+    ports:
+      - ${API__PORT}:5000
+
+    command: [
+      "poetry", "run", "uvicorn", "app:create_app",
+      "--host", "0.0.0.0",
+      "--port", "5000",
+      "--log-level", "debug",
+      "--factory",
+      "--reload",
+    ]
+    volumes:
+      - ./app:/usr/src/app/app
+
+  ship__postgres:
+    container_name: ${POSTGRES__HOST}
+    build:
+      context: .
+      dockerfile: docker/postgresql/Dockerfile
+
+    restart: unless-stopped
+
+    env_file:
+      - .env
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      - POSTGRES_PASSWORD=${POSTGRES__PASSWORD}
+      - POSTGRES_USER=${POSTGRES__USER}
+      - POSTGRES_DATABASES="test_${POSTGRES__DATABASE_NAME}","${POSTGRES__DATABASE_NAME}"
+    ports:
+      - ${POSTGRES__PORT}:5432
+    volumes:
+      - ship__postgres_data:/var/lib/postgresql/data
+
+  ship__postgres__migrations:
+    container_name: ${POSTGRES__HOST}__migrations
+    build:
+      context: .
+      dockerfile: docker/migrations/Dockerfile
+    env_file:
+      - .env
+    environment:
+      - POSTGRES__HOST=${POSTGRES__HOST}
+      - POSTGRES__PORT=5432
+    depends_on:
+      - ship__postgres
+    command: [
+        "bash", "./scripts/wait-for-server.sh", "ship__postgres:5432", "-t", "120",
+        "--",
+        "poetry", "run", "python", "-m", "scripts.migrate"
+    ]
+
+  ship__redis:
+    container_name: ${REDIS__HOST}
+    build:
+      context: .
+      dockerfile: docker/redis/Dockerfile
+      args:
+        REDIS_PASSWORD: ${REDIS__PASSWORD}
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - ${REDIS__PORT}:6379
+    volumes:
+      - ship__redis_data:/data
 
 
   ship__minio:
@@ -119,7 +119,7 @@ services:
     depends_on:
       - ship__minio
     command: [
-      "bash", "scripts/wait-for-server.sh", "ship__minio:9000", "-t", "120",
+      "bash", "./scripts/wait-for-server.sh", "ship__minio:9000", "-t", "120",
       "--",
       "python", "scripts/migrate_minio.py", "apply"
     ]
@@ -132,3 +132,4 @@ networks:
 volumes:
   ship__postgres_data:
   ship__redis_data:
+  ship__minio_data:
