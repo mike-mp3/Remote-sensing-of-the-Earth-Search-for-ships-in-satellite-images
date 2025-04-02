@@ -1,7 +1,7 @@
 from unittest.mock import DEFAULT
 
 from app.pkg.models import UserRoleName
-from app.pkg.models.app.user_roles import UserRoleEnum
+from app.pkg.models.app.user_roles import UserRoleEnum, UserRoleID
 from app.pkg.models.base import BaseModel
 from pydantic import (
     Field,
@@ -14,11 +14,20 @@ from pydantic import (
 
 __all__ = [
     "User",
+    "UserFields",
     "CreateUserRequest",
     "CreateUserCommand",
     "CreateUserResponse",
+    "CreateUserConfirmationCode",
+    "ReadUserConfirmationCode",
+    "ConfirmUserEmailRequest",
+    "UpdateUserStatusCommand",
+    "ResendUserConfirmationCodeRequest",
+    "ReadUserByEmailCommand",
+    "ActiveUser"
 ]
 
+#todo: добавить аннотации филдам
 class UserFields:
     id = Field(
         description="User ID",
@@ -43,23 +52,31 @@ class UserFields:
         max_length=64,
         examples=["SecurePass123"],
     )
-
-    #
+    #todo: добавить поля в Field encrypted_password и вырезать unencrypted_password
     encrypted_password = Field(
         description="Encrypted user password"
     )
-
     is_activated = Field(
         description="Has user confirmed his email",
         examples=["True", "False"],
     )
-
+    confirmation_code = Field(
+        description="Confirmation email code",
+        min_length=6,
+        max_length=6,
+        examples=["357298"],
+    )
+    confirmation_code_ex_time = Field(
+        description="Confirmation code expiration time in seconds",
+        default=600,
+        le=1200
+    )
 
 class BaseUser(BaseModel):
     """User base model"""
 
 
-# Commands
+# Representation layer
 class CreateUserRequest(BaseUser):
     email: EmailStr = UserFields.email
     password: SecretStr = UserFields.unencrypted_password
@@ -77,22 +94,50 @@ class CreateUserRequest(BaseUser):
 
         return v
 
+class CreateUserResponse(BaseUser):
+    email: EmailStr = UserFields.email
+    role_name: UserRoleName = UserRoleEnum.DEFAULT.name
 
-# Commands (DataBase)
+class ConfirmUserEmailRequest(BaseUser):
+    email: EmailStr = UserFields.email
+    confirmation_code: SecretStr = UserFields.confirmation_code
+
+class ResendUserConfirmationCodeRequest(BaseUser):
+    email: EmailStr = UserFields.email
+
+
+# Commands - SQL
+class User(BaseUser):
+    id: PositiveInt = UserFields.id
+    email: EmailStr = UserFields.email
+    role_id: UserRoleID = UserFields.role_id
+    is_activated: bool = UserFields.is_activated
+    password: SecretBytes = UserFields.encrypted_password
+
 class CreateUserCommand(BaseUser):
     email: EmailStr = UserFields.email
     password: SecretBytes = UserFields.encrypted_password
 
-#
-class User(BaseUser):
+class ReadUserByEmailCommand(BaseUser):
+    email: EmailStr = UserFields.email
+
+class UpdateUserStatusCommand(BaseUser):
+    email: EmailStr = UserFields.email
+    is_activated: bool = UserFields.is_activated
+
+
+# Commands - NoSQL
+class CreateUserConfirmationCode(BaseUser):
+    email: EmailStr = UserFields.email
+    confirmation_code: SecretStr = UserFields.confirmation_code
+    ex_time: PositiveInt = UserFields.confirmation_code_ex_time
+
+class ReadUserConfirmationCode(BaseUser):
+    email: EmailStr = UserFields.email
+
+# Other
+class ActiveUser(BaseUser):
     id: PositiveInt = UserFields.id
     email: EmailStr = UserFields.email
-    role_id: PositiveInt = UserFields.role_id
+    role_name: UserRoleName = UserFields.role_name
     is_activated: bool = UserFields.is_activated
-    password: SecretStr = UserFields.encrypted_password
-
-
-# Responses
-class CreateUserResponse(BaseUser):
-    email: EmailStr = UserFields.email
-    role_name: UserRoleName = UserRoleEnum.DEFAULT.name

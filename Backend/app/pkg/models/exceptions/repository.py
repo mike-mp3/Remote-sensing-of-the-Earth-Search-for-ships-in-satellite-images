@@ -13,12 +13,12 @@ __all__ = [
 
 
 class UniqueViolation(BaseAPIException):
-    message = "Not unique."
+    message = "Not unique"
     status_code = status.HTTP_409_CONFLICT
 
 
 class EmptyResult(BaseAPIException):
-    message = "Empty result."
+    message = "Empty result"
     status_code = status.HTTP_404_NOT_FOUND
 
 

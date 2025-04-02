@@ -2,10 +2,9 @@
 
 from typing import Optional, Union
 
+import pydantic
 from fastapi import HTTPException
 from starlette import status
-
-from app.pkg.models.types.strings import NotEmptyStr
 
 __all__ = ["BaseAPIException"]
 
@@ -38,10 +37,10 @@ class BaseAPIException(HTTPException):
     # TODO: Добавить магическое слово, при определении которого, будет выбираться
     #       шаблон для формирования сообщения об ошибке.
 
-    message: Optional[Union[NotEmptyStr, str]] = "Base API Exception"
+    message: Optional[Union[pydantic.StrictStr, str]] = "Base API Exception"
     status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR
 
-    def __init__(self, message: Optional[Union[NotEmptyStr, str, Exception]] = None):
+    def __init__(self, message: Optional[Union[pydantic.StrictStr, str, Exception]] = None):
         """Init BaseAPIException.
 
         Args:

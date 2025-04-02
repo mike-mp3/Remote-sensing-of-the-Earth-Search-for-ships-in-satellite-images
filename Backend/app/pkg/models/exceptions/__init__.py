@@ -10,5 +10,21 @@ Examples:
 """
 
 from app.pkg.models.exceptions.user import (
-    UserAlreadyExists
+    UserAlreadyExists,
+    IncorrectCode,
+    CodeNotFound,
+    UserNotFound,
+)
+
+from app.pkg.models.exceptions.jwt import (
+    UnAuthorized,
+    TokenTimeExpired,
+    WrongToken,
+    IncorrectTokenPlace,
+    AlgorithIsNotSupported,
+)
+
+from app.pkg.models.exceptions.auth import (
+    IncorrectUsernameOrPassword,
+    UserIsNotActivated,
 )
