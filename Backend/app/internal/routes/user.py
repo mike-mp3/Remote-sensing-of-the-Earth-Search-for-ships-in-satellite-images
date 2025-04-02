@@ -15,6 +15,7 @@ router = APIRouter(prefix="/user", tags=["user"])
     status_code=status.HTTP_201_CREATED,
     description="Create user",
 )
+@with_errors(excs.UserAlreadyExists)
 @inject
 async def create_user(
     req: models.CreateUserRequest,
@@ -28,6 +29,7 @@ async def create_user(
     status_code=status.HTTP_200_OK,
     description="Confirm user email after registration with code",
 )
+@with_errors(excs.CodeNotFound, excs.IncorrectCode)
 @inject
 async def confirm_user_email(
     req: models.ConfirmUserEmailRequest,

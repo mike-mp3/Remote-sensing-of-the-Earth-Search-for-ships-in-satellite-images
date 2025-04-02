@@ -8,11 +8,8 @@ from app.pkg.clients.email_client.base.template import BaseEmailTemplate
 from app.pkg.logger import get_logger
 from app.pkg.models.exceptions import UserAlreadyExists
 from app.pkg.models.exceptions.repository import EmptyResult, UniqueViolation
-from app.pkg.models.exceptions.user import CodeNotFound, IncorrectCode, TryToRegisterAgain
-from app.pkg.utils.confirmation_code import (
-    generate_secure_code,
-    verify_secure_code
-)
+from app.pkg.models.exceptions.user import CodeNotFound, IncorrectCode, UserNotFound
+from app.pkg.utils.confirmation_code import generate_secure_code, verify_secure_code
 from app.pkg.utils.password import hash_password
 
 from pydantic import SecretBytes, SecretStr, EmailStr
