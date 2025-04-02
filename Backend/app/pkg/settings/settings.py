@@ -107,6 +107,17 @@ class Redis(_Settings):
         return values
 
 
+class JWT(_Settings):
+    """JWT settings."""
+
+    #: str: Refresh token name in headers/body/cookies.
+    REFRESH_TOKEN_NAME: str = "refresh_token"
+    #: str: Access token name in headers/body/cookies.
+    ACCESS_TOKEN_NAME: str = "access_token"
+    #: SecretStr: Key for encrypt payload in jwt.
+    SECRET_KEY: SecretStr = SecretStr("<KEY>")
+
+
 class Logging(_Settings):
     """Logging settings."""
 
@@ -166,6 +177,9 @@ class Settings(_Settings):
 
     #: APIServer: API settings. Contains all settings for API.
     API: APIServer
+
+    #: JWT: JWT settings.
+    JWT: JWT
 
     #: Postgresql: Postgresql settings.
     POSTGRES: Postgresql

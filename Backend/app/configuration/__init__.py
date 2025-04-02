@@ -24,6 +24,7 @@ from app.pkg.clients import Clients
 from app.pkg.connectors import Connectors, PostgresSQL, AsyncRedis
 from app.pkg.models.core import Container, Containers
 from app.pkg.models.core.containers import Resource
+from app.pkg.utils.jwt import JWT
 
 __all__ = ["__containers__"]
 
@@ -33,6 +34,7 @@ __containers__ = Containers(
     containers=[
         Container(container=Clients),
         Container(container=Services),
+        Container(container=JWT),
         Resource(
             container=Connectors,
             depends_on=[

@@ -8,17 +8,16 @@ __all__ = [
     "UserAlreadyExists",
     "IncorrectCode",
     "CodeNotFound",
-    "TryToRegisterAgain"
+    "UserNotFound",
 ]
 
 class UserAlreadyExists(BaseAPIException):
     message = "User already exists"
     status_code = status.HTTP_409_CONFLICT
 
-class TryToRegisterAgain(BaseAPIException):
-    message = "User not found. Try again register again"
+class UserNotFound(BaseAPIException):
+    message = "User not found. You need to register"
     status_code = status.HTTP_404_NOT_FOUND
-
 
 class IncorrectCode(BaseAPIException):
     message = "Incorrect confirmation code"

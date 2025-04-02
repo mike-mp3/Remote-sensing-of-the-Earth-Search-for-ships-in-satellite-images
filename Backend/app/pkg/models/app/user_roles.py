@@ -4,6 +4,7 @@ from pydantic_core import core_schema, CoreSchema
 from pydantic import GetCoreSchemaHandler
 
 __all__ = [
+    "UserRoleEnum",
     "UserRoleID",
     "UserRoleName",
 ]

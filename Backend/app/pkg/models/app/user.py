@@ -14,6 +14,7 @@ from pydantic import (
 
 __all__ = [
     "User",
+    "UserFields",
     "CreateUserRequest",
     "CreateUserCommand",
     "CreateUserResponse",
@@ -22,8 +23,11 @@ __all__ = [
     "ConfirmUserEmailRequest",
     "UpdateUserStatusCommand",
     "ResendUserConfirmationCodeRequest",
+    "ReadUserByEmailCommand",
+    "ActiveUser"
 ]
 
+#todo: добавить аннотации филдам
 class UserFields:
     id = Field(
         description="User ID",

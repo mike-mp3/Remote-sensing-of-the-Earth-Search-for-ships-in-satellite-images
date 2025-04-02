@@ -6,10 +6,10 @@ from app.internal.repository import (
     postgresql as postgres_module,
     async_redis as async_redis_module
 )
+from app.internal.services.auth import AuthService
 from app.internal.services.city import CityService
 from app.internal.services.user import UserService
 from app.pkg.clients import Clients
-
 
 
 class Services(containers.DeclarativeContainer):
@@ -35,5 +35,11 @@ class Services(containers.DeclarativeContainer):
         user_repository=repositories.user_repository,
         email_confirmation=clients.email.user_confirmation,
         user_redis_repository=async_redis.user_repository,
+    )
+
+    auth_service = providers.Factory(
+        AuthService,
+        refresh_token_repository=repositories.refresh_token_repository,
+        user_repository=repositories.user_repository,
     )
 

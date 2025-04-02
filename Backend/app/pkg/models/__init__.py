@@ -16,8 +16,27 @@ from app.pkg.models.app.user import (
     ReadUserConfirmationCode,
     ConfirmUserEmailRequest,
     UpdateUserStatusCommand,
-    ResendUserConfirmationCodeRequest
+    ResendUserConfirmationCodeRequest,
+    ReadUserByEmailCommand,
+    ActiveUser,
 )
+
+from app.pkg.models.app.auth import (
+    AuthRequest,
+)
+
+from app.pkg.models.app.refresh_token import (
+    JWTRefreshToken,
+    CreateJWTRefreshTokenCommand,
+    ReadJWTRefreshTokenQuery,
+    UpdateJWTRefreshTokenCommand,
+    DeleteJWTRefreshTokenCommand,
+    CreateOrUpdateJWTRefreshTokenCommand
+)
+
+
+
+
 
 
 from app.pkg.models.app.city import (
@@ -27,53 +46,4 @@ from app.pkg.models.app.city import (
     ReadCityByCountryQuery,
     ReadCityQuery,
     UpdateCityCommand,
-)
-from app.pkg.models.app.contacts import (
-    Contacts,
-    ContactsFields,
-    CreateContactsCommand,
-    DeleteContactsCommand,
-    ReadContactsByIdQuery,
-    ReadContactsByTelegramUserIdQuery,
-    ReadContactsQuery,
-    UpdateContactsCommand,
-    UpdateEmailCommand,
-)
-from app.pkg.models.app.country import (
-    Country,
-    CreateCountryCommand,
-    DeleteCountryCommand,
-    ReadCountryQuery,
-    UpdateCountryCommand,
-)
-from app.pkg.models.app.direction import (
-    CreateDirectionCommand,
-    DeleteDirectionCommand,
-    Direction,
-    ReadAllDirectionByIdQuery,
-    ReadDirectionQuery,
-    UpdateDirectionCommand,
-)
-from app.pkg.models.app.partner import (
-    CreatePartnerCommand,
-    DeletePartnerCommand,
-    Partner,
-    ReadPartnerByTokenQuery,
-    ReadPartnerQuery,
-    UpdatePartnerCommand,
-)
-from app.pkg.models.app.skill import (
-    CreateSkillCommand,
-    DeleteSkillCommand,
-    ReadAllSkillByIdQuery,
-    ReadSkillQuery,
-    Skill,
-    UpdateSkillCommand,
-)
-from app.pkg.models.app.skill_levels import (
-    CreateSkillLevelCommand,
-    DeleteSkillLevelCommand,
-    ReadSkillLevelQuery,
-    SkillLevel,
-    UpdateSkillLevelCommand,
 )
