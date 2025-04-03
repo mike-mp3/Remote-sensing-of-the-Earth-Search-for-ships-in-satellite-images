@@ -1,11 +1,10 @@
 """Server configuration."""
 
-import logging
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
+from fastapi.routing import APIRoute
 from app.configuration.events import on_shutdown, on_startup
+from app.internal.pkg.handlers import ERROR_REGISTRY
 from app.internal.pkg.middlewares.handle_http_exceptions import (
     handle_api_exceptions,
     handle_drivers_exceptions,
@@ -47,6 +46,7 @@ class Server:
         self._register_events(app)
         self._register_middlewares(app)
         self._register_http_exceptions(app)
+        self._register_open_api_errors(app)
 
     def get_app(self) -> FastAPI:
         """Getter of the current application instance.
@@ -141,4 +141,22 @@ class Server:
         """
 
         self.__register_cors_origins(app)
+
+    @staticmethod
+    def _register_open_api_errors(app: FastAPI):
+        """Updates the responses of routes that have registered errors.
+
+        Args:
+            app:
+                ``FastAPI`` application instance.
+        Returns:
+            None
+        """
+
+        for route in app.routes:
+            if isinstance(route, APIRoute):
+                unique_key = f"{route.endpoint.__module__}.{route.endpoint.__qualname__}"
+                if unique_key in ERROR_REGISTRY:
+                    for error in ERROR_REGISTRY[unique_key]:
+                        route.responses[error["status_code"]] = error
 

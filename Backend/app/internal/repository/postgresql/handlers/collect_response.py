@@ -75,10 +75,14 @@ def collect_response(fn):
         if not response:
             raise EmptyResult
 
-        return pydantic.validate_python(
-            (ann := fn.__annotations__["return"]),
-            await __convert_response(response=response, annotations=str(ann)),
+        ann = fn.__annotations__["return"]
+        data = await __convert_response(
+            response=response,
+            annotations=str(ann),
         )
+
+        adapter = pydantic.TypeAdapter(ann)
+        return adapter.validate_python(data)
 
     return inner
 
