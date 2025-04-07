@@ -5,8 +5,8 @@
   "actions": [
     {
       "type": "create_user",
-      "username": "$MINIO__REQUESTER_USER_NAME",
-      "password": "$MINIO__REQUESTER_USER_PASSWORD",
+      "username": "$S3__REQUESTER_USER_NAME",
+      "password": "$S3__REQUESTER_USER_PASSWORD",
       "policy": "main_for_user_prompts_raw"
     }
   ]

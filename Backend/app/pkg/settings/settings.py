@@ -8,6 +8,7 @@ from functools import lru_cache
 from dotenv import find_dotenv
 from pydantic import PostgresDsn, RedisDsn, model_validator, field_validator
 from pydantic.types import PositiveInt, SecretStr
+from pydantic import AnyUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from app.pkg.models.core.logger import LoggerLevel
 
@@ -151,6 +152,14 @@ class SMTP(_Settings):
     PASSWORD: SecretStr
 
 
+class S3(_Settings):
+    """S3 settings."""
+
+    # --- S3 SETTINGS ---
+    URL: AnyUrl
+    REQUESTER_USER_NAME: str
+    REQUESTER_USER_PASSWORD: SecretStr
+
 
 class APIServer(_Settings):
     """API settings."""
@@ -189,6 +198,9 @@ class Settings(_Settings):
 
     #: SMTP: SMTP settings.
     SMTP: SMTP
+
+    #: S3: S3 settings.
+    S3: S3
 
 
 # TODO: Возможно даже lru_cache не стоит использовать. Стоит использовать meta sigleton.

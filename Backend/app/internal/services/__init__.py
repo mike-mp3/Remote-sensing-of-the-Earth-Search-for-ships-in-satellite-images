@@ -8,6 +8,7 @@ from app.internal.repository import (
 )
 from app.internal.services.auth import AuthService
 from app.internal.services.city import CityService
+from app.internal.services.prompt import PromptService
 from app.internal.services.user import UserService
 from app.pkg.clients import Clients
 
@@ -43,3 +44,7 @@ class Services(containers.DeclarativeContainer):
         user_repository=repositories.user_repository,
     )
 
+    prompt_service = providers.Factory(
+        PromptService,
+        s3_prompter_client=clients.s3.prompter
+    )

@@ -19,6 +19,7 @@ httpx= "^0.28.1"
 aiosmtplib="^4.0.0"
 redis = "^4.6.0"
 python-jose = {version = "3.3.0", extras = ["cryptography"]}
+aioboto3 = "^13.4.0"
 
 [tool.poetry.group.dev.dependencies]
 MarkupSafe = "^2.1.0"
