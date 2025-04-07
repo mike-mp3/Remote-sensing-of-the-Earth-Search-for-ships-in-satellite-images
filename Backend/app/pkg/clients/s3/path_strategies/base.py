@@ -20,3 +20,7 @@ class PathStrategy(ABC, Generic[Command, Output]):
     @abstractmethod
     def generate_path(cls, cmd: Command) -> Output:
         raise NotImplementedError
+
+    @classmethod
+    def parse(cls, path: str) -> Output:
+        raise NotImplementedError

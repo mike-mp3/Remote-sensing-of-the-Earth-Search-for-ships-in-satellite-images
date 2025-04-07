@@ -60,6 +60,7 @@ class S3AsyncClient(ABC):
                 )
         except ClientError as e:
             logger.error("Error uploading file: %s", e)
+            raise e from e
 
 
     async def _download_file(self, file_key: str):
@@ -73,6 +74,7 @@ class S3AsyncClient(ABC):
                 return data
         except ClientError as e:
             logger.error("Error downloading file: %s", e)
+            raise e from e
 
 
     async def _delete_file(self, file_key: str):
@@ -84,6 +86,7 @@ class S3AsyncClient(ABC):
                 )
         except ClientError as e:
             logger.error("Error deleting file: %s", e)
+            raise e from e
 
     async def _create_presigned_post(
         self,
@@ -103,3 +106,18 @@ class S3AsyncClient(ABC):
                 )
         except ClientError as e:
             logger.error("Error creating presigned post: %s", e)
+            raise e from e
+
+    async def _object_exists(self, file_key: str) -> bool:
+        try:
+            async with self.__get_client() as client:
+                await client.head_object(
+                    Bucket=self.bucket_name,
+                    Key=file_key
+                )
+                return True
+        except ClientError as e:
+            if e.response["Error"]["Code"] == "404":
+                return False
+            logger.error("Error checking if object %s exists: %s", file_key, e)
+            raise e from e

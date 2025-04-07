@@ -46,5 +46,6 @@ class Services(containers.DeclarativeContainer):
 
     prompt_service = providers.Factory(
         PromptService,
-        s3_prompter_client=clients.s3.prompter
+        s3_prompter_client=clients.s3.prompter,
+        prompt_repository=repositories.prompt_repository,
     )
