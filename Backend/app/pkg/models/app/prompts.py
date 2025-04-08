@@ -19,6 +19,7 @@ __all__ = [
     "ConfirmPromptRequest",
     "PromptLink",
     "PresignedPostResponse",
+    "PutPromptMessage"
 ]
 
 
@@ -140,3 +141,9 @@ class Prompt(BasePrompt):
     status: PromptStatus = PromptFields.status
     created_at: datetime = PromptFields.created_at
     updated_at: datetime = PromptFields.updated_at
+
+
+# Messages - Rabbit
+class PutPromptMessage(BasePrompt):
+    id: UUID = PromptFields.id
+    raw_key: str = PromptFields.key_path

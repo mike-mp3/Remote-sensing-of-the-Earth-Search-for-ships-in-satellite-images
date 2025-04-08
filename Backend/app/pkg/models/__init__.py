@@ -45,6 +45,7 @@ from app.pkg.models.app.prompts import (
     PresignedPostRequest,
     ConfirmPromptRequest,
     PresignedPostResponse,
+    PutPromptMessage,
 )
 
 

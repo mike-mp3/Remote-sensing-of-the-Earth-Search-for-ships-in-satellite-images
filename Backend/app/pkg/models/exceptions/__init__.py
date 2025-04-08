@@ -33,4 +33,5 @@ from app.pkg.models.exceptions.prompt import (
     InvalidPromptPath,
     RawPromptNowFound,
     RawPromptAlreadyExists,
+    CannotProcessPrompt,
 )

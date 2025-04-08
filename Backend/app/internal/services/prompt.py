@@ -1,4 +1,8 @@
+from aio_pika.exceptions import AMQPConnectionError, ChannelClosed
+
 from app.internal.repository.postgresql import PromptRepository
+from app.internal.repository.repository import BaseRepository
+from app.pkg.clients.rabbitmq.producer import RabbitMQProducer
 from app.pkg.clients.s3 import S3PrompterClient
 from app.pkg.clients.s3.base_client import BaseS3AsyncClient
 from app.pkg.models import (
@@ -7,12 +11,14 @@ from app.pkg.models import (
     PromptObjectType,
     ActiveUser,
     CreatePromptCommand,
-    Prompt
+    Prompt,
+    PutPromptMessage,
 )
 from app.pkg.models.exceptions import (
     InvalidPromptPath,
     RawPromptNowFound,
-    RawPromptAlreadyExists
+    RawPromptAlreadyExists,
+    CannotProcessPrompt,
 )
 from app.pkg.models.exceptions.repository import UniqueViolation
 
@@ -20,15 +26,20 @@ from app.pkg.models.exceptions.repository import UniqueViolation
 class PromptService:
     s3_prompter_client: S3PrompterClient
     prompt_repository: PromptRepository
+    producer: RabbitMQProducer
+    raw_queue_name: str
 
     def __init__(
         self,
         s3_prompter_client: BaseS3AsyncClient,
-        prompt_repository: PromptRepository,
+        prompt_repository: BaseRepository,
+        producer: RabbitMQProducer,
+        raw_queue_name: str
     ):
         self.s3_prompter_client = s3_prompter_client
         self.prompt_repository = prompt_repository
-
+        self.producer = producer
+        self.raw_queue_name = raw_queue_name
 
     async def generate_presigned_post(
         self, request: PresignedPostRequest
@@ -60,6 +71,13 @@ class PromptService:
                     raw_key=link.key_path,
                 )
             )
+            await self.producer.publish_message(
+                PutPromptMessage(**prompt.to_dict()),
+                self.raw_queue_name
+            )
         except UniqueViolation:
             raise RawPromptAlreadyExists
+        except (AMQPConnectionError, ChannelClosed):
+            raise CannotProcessPrompt
+
         return prompt

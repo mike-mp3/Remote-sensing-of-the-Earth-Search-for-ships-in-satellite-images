@@ -15,6 +15,7 @@ services:
       - ship__redis
       - ship__minio
       - ship__minio__migrations
+      - ship__rabbitmq
     ports:
       - ${API__PORT}:5000
 
@@ -126,6 +127,24 @@ services:
       "python", "scripts/migrate_minio.py", "apply"
     ]
 
+  ship__rabbitmq:
+    container_name: ${RABBIT__HOST}
+    hostname: ${RABBIT__HOST}
+    image: rabbitmq:3.10.7-management
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - RABBITMQ_DEFAULT_VHOST=${RABBIT__VIRTUAL_HOST}
+      - RABBITMQ_DEFAULT_USER=${RABBIT__USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBIT__PASSWORD}
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbit log_levels [{connection,error},{default,error}] disk_free_limit 2147483648
+    ports:
+      - ${RABBIT__PORT}:5672
+      - ${RABBIT__CONSOLE_PORT}:15672
+    volumes:
+      - ship__rabbitmq_data:/var/lib/rabbitmq
+
 
 networks:
   default:
@@ -135,3 +154,4 @@ volumes:
   ship__postgres_data:
   ship__redis_data:
   ship__minio_data:
+  ship__rabbitmq_data:

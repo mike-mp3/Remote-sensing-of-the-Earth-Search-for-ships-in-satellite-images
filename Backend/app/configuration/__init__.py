@@ -21,7 +21,7 @@ Examples:
 
 from app.internal.services import Services
 from app.pkg.clients import Clients
-from app.pkg.connectors import Connectors, PostgresSQL, AsyncRedis
+from app.pkg.connectors import Connectors, PostgresSQL, AsyncRedis, RabbitMQ
 from app.pkg.models.core import Container, Containers
 from app.pkg.models.core.containers import Resource
 from app.pkg.utils.jwt import JWT
@@ -40,6 +40,7 @@ __containers__ = Containers(
             depends_on=[
                 Container(container=PostgresSQL),
                 Container(container=AsyncRedis),
+                Container(container=RabbitMQ),
             ],
         ),
     ],

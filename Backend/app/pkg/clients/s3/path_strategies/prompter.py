@@ -1,5 +1,6 @@
 import re
 from typing import Optional
+from pydantic_core._pydantic_core import ValidationError
 
 from app.pkg.models import GeneratePrompt, PromptLink
 from .base import PathStrategy
@@ -30,17 +31,20 @@ class PrompterPathStrategy(PathStrategy[GeneratePrompt, PromptLink]):
 
     @classmethod
     def parse(cls, path: str) -> Optional[PromptLink]:
-        match = cls._pattern.match(path)
-        if not match:
+        try:
+            match = cls._pattern.match(path)
+            if not match:
+                return None
+
+            groups = match.groupdict()
+            key_starts_with = "/".join(path.split("/")[:-1])
+
+            return PromptLink(
+                object_type=groups["object_type"],
+                user_id=groups["user_id"],
+                prompt_id=groups["prompt_id"],
+                key_path=path,
+                key_starts_with=key_starts_with,
+            )
+        except ValidationError:
             return None
-
-        groups = match.groupdict()
-        key_starts_with = "/".join(path.split("/")[:-1])
-
-        return PromptLink(
-            object_type=groups["object_type"],
-            user_id=groups["user_id"],
-            prompt_id=groups["prompt_id"],
-            key_path=path,
-            key_starts_with=key_starts_with,
-        )

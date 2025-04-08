@@ -6,6 +6,7 @@ __all__ = [
     "InvalidPromptPath",
     "RawPromptNowFound",
     "RawPromptAlreadyExists",
+    "CannotProcessPrompt"
 ]
 
 class InvalidPromptPath(BaseAPIException):
@@ -23,3 +24,7 @@ class RawPromptAlreadyExists(BaseAPIException):
         "presigned link and upload image"
     )
     status_code = status.HTTP_409_CONFLICT
+
+class CannotProcessPrompt(BaseAPIException):
+    message = "Sorry. Now we can't process your request. Try again later"
+    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR

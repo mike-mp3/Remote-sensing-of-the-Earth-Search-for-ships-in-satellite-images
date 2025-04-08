@@ -11,7 +11,12 @@ from app.pkg.models import (
     PresignedPostResponse,
     Prompt
 )
-from app.pkg.models.exceptions import InvalidPromptPath, RawPromptNowFound, RawPromptAlreadyExists
+from app.pkg.models.exceptions import (
+    InvalidPromptPath,
+    RawPromptNowFound,
+    RawPromptAlreadyExists,
+    CannotProcessPrompt
+)
 from app.pkg.utils.jwt import get_current_user
 
 router = APIRouter(prefix="/prompt", tags=["Prompt"])
@@ -44,7 +49,8 @@ async def generate_s3_presigned_post(
 @with_errors(
     InvalidPromptPath,
     RawPromptNowFound,
-    RawPromptAlreadyExists
+    RawPromptAlreadyExists,
+    CannotProcessPrompt
 )
 @inject
 async def confirm(
