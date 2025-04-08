@@ -8,6 +8,7 @@ from functools import lru_cache
 from dotenv import find_dotenv
 from pydantic import PostgresDsn, RedisDsn, model_validator, field_validator
 from pydantic.types import PositiveInt, SecretStr
+from pydantic import AnyUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from app.pkg.models.core.logger import LoggerLevel
 
@@ -151,6 +152,41 @@ class SMTP(_Settings):
     PASSWORD: SecretStr
 
 
+class S3(_Settings):
+    """S3 settings."""
+
+    # --- S3 SETTINGS ---
+    URL: AnyUrl
+    REQUESTER_USER_NAME: str
+    REQUESTER_USER_PASSWORD: SecretStr
+
+
+class Rabbit(_Settings):
+    """RabbitMQ settings."""
+
+    # --- RabbitMQ SETTINGS ---
+    HOST: str = "localhost"
+    PORT: PositiveInt = 5672
+    USER: str = "guest"
+    PASSWORD: SecretStr = SecretStr("guest")
+    VIRTUAL_HOST: str = "/"
+    HEARTBEAT: int = 300
+
+    #: str: Queue with tasks with raw prompts
+    RAW_PROMPTS_QUEUE_NAME: str = "raw_prompts"
+
+    DSN: typing.Optional[str] = None
+
+    @model_validator(mode="after")
+    def build_dsn(cls, values: "Rabbit"):  # pylint: disable=no-self-argument
+        password = urllib.parse.quote_plus(values.PASSWORD.get_secret_value())
+        values.DSN = (
+            f"amqp://{values.USER}:{password}"
+            f"@{values.HOST}:{values.PORT}"
+            f"/{values.VIRTUAL_HOST}"
+        )
+        return values
+
 
 class APIServer(_Settings):
     """API settings."""
@@ -189,6 +225,12 @@ class Settings(_Settings):
 
     #: SMTP: SMTP settings.
     SMTP: SMTP
+
+    #: S3: S3 settings.
+    S3: S3
+
+    #: Rabbit: Rabbit settings.
+    RABBIT: Rabbit
 
 
 # TODO: Возможно даже lru_cache не стоит использовать. Стоит использовать meta sigleton.

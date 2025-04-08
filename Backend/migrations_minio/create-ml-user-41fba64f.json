@@ -5,9 +5,9 @@
   "actions": [
     {
       "type": "create_user",
-      "username": "$MINIO__ML_USER_NAME",
-      "password": "$MINIO__ML_USER_PASSWORD",
-      "policy": "main_for_user_prompts_raw"
+      "username": "$S3__ML_USER_NAME",
+      "password": "$S3__ML_USER_PASSWORD",
+      "policy": "main_for_user_prompts_results"
     }
   ]
 }

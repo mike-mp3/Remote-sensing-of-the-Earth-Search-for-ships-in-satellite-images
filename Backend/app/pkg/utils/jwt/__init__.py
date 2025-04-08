@@ -26,6 +26,7 @@ __all__ = [
     "UnAuthorized",
     "TokenTimeExpired",
     "WrongToken",
+    "get_current_user"
 ]
 
 

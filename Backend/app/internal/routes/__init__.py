@@ -8,6 +8,7 @@ from app.pkg.models.core.routes import Routes
 from app.internal.routes import (
     user,
     auth,
+    prompt,
 )
 
 __all__ = [
@@ -18,7 +19,8 @@ __routes__ = Routes(
     routers=(
         (
             user.router,
-            auth.router
+            auth.router,
+            prompt.router,
         )
     ),
 )

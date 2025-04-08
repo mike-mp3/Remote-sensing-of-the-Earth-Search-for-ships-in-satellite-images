@@ -28,3 +28,10 @@ from app.pkg.models.exceptions.auth import (
     IncorrectUsernameOrPassword,
     UserIsNotActivated,
 )
+
+from app.pkg.models.exceptions.prompt import (
+    InvalidPromptPath,
+    RawPromptNowFound,
+    RawPromptAlreadyExists,
+    CannotProcessPrompt,
+)
