@@ -1,7 +1,6 @@
 from unittest.mock import DEFAULT
 
-from app.pkg.models import UserRoleName
-from app.pkg.models.app.user_roles import UserRoleEnum, UserRoleID
+from app.pkg.models.app.user_roles import UserRoleEnum, UserRoleID, UserRoleName
 from app.pkg.models.base import BaseModel
 from pydantic import (
     EmailStr,

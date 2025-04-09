@@ -1,4 +1,6 @@
 import asyncio
+from contextlib import asynccontextmanager
+from typing import AsyncGenerator
 
 import aio_pika
 from aio_pika.exceptions import AMQPConnectionError
@@ -23,16 +25,7 @@ class RabbitMQConnector:
         self._connection = None
         self._channel = None
 
-    @property
-    def connection(self) -> aio_pika.RobustConnection:
-        return self._connection
-
-    @property
-    def channel(self) -> aio_pika.RobustChannel:
-        return self._channel
-
     async def connect(self):
-        print("AHHAHAHA я коннекчусь бро в коннекторе")
         error_msg = ""
         while True:
             try:
@@ -72,3 +65,11 @@ class RabbitMQConnector:
         if self._connection and not self._connection.is_closed:
             await self._connection.close()
             self._connection = None
+
+    @asynccontextmanager
+    async def get_channel(self) -> AsyncGenerator[aio_pika.RobustChannel, None]:
+        if not self._connection or self._connection.is_closed:
+            await self.connect()
+        if not self._channel or self._channel.is_closed:
+            await self.open_channel()
+        yield self._channel
