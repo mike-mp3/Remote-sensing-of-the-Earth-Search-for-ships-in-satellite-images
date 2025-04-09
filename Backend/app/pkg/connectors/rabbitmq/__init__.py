@@ -1,10 +1,9 @@
 """Container with RabbitMQ connector."""
 
-from dependency_injector import containers, providers
-
 from app.pkg.connectors.rabbitmq.connector import RabbitMQConnector
 from app.pkg.connectors.rabbitmq.resource import RabbitMQResource
 from app.pkg.settings import settings
+from dependency_injector import containers, providers
 
 __all__ = ["RabbitMQ"]
 

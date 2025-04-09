@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
-from typing import Optional, AsyncGenerator
+from typing import AsyncGenerator, Optional
 
-from redis.asyncio import Redis, ConnectionPool
+from redis.asyncio import ConnectionPool, Redis
 
 from ..connector import BaseConnector
 
@@ -21,11 +21,11 @@ class AsyncRedisConnector(BaseConnector):
             self._pool = ConnectionPool.from_url(
                 self.dsn,
                 decode_responses=True,
-                socket_connect_timeout=5
+                socket_connect_timeout=5,
             )
         client = Redis(
             connection_pool=self._pool,
-            auto_close_connection_pool=False
+            auto_close_connection_pool=False,
         )
         try:
             yield client

@@ -1,8 +1,10 @@
 import asyncio
 from typing import Callable
+
 from app.pkg.logger import get_logger
 
 logger = get_logger(__name__)
+
 
 # TODO: техдолг - заменить этот ужасный воркер на Celery
 class BackgroundWorker:
@@ -42,11 +44,12 @@ class BackgroundWorker:
                 logger.debug(
                     "Task '%s' processed successfully. Args: %s",
                     task.__name__,
-                    args
+                    args,
                 )
             except Exception as e:
-                logger.error(f"Task failed: %s", e)
+                logger.error("Task failed: %s", e)
             finally:
                 self._queue.task_done()
+
 
 background_worker = BackgroundWorker()

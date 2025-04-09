@@ -1,10 +1,9 @@
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
-from dependency_injector.wiring import Provide, inject
-
 from app.pkg.connectors import Connectors
 from app.pkg.connectors.async_redis import AsyncRedis
+from dependency_injector.wiring import Provide, inject
 from redis.asyncio import Redis
 
 

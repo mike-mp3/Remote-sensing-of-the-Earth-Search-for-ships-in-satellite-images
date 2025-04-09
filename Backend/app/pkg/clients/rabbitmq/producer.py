@@ -1,17 +1,15 @@
 import aio_pika
 from aio_pika.exceptions import AMQPConnectionError, ChannelClosed
-
 from app.pkg.connectors.rabbitmq.connector import RabbitMQConnector
-from app.pkg.models.base import BaseModel
 from app.pkg.logger import get_logger
+from app.pkg.models.base import BaseModel
 
-__all__ = ['RabbitMQProducer']
+__all__ = ["RabbitMQProducer"]
 
 logger = get_logger(__name__)
 
 
 class RabbitMQProducer:
-
     def __init__(self, connector: RabbitMQConnector):
         self.conn = connector
 
@@ -29,11 +27,10 @@ class RabbitMQProducer:
                 aio_pika.Message(
                     body=message.model_dump_json().encode(),
                     delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
-                    content_type="application/json"
+                    content_type="application/json",
                 ),
-                routing_key=queue.name
+                routing_key=queue.name,
             )
         except (AMQPConnectionError, ChannelClosed) as e:
             logger.error("Publication error: %s", e)
             raise e
-

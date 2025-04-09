@@ -1,16 +1,13 @@
 from functools import wraps
+
+from app.pkg import models
+from app.pkg.models.exceptions.jwt import TokenTimeExpired, UnAuthorized, WrongToken
+from app.pkg.settings import settings
 from dependency_injector import containers, providers
 from dependency_injector.providers import Factory
 from dependency_injector.wiring import Provide, inject
 from fastapi import Depends, Security
 
-from app.pkg import models
-from app.pkg.models.exceptions.jwt import (
-    TokenTimeExpired,
-    UnAuthorized,
-    WrongToken,
-)
-from app.pkg.settings import settings
 from .access import JwtAccessCookie
 from .credentionals import JwtAuthorizationCredentials
 from .refresh import JwtRefreshCookie
@@ -26,12 +23,13 @@ __all__ = [
     "UnAuthorized",
     "TokenTimeExpired",
     "WrongToken",
-    "get_current_user"
+    "get_current_user",
 ]
 
 
 access_security = JwtAccessCookie(secret_key=settings.JWT.SECRET_KEY)
 refresh_security = JwtRefreshCookie(secret_key=settings.JWT.SECRET_KEY)
+
 
 class JWT(containers.DeclarativeContainer):
     access: Factory[JwtAccessCookie] = providers.Factory(
@@ -43,13 +41,14 @@ class JWT(containers.DeclarativeContainer):
         secret_key=settings.JWT.SECRET_KEY,
     )
 
+
 def update_jwt(func):
     @wraps(func)
     @inject
     async def wrapper(
         access_token: JwtAccessCookie = Depends(Provide[JWT.access]),
         *args,
-        **kwargs
+        **kwargs,
     ):
         response = kwargs["response"]
         credentials = kwargs["credentials"]
@@ -69,10 +68,11 @@ def update_jwt(func):
         )
         access_token.set_account_cookie(response=response, access_token=at)
         return user
+
     return wrapper
 
 
 def get_current_user(
-    jwt: JwtAuthorizationCredentials = Security(access_security)
+    jwt: JwtAuthorizationCredentials = Security(access_security),
 ) -> models.ActiveUser:
     return jwt.get_user()

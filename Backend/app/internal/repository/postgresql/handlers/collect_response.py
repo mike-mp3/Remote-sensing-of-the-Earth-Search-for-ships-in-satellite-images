@@ -4,13 +4,12 @@ from functools import wraps
 from typing import List, Type, Union
 
 import pydantic
-from psycopg2.extras import RealDictRow  # type: ignore
-
 from app.internal.repository.postgresql.handlers.handle_exception import (
     handle_exception,
 )
 from app.pkg.models.base import Model
 from app.pkg.models.exceptions.repository import EmptyResult
+from psycopg2.extras import RealDictRow  # type: ignore
 
 __all__ = ["collect_response"]
 

@@ -1,23 +1,22 @@
-from fastapi import APIRouter, Depends, status
-from dependency_injector.wiring import Provide, inject
-
 from app.internal.pkg.handlers import with_errors
 from app.internal.services import Services
 from app.internal.services.prompt import PromptService
 from app.pkg.models import (
     ActiveUser,
-    PresignedPostRequest,
     ConfirmPromptRequest,
+    PresignedPostRequest,
     PresignedPostResponse,
-    Prompt
+    Prompt,
 )
 from app.pkg.models.exceptions import (
+    CannotProcessPrompt,
     InvalidPromptPath,
-    RawPromptNowFound,
     RawPromptAlreadyExists,
-    CannotProcessPrompt
+    RawPromptNowFound,
 )
 from app.pkg.utils.jwt import get_current_user
+from dependency_injector.wiring import Provide, inject
+from fastapi import APIRouter, Depends, status
 
 router = APIRouter(prefix="/prompt", tags=["Prompt"])
 
@@ -31,12 +30,12 @@ router = APIRouter(prefix="/prompt", tags=["Prompt"])
 @inject
 async def generate_s3_presigned_post(
     prompt_service: PromptService = Depends(Provide[Services.prompt_service]),
-    user: ActiveUser = Depends(get_current_user)
+    user: ActiveUser = Depends(get_current_user),
 ):
     return await prompt_service.generate_presigned_post(
         request=PresignedPostRequest(
             user_id=user.id,
-        )
+        ),
     )
 
 
@@ -44,21 +43,21 @@ async def generate_s3_presigned_post(
     "/confirm",
     status_code=status.HTTP_201_CREATED,
     response_model=Prompt,
-    description="Start to process the prompt"
+    description="Start to process the prompt",
 )
 @with_errors(
     InvalidPromptPath,
     RawPromptNowFound,
     RawPromptAlreadyExists,
-    CannotProcessPrompt
+    CannotProcessPrompt,
 )
 @inject
 async def confirm(
     req: ConfirmPromptRequest,
     prompt_service: PromptService = Depends(Provide[Services.prompt_service]),
-    user: ActiveUser = Depends(get_current_user)
+    user: ActiveUser = Depends(get_current_user),
 ):
     return await prompt_service.confirm_prompt(
-        request=req, active_user=user,
+        request=req,
+        active_user=user,
     )
-

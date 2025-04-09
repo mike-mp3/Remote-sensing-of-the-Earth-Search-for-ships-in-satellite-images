@@ -1,7 +1,7 @@
 import asyncio
+
 import aio_pika
 from aio_pika.exceptions import AMQPConnectionError
-
 from app.pkg.logger import get_logger
 
 __all__ = ["RabbitMQConnector"]
@@ -49,7 +49,7 @@ class RabbitMQConnector:
                     "Connection attempt %d/%d failed. Retrying after %ss...",
                     self._reconnect_attempts,
                     self._max_reconnect_attempts,
-                    self._reconnect_delay
+                    self._reconnect_delay,
                 )
                 error_msg = str(exc)
                 if self._reconnect_attempts < self._max_reconnect_attempts:
@@ -57,7 +57,6 @@ class RabbitMQConnector:
                 else:
                     logger.error(f"Couldn't connect to RabbitMQ server. {error_msg}")
                     raise exc
-
 
     async def open_channel(self):
         if self._connection and not self._connection.is_closed:

@@ -1,12 +1,11 @@
 from datetime import timedelta
 from typing import Optional, Set
 
+from app.pkg.utils.jwt.base import JwtAuthBase
+from app.pkg.utils.jwt.credentionals import JwtAuthorizationCredentials
 from fastapi import Security
 from jose import jwt
 from pydantic import SecretStr
-
-from app.pkg.utils.jwt.base import JwtAuthBase
-from app.pkg.utils.jwt.credentionals import JwtAuthorizationCredentials
 
 __all__ = ["JwtAccessCookie"]
 

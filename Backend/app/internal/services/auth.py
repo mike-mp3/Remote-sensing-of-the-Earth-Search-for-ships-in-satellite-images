@@ -1,21 +1,24 @@
-from app.internal.repository.postgresql import UserRepository, JWTRefreshTokenRepository
+from app.internal.repository.postgresql import JWTRefreshTokenRepository, UserRepository
 from app.internal.repository.repository import BaseRepository
 from app.pkg.logger import get_logger
 from app.pkg.models import (
-    CreateOrUpdateJWTRefreshTokenCommand,
-    JWTRefreshToken,
-    UpdateJWTRefreshTokenCommand,
+    AuthRequest,
     CreateJWTRefreshTokenCommand,
+    CreateOrUpdateJWTRefreshTokenCommand,
+    DeleteJWTRefreshTokenCommand,
+    JWTRefreshToken,
     ReadJWTRefreshTokenQuery,
-    DeleteJWTRefreshTokenCommand, AuthRequest, User, ReadUserByEmailCommand,
+    ReadUserByEmailCommand,
+    UpdateJWTRefreshTokenCommand,
+    User,
 )
+from app.pkg.models.exceptions.auth import IncorrectUsernameOrPassword
 from app.pkg.models.exceptions.jwt import UnAuthorized
 from app.pkg.models.exceptions.repository import EmptyResult
-from app.pkg.models.exceptions.auth import IncorrectUsernameOrPassword
 from app.pkg.utils.password import verify_password
 
-
 logger = get_logger(__name__)
+
 
 class AuthService:
     """Service authorization and authentication user management."""
@@ -31,13 +34,12 @@ class AuthService:
         self.refresh_token_repository = refresh_token_repository
         self.user_repository = user_repository
 
-
     async def check_password(self, request: AuthRequest) -> User:
         try:
             user = await self.user_repository.read_by_email(
                 cmd=ReadUserByEmailCommand(
-                    email=request.email
-                )
+                    email=request.email,
+                ),
             )
         except EmptyResult:
             raise IncorrectUsernameOrPassword
@@ -47,10 +49,9 @@ class AuthService:
 
         return user
 
-
     async def update_or_create_refresh_token(
         self,
-        request: CreateOrUpdateJWTRefreshTokenCommand
+        request: CreateOrUpdateJWTRefreshTokenCommand,
     ) -> JWTRefreshToken:
         try:
             return await self.refresh_token_repository.update(
@@ -64,9 +65,8 @@ class AuthService:
                 cmd=CreateJWTRefreshTokenCommand(
                     user_id=request.user_id,
                     refresh_token=request.refresh_token,
-                )
+                ),
             )
-
 
     async def check_refresh_token_exists(
         self,
@@ -78,7 +78,6 @@ class AuthService:
             )
         except EmptyResult:
             raise UnAuthorized
-
 
     async def delete_refresh_token(
         self,

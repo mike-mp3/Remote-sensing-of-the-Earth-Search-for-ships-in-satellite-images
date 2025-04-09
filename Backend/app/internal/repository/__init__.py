@@ -58,8 +58,8 @@ Examples:
         ...        return self.repository.update(cmd=cmd.migrate(UpdateUserCommand))
 """
 
+from app.internal.repository import async_redis, postgresql
 from dependency_injector import containers, providers
-from app.internal.repository import postgresql, async_redis
 
 __all__ = ["Repositories"]
 

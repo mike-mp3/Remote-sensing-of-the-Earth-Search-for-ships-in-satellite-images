@@ -1,29 +1,29 @@
-from fastapi import APIRouter, Depends, status, Response, Security
-from dependency_injector.wiring import Provide, inject
-from pydantic import SecretStr
-
 from app.internal.pkg.handlers import with_errors
-from app.internal.services import Services, AuthService
+from app.internal.services import AuthService, Services
 from app.pkg.models import (
-    CreateUserRequest,
-    UserRoleEnum,
+    ActiveUser,
     CreateOrUpdateJWTRefreshTokenCommand,
-    ReadJWTRefreshTokenQuery, DeleteJWTRefreshTokenCommand, ActiveUser
+    CreateUserRequest,
+    DeleteJWTRefreshTokenCommand,
+    ReadJWTRefreshTokenQuery,
+    UserRoleEnum,
 )
-
 from app.pkg.models.exceptions import (
     IncorrectUsernameOrPassword,
+    UnAuthorized,
     UserIsNotActivated,
-    UnAuthorized
 )
 from app.pkg.utils.jwt import (
-    JwtAccessCookie,
-    JwtRefreshCookie,
     JWT,
+    JwtAccessCookie,
     JwtAuthorizationCredentials,
+    JwtRefreshCookie,
+    get_current_user,
     refresh_security,
-    get_current_user
 )
+from dependency_injector.wiring import Provide, inject
+from fastapi import APIRouter, Depends, Response, Security, status
+from pydantic import SecretStr
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -121,11 +121,10 @@ async def create_new_token_pair(
     refresh_util.set_refresh_cookie(response=response, refresh_token=refresh_token)
 
 
-
 @router.post(
     "/logout",
     status_code=status.HTTP_200_OK,
-    description="Logout user"
+    description="Logout user",
 )
 @with_errors(UnAuthorized)
 @inject
@@ -147,10 +146,12 @@ async def logout(
         ),
     )
 
+
 @router.get(
     "/test",
     status_code=status.HTTP_200_OK,
-    description="Logout user")
+    description="Logout user",
+)
 @inject
 async def test(
     user: ActiveUser = Depends(get_current_user),

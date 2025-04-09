@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
+
 from pydantic import EmailStr
+
 
 class BaseEmailDispatcher(ABC):
     """Абстрактный класс для всех email_client-диспетчеров."""
