@@ -21,7 +21,7 @@ Examples:
 
 from app.internal.services import Services
 from app.pkg.clients import Clients
-from app.pkg.connectors import Connectors, PostgresSQL, AsyncRedis, RabbitMQ
+from app.pkg.connectors import AsyncRedis, Connectors, PostgresSQL, RabbitMQ
 from app.pkg.models.core import Container, Containers
 from app.pkg.models.core.containers import Resource
 from app.pkg.utils.jwt import JWT

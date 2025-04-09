@@ -1,7 +1,7 @@
-from typing import Dict, Optional, Union, Any
-from pydantic import SecretStr
+from typing import Any, Dict, Optional, Union
 
 from app.pkg.models import ActiveUser
+from pydantic import SecretStr
 
 __all__ = ["JwtAuthorizationCredentials"]
 

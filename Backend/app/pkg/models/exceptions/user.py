@@ -1,8 +1,7 @@
 """Exceptions for a User model."""
 
-from starlette import status
-
 from app.pkg.models.base import BaseAPIException
+from starlette import status
 
 __all__ = [
     "UserAlreadyExists",
@@ -11,13 +10,16 @@ __all__ = [
     "UserNotFound",
 ]
 
+
 class UserAlreadyExists(BaseAPIException):
     message = "User already exists"
     status_code = status.HTTP_409_CONFLICT
 
+
 class UserNotFound(BaseAPIException):
     message = "User not found. You need to register"
     status_code = status.HTTP_404_NOT_FOUND
+
 
 class IncorrectCode(BaseAPIException):
     message = "Incorrect confirmation code"

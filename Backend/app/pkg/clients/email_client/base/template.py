@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar, Generic
+from typing import Generic, TypeVar
+
 from pydantic import EmailStr
 
 from .dispatcher import BaseEmailDispatcher
@@ -14,4 +15,3 @@ class BaseEmailTemplate(Generic[T], ABC):
     async def send(self, to_email: EmailStr, **kwargs):
         """Метод должен быть реализован в потомках."""
         pass
-

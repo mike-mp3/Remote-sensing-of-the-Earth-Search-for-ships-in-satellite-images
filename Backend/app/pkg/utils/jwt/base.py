@@ -1,12 +1,7 @@
 from abc import ABC
-from datetime import datetime, timedelta, UTC
+from datetime import UTC, datetime, timedelta
 from typing import Any, Dict, Optional, Set, Tuple
 from uuid import uuid4
-
-from fastapi.responses import Response
-from fastapi.security import APIKeyCookie, HTTPBearer
-from jose import jwt
-from pydantic import SecretStr
 
 from app.pkg.models.exceptions.jwt import (
     AlgorithIsNotSupported,
@@ -16,6 +11,10 @@ from app.pkg.models.exceptions.jwt import (
     WrongToken,
 )
 from app.pkg.settings import settings
+from fastapi.responses import Response
+from fastapi.security import APIKeyCookie, HTTPBearer
+from jose import jwt
+from pydantic import SecretStr
 
 __all__ = ["JwtAuthBase"]
 
@@ -131,7 +130,6 @@ class JwtAuthBase(ABC):
 
         payload = self._decode_payload(SecretStr(token))
         return payload, token
-
 
     @staticmethod
     def _generate_payload(

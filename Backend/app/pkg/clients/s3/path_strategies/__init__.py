@@ -1,8 +1,7 @@
 """S3 Path Strategies."""
 
-from dependency_injector import containers, providers
-
 from app.pkg.clients.s3.path_strategies.prompter import PrompterPathStrategy
+from dependency_injector import containers, providers
 
 
 class PathStrategies(containers.DeclarativeContainer):

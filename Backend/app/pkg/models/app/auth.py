@@ -1,12 +1,12 @@
 from app.pkg.models.app.jwt import JWTFields
-from app.pkg.models.base import BaseModel
 from app.pkg.models.app.user import UserFields
-
-from pydantic import SecretStr, EmailStr
+from app.pkg.models.base import BaseModel
+from pydantic import EmailStr, SecretStr
 
 __all__ = [
     "AuthRequest",
 ]
+
 
 class AuthFields:
     access_token: JWTFields.access_token
@@ -24,6 +24,3 @@ class BaseAuth(BaseModel):
 class AuthRequest(BaseAuth):
     email: EmailStr = AuthFields.email
     password: SecretStr = AuthFields.password
-
-
-
