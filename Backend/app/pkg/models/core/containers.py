@@ -3,12 +3,11 @@
 from dataclasses import dataclass, field
 from typing import Callable, List, Optional, Type, Union
 
+from app.pkg import handlers
+from app.pkg.models.core.meta import SingletonMeta
 from dependency_injector import containers, providers
 from dependency_injector.containers import Container as _DIContainer
 from fastapi import FastAPI
-
-from app.pkg import handlers
-from app.pkg.models.core.meta import SingletonMeta
 
 __all__ = ["Container", "Containers", "Resource"]
 
@@ -232,7 +231,7 @@ class Containers:
                 if not (
                     container.container.__name__
                     in [connector_class.__name__ for connector_class in connectors]
-                    or isinstance(container, Resource)
+                    or isinstance(container, Resource)  # noqa: W503
                 ):
                     continue
 

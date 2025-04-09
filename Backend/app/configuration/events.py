@@ -1,6 +1,7 @@
 """``on_startup`` function will be called when server trying to start."""
 from app.internal.workers.background import background_worker
 
+
 async def on_startup() -> None:
     """Run code on server startup.
 

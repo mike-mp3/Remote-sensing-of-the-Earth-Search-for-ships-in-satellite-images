@@ -22,13 +22,12 @@ Examples:
         }
 """
 
-from starlette import status
-from starlette.requests import Request
-from starlette.responses import JSONResponse
-
 from app.pkg.logger import get_logger
 from app.pkg.models.base import BaseAPIException
 from app.pkg.models.exceptions.repository import DriverError
+from starlette import status
+from starlette.requests import Request
+from starlette.responses import JSONResponse
 
 __all__ = [
     "handle_internal_exception",

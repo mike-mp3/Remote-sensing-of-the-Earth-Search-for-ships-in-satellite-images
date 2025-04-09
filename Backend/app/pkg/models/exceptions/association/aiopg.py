@@ -1,12 +1,8 @@
 """Here you can pass the postgres error codes with association python
 exceptions."""
 
+from app.pkg.models.exceptions import city, repository
 from psycopg2 import errorcodes
-
-from app.pkg.models.exceptions import (
-    city,
-    repository,
-)
 
 __all__ = ["__aiopg__", "__constrains__"]
 

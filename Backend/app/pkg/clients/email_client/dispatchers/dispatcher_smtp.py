@@ -1,25 +1,27 @@
-from app.pkg.logger import get_logger
-from app.pkg.clients.email_client.base.dispatcher import BaseEmailDispatcher
-from aiosmtplib import SMTP
-from typing import Optional
-from pydantic import EmailStr
 from email.message import EmailMessage
+from typing import Optional
+
 import aiosmtplib
+from aiosmtplib import SMTP
+from app.pkg.clients.email_client.base.dispatcher import BaseEmailDispatcher
+from app.pkg.logger import get_logger
+from pydantic import EmailStr
 
 logger = get_logger(__name__)
+
 
 # TODO: 1. реализовать сначала попытку use_tls, только потом start_tls
 # TODO: 2. реализовать 2 сервер
 # TODO: 3. MIMEText
 class SMTPEmailDispatcher(BaseEmailDispatcher):
     def __init__(
-            self,
-            smtp_host: str,
-            smtp_port: int,
-            username: str,
-            password: str,
-            use_tls: bool,
-            timeout: float = 30.0
+        self,
+        smtp_host: str,
+        smtp_port: int,
+        username: str,
+        password: str,
+        use_tls: bool,
+        timeout: float = 30.0,
     ):
         self.smtp_host = smtp_host
         self.smtp_port = smtp_port
@@ -37,7 +39,7 @@ class SMTPEmailDispatcher(BaseEmailDispatcher):
             username=self.username,
             password=self.password,
             use_tls=self.use_tls,
-            timeout=self.timeout
+            timeout=self.timeout,
         )
 
     # todo: добавить в body возможность приема SecretStr, SecretBytes

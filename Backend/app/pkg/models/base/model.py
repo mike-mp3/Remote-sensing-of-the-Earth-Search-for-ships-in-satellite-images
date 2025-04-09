@@ -8,9 +8,8 @@ from typing import Any, Dict, List, Tuple, TypeVar
 from uuid import UUID
 
 import pydantic
-from pydantic import UUID4, ConfigDict
-
 from app.pkg.models import types
+from pydantic import UUID4, ConfigDict
 
 __all__ = ["BaseModel", "Model"]
 
@@ -21,19 +20,18 @@ _T = TypeVar("_T")
 class BaseModel(pydantic.BaseModel):
     """Base model for all models in API server."""
 
-
     model_config = ConfigDict(
         use_enum_values=True,
         populate_by_name=True,
         validate_assignment=True,
         str_strip_whitespace=True,
-        json_encoders = {
+        json_encoders={
             pydantic.SecretStr: lambda v: v.get_secret_value() if v else None,
             pydantic.SecretBytes: lambda v: v.get_secret_value() if v else None,
             bytes: lambda v: v.decode() if v else None,
             datetime: lambda v: int(v.timestamp()) if v else None,
             date: lambda v: int(time.mktime(v.timetuple())) if v else None,
-        }
+        },
     )
 
     def to_dict(
@@ -141,8 +139,7 @@ class BaseModel(pydantic.BaseModel):
 
         if isinstance(v, (List, Tuple)):
             return [
-                self.__cast_values(v=ve, show_secrets=show_secrets, **kwargs)
-                for ve in v
+                self.__cast_values(v=ve, show_secrets=show_secrets, **kwargs) for ve in v
             ]
 
         elif isinstance(v, (pydantic.SecretBytes, pydantic.SecretStr)):

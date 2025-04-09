@@ -1,11 +1,10 @@
 """All postgresql repositories are defined here."""
 
-from dependency_injector import containers, providers
-
 from app.internal.repository.postgresql.city import CityRepository
 from app.internal.repository.postgresql.prompt import PromptRepository
-from app.internal.repository.postgresql.user import UserRepository
 from app.internal.repository.postgresql.refresh_token import JWTRefreshTokenRepository
+from app.internal.repository.postgresql.user import UserRepository
+from dependency_injector import containers, providers
 
 
 class Repositories(containers.DeclarativeContainer):

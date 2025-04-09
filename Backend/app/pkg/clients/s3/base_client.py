@@ -1,11 +1,11 @@
-import aioboto3
+from abc import ABC, abstractmethod
 from contextlib import asynccontextmanager
-from abc import abstractmethod, ABC
-from typing import Optional, Dict, List, TypeVar
+from typing import Dict, List, Optional, TypeVar
+
+import aioboto3
+from app.pkg.logger import get_logger
 from botocore.exceptions import ClientError
 from pydantic import AnyUrl, SecretStr
-
-from app.pkg.logger import get_logger
 
 logger = get_logger(__name__)
 
@@ -27,9 +27,8 @@ class S3AsyncClient(ABC):
         self.__session = aioboto3.Session(
             aws_access_key_id=self.aws_access_key_id,
             aws_secret_access_key=self.aws_secret_access_key.get_secret_value(),
-            region_name=self.region_name
+            region_name=self.region_name,
         )
-
 
     @property
     @abstractmethod
@@ -40,7 +39,7 @@ class S3AsyncClient(ABC):
     async def __get_client(self):
         async with self.__session.client(
             service_name="s3",
-            endpoint_url=self.base_url
+            endpoint_url=self.base_url,
         ) as client:
             yield client
 
@@ -48,7 +47,7 @@ class S3AsyncClient(ABC):
         self,
         file_key: str,
         data: bytes,
-        content_type: str = "image/"
+        content_type: str = "image/",
     ) -> None:
         try:
             async with self.__get_client() as client:
@@ -56,19 +55,18 @@ class S3AsyncClient(ABC):
                     Bucket=self.bucket_name,
                     Key=file_key,
                     Body=data,
-                    ContentType=content_type
+                    ContentType=content_type,
                 )
         except ClientError as e:
             logger.error("Error uploading file: %s", e)
             raise e from e
-
 
     async def _download_file(self, file_key: str):
         try:
             async with self.__get_client() as client:
                 response = await client.get_object(
                     Bucket=self.bucket_name,
-                    Key=file_key
+                    Key=file_key,
                 )
                 data = await response["Body"].read()
                 return data
@@ -76,13 +74,12 @@ class S3AsyncClient(ABC):
             logger.error("Error downloading file: %s", e)
             raise e from e
 
-
     async def _delete_file(self, file_key: str):
         try:
             async with self.__get_client() as client:
                 await client.delete_object(
                     Bucket=self.bucket_name,
-                    Key=file_key
+                    Key=file_key,
                 )
         except ClientError as e:
             logger.error("Error deleting file: %s", e)
@@ -113,7 +110,7 @@ class S3AsyncClient(ABC):
             async with self.__get_client() as client:
                 await client.head_object(
                     Bucket=self.bucket_name,
-                    Key=file_key
+                    Key=file_key,
                 )
                 return True
         except ClientError as e:

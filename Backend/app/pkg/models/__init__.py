@@ -2,58 +2,38 @@
 # ruff: noqa
 
 
-from app.pkg.models.app.user_roles import (
-    UserRoleEnum,
-    UserRoleID,
-    UserRoleName,
+from app.pkg.models.app.auth import AuthRequest
+from app.pkg.models.app.prompts import (
+    ConfirmPromptRequest,
+    CreatePromptCommand,
+    GeneratePrompt,
+    PresignedPostRequest,
+    PresignedPostResponse,
+    Prompt,
+    PromptLink,
+    PromptObjectType,
+    PutPromptMessage,
+    ValidatePromptPath,
 )
-
-from app.pkg.models.app.user import (
-    User,
-    CreateUserRequest,
-    CreateUserCommand,
-    CreateUserResponse,
-    CreateUserConfirmationCode,
-    ReadUserConfirmationCode,
-    ConfirmUserEmailRequest,
-    UpdateUserStatusCommand,
-    ResendUserConfirmationCodeRequest,
-    ReadUserByEmailCommand,
-    ActiveUser,
-)
-
-from app.pkg.models.app.auth import (
-    AuthRequest,
-)
-
 from app.pkg.models.app.refresh_token import (
-    JWTRefreshToken,
     CreateJWTRefreshTokenCommand,
+    CreateOrUpdateJWTRefreshTokenCommand,
+    DeleteJWTRefreshTokenCommand,
+    JWTRefreshToken,
     ReadJWTRefreshTokenQuery,
     UpdateJWTRefreshTokenCommand,
-    DeleteJWTRefreshTokenCommand,
-    CreateOrUpdateJWTRefreshTokenCommand
 )
-
-from app.pkg.models.app.prompts import (
-    PromptObjectType,
-    GeneratePrompt,
-    Prompt,
-    CreatePromptCommand,
-    PromptLink,
-    ValidatePromptPath,
-    PresignedPostRequest,
-    ConfirmPromptRequest,
-    PresignedPostResponse,
-    PutPromptMessage,
+from app.pkg.models.app.user import (
+    ActiveUser,
+    ConfirmUserEmailRequest,
+    CreateUserCommand,
+    CreateUserConfirmationCode,
+    CreateUserRequest,
+    CreateUserResponse,
+    ReadUserByEmailCommand,
+    ReadUserConfirmationCode,
+    ResendUserConfirmationCodeRequest,
+    UpdateUserStatusCommand,
+    User,
 )
-
-
-from app.pkg.models.app.city import (
-    City,
-    CreateCityCommand,
-    DeleteCityCommand,
-    ReadCityByCountryQuery,
-    ReadCityQuery,
-    UpdateCityCommand,
-)
+from app.pkg.models.app.user_roles import UserRoleEnum, UserRoleID, UserRoleName

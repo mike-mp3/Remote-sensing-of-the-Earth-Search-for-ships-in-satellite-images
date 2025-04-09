@@ -70,7 +70,7 @@ def get_logger(name):
             >>> from app.pkg.logger import get_logger
             >>> logger = get_logger(__name__)
             >>> logger.info("Hello, World!")
-            2021-01-01 00:00:00,000 - [INFO] - app.pkg.logger - (logger.py).get_logger(43) - Hello, World!  # pylint: disable=line-too-long
+            2021-01-01 00:00:00,000 - [INFO] - app.pkg.logger - (logger.py).get_logger(43) - Hello, World!  # noqa: E501
     """
     logger = logging.getLogger(name)
     file_path = str(

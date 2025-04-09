@@ -1,14 +1,13 @@
-from fastapi import APIRouter, Depends, status
-
 from app.internal.pkg.handlers import with_errors
-from app.pkg import models
-
-from dependency_injector.wiring import Provide, inject
 from app.internal.services import Services
 from app.internal.services.user import UserService
+from app.pkg import models
 from app.pkg.models import exceptions as excs
+from dependency_injector.wiring import Provide, inject
+from fastapi import APIRouter, Depends, status
 
 router = APIRouter(prefix="/user", tags=["User"])
+
 
 @router.post(
     "",
@@ -20,7 +19,7 @@ router = APIRouter(prefix="/user", tags=["User"])
 @inject
 async def create_user(
     req: models.CreateUserRequest,
-    user_service: UserService = Depends(Provide[Services.user_service])
+    user_service: UserService = Depends(Provide[Services.user_service]),
 ):
     return await user_service.create_user(req)
 
@@ -34,7 +33,7 @@ async def create_user(
 @inject
 async def confirm_user_email(
     req: models.ConfirmUserEmailRequest,
-    user_service: UserService = Depends(Provide[Services.user_service])
+    user_service: UserService = Depends(Provide[Services.user_service]),
 ):
     return await user_service.confirm_email(req)
 
@@ -47,6 +46,6 @@ async def confirm_user_email(
 @inject
 async def resend_user_email(
     req: models.ResendUserConfirmationCodeRequest,
-    user_service: UserService = Depends(Provide[Services.user_service])
+    user_service: UserService = Depends(Provide[Services.user_service]),
 ):
     return await user_service.resend_confirmation_code(req)

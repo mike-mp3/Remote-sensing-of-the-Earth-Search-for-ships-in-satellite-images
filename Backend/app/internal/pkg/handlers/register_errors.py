@@ -1,11 +1,13 @@
 from functools import wraps
 from typing import Type
+
 from app.pkg.models.base import BaseAPIException
 
 # Global error registry for endpoints.
 # This registry uses a unique key for each endpoint function,
 # composed of the module and qualified name.
 ERROR_REGISTRY = {}
+
 
 def with_errors(*excs: Type[BaseAPIException]):
     """
@@ -63,9 +65,9 @@ def with_errors(*excs: Type[BaseAPIException]):
                 "description": exc.message,
                 "content": {
                     "application/json": {
-                        "example": {"detail": exc.message}
-                    }
-                }
+                        "example": {"detail": exc.message},
+                    },
+                },
             }
             for exc in excs
         ]
@@ -73,5 +75,7 @@ def with_errors(*excs: Type[BaseAPIException]):
         @wraps(func)
         async def wrapper(*args, **kwargs):
             return await func(*args, **kwargs)
+
         return wrapper
+
     return decorator

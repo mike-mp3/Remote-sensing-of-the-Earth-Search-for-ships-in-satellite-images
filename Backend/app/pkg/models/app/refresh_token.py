@@ -1,8 +1,7 @@
-from pydantic import PositiveInt, SecretStr
-
 from app.pkg.models.app.jwt import JWTFields
 from app.pkg.models.app.user import UserFields
 from app.pkg.models.base import BaseModel
+from pydantic import PositiveInt, SecretStr
 
 __all__ = [
     "JWTFields",
@@ -11,7 +10,7 @@ __all__ = [
     "ReadJWTRefreshTokenQuery",
     "UpdateJWTRefreshTokenCommand",
     "DeleteJWTRefreshTokenCommand",
-    "CreateOrUpdateJWTRefreshTokenCommand"
+    "CreateOrUpdateJWTRefreshTokenCommand",
 ]
 
 
@@ -22,6 +21,7 @@ class JWTRefreshFields:
 
 class BaseJWTRefreshToken(BaseModel):
     """Base class for refresh token."""
+
 
 # From database
 class JWTRefreshToken(BaseJWTRefreshToken):
@@ -39,6 +39,7 @@ class UpdateJWTRefreshTokenCommand(BaseJWTRefreshToken):
     user_id: PositiveInt = JWTRefreshFields.user_id
     refresh_token: SecretStr = JWTRefreshFields.refresh_token
 
+
 class CreateOrUpdateJWTRefreshTokenCommand(BaseJWTRefreshToken):
     user_id: PositiveInt = JWTRefreshFields.user_id
     refresh_token: SecretStr = JWTRefreshFields.refresh_token
@@ -53,5 +54,3 @@ class DeleteJWTRefreshTokenCommand(BaseJWTRefreshToken):
 class ReadJWTRefreshTokenQuery(BaseJWTRefreshToken):
     user_id: PositiveInt = JWTRefreshFields.user_id
     refresh_token: SecretStr = JWTRefreshFields.refresh_token
-
-

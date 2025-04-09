@@ -1,8 +1,5 @@
 """Server configuration."""
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.routing import APIRoute
 from app.configuration.events import on_shutdown, on_startup
 from app.internal.pkg.handlers import ERROR_REGISTRY
 from app.internal.pkg.middlewares.handle_http_exceptions import (
@@ -14,6 +11,9 @@ from app.internal.routes import __routes__
 from app.pkg.models.base import BaseAPIException
 from app.pkg.models.types.fastapi import FastAPITypes
 from app.pkg.settings import settings
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.routing import APIRoute
 
 __all__ = ["Server"]
 
@@ -128,7 +128,6 @@ class Server:
             allow_headers=["*"],
         )
 
-
     def _register_middlewares(self, app) -> None:
         """Apply routes middlewares.
 
@@ -159,4 +158,3 @@ class Server:
                 if unique_key in ERROR_REGISTRY:
                     for error in ERROR_REGISTRY[unique_key]:
                         route.responses[error["status_code"]] = error
-

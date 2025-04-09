@@ -5,12 +5,11 @@ import typing
 import urllib.parse
 from functools import lru_cache
 
-from dotenv import find_dotenv
-from pydantic import PostgresDsn, RedisDsn, model_validator, field_validator
-from pydantic.types import PositiveInt, SecretStr
-from pydantic import AnyUrl
-from pydantic_settings import BaseSettings, SettingsConfigDict
 from app.pkg.models.core.logger import LoggerLevel
+from dotenv import find_dotenv
+from pydantic import AnyUrl, PostgresDsn, RedisDsn, field_validator, model_validator
+from pydantic.types import PositiveInt, SecretStr
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 __all__ = ["Settings", "get_settings"]
 
@@ -51,7 +50,7 @@ class _Settings(BaseSettings):
         env_file_encoding="utf-8",
         case_sensitive=True,
         env_nested_delimiter="__",
-        extra='allow',
+        extra="allow",
     )
 
 
@@ -201,7 +200,6 @@ class APIServer(_Settings):
 
     # --- OTHER SETTINGS ---
     LOGGER: Logging
-
 
 
 class Settings(_Settings):

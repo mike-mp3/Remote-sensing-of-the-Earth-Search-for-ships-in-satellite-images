@@ -5,11 +5,10 @@ from typing import Optional, Union
 
 from aiopg import Pool
 from aiopg.pool import Cursor
+from app.pkg.connectors import Connectors
 from dependency_injector.wiring import Provide, inject
 from psycopg2.extensions import cursor  # type: ignore
 from psycopg2.extras import RealDictCursor  # type: ignore
-
-from app.pkg.connectors import Connectors
 
 __all__ = ["get_connection", "acquire_connection"]
 

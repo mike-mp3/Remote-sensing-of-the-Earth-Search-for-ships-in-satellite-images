@@ -1,8 +1,9 @@
 from pydantic import Field
 
 __all__ = [
-    "JWTFields"
+    "JWTFields",
 ]
+
 
 class JWTFields:
     access_token = Field(

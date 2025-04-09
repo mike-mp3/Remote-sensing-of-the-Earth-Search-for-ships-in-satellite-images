@@ -4,10 +4,9 @@ from enum import Enum
 from typing import Optional
 from uuid import UUID
 
-from pydantic import Field, PositiveInt, AnyUrl
-
 from app.pkg.models.app.user import UserFields
 from app.pkg.models.base import BaseModel
+from pydantic import AnyUrl, Field, PositiveInt
 
 __all__ = [
     "PromptObjectType",
@@ -19,7 +18,7 @@ __all__ = [
     "ConfirmPromptRequest",
     "PromptLink",
     "PresignedPostResponse",
-    "PutPromptMessage"
+    "PutPromptMessage",
 ]
 
 
@@ -47,11 +46,11 @@ class PromptFields:
     )
     created_at = Field(
         description="Prompt creation time",
-        examples=[""]
+        examples=[""],
     )
     updated_at = Field(
         description="Prompt status update time",
-        examples=[""]
+        examples=[""],
     )
 
 
@@ -79,12 +78,12 @@ class PresignedPostRequest(BasePrompt):
 class PresignedPostFields(BaseModel):
     content_type: str = Field(
         examples=["image/"],
-        alias="Content-Type"
+        alias="Content-Type",
     )
     key: str = PromptFields.key_path
     aws_access_key_id: str = Field(
         examples=["user"],
-        alias="AWSAccessKeyId"
+        alias="AWSAccessKeyId",
     )
     policy: str = Field(
         examples=["policy"],

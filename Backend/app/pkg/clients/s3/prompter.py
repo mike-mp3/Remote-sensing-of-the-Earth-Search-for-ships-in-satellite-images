@@ -1,8 +1,9 @@
 from typing import Optional, Type
 from uuid import uuid4
-from pydantic import PositiveInt, AnyUrl, SecretStr
 
-from app.pkg.models import GeneratePrompt, PromptObjectType, PromptLink
+from app.pkg.models import GeneratePrompt, PromptLink, PromptObjectType
+from pydantic import AnyUrl, PositiveInt, SecretStr
+
 from .base_client import S3AsyncClient
 from .path_strategies.base import BasePathStrategy
 from .path_strategies.prompter import PrompterPathStrategy
@@ -34,29 +35,29 @@ class S3PrompterClient(S3AsyncClient):
             cmd=GeneratePrompt(
                 object_type=PromptObjectType.RAW.value,
                 user_id=user_id,
-                prompt_id=prompt_id
-            )
+                prompt_id=prompt_id,
+            ),
         )
 
     def parse_path(self, path: str) -> Optional[PromptLink]:
         return self._path_strategy.parse(path)
 
-
     async def create_presigned_post(
-        self, link: PromptLink,
+        self,
+        link: PromptLink,
     ):
         fields_ = {
-            "Content-Type": "image/"
+            "Content-Type": "image/",
         }
         conditions = [
-            ["content-length-range", 1024, 10 * 1024 * 1024], # 10 MB
+            ["content-length-range", 1024, 10 * 1024 * 1024],  # 10 MB
             ["starts-with", "$Content-Type", "image/"],
         ]
         presigned_data = await self._create_presigned_post(
             file_key=link.key_path,
             fields=fields_,
             conditions=conditions,
-            expires_in=600
+            expires_in=600,
         )
         return presigned_data
 
