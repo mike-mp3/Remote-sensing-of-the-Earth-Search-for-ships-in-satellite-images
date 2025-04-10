@@ -18,7 +18,8 @@ __all__ = [
     "ConfirmPromptRequest",
     "PromptLink",
     "PresignedPostResponse",
-    "PutPromptMessage",
+    "RawPromptMessage",
+    "ResultPromptMessage",
 ]
 
 
@@ -32,7 +33,7 @@ class PromptFields:
         examples=["some-id"],
     )
     user_id = UserFields.id
-    key_path = Field(
+    file_key = Field(
         description="Key path to object",
         examples=["raw/user_{some-id}/prompt_{some-id}"],
     )
@@ -80,7 +81,7 @@ class PresignedPostFields(BaseModel):
         examples=["image/"],
         alias="Content-Type",
     )
-    key: str = PromptFields.key_path
+    key: str = PromptFields.file_key
     aws_access_key_id: str = Field(
         examples=["user"],
         alias="AWSAccessKeyId",
@@ -99,7 +100,7 @@ class PresignedPostResponse(BaseModel):
 
 
 class ConfirmPromptRequest(BasePrompt):
-    key_path: str = PromptFields.key_path
+    key_path: str = PromptFields.file_key
 
 
 # Path Strategy
@@ -113,7 +114,7 @@ class PromptLink(BasePrompt):
     object_type: PromptObjectType
     prompt_id: str = PromptFields.prompt_id
     user_id: PositiveInt = PromptFields.user_id
-    key_path: str = PromptFields.key_path
+    key_path: str = PromptFields.file_key
     key_starts_with: str = PromptFields.key_starts_with
 
 
@@ -128,21 +129,26 @@ class ValidatePromptPath(BasePrompt):
 class CreatePromptCommand(BasePrompt):
     user_id: PositiveInt = PromptFields.user_id
     prompt_id: str = PromptFields.prompt_id
-    raw_key: str = PromptFields.key_path
+    raw_key: str = PromptFields.file_key
 
 
 class Prompt(BasePrompt):
     id: UUID = PromptFields.id
     user_id: PositiveInt = PromptFields.user_id
     prompt_id: str = PromptFields.prompt_id
-    raw_key: str = PromptFields.key_path
-    result_key: Optional[str] = PromptFields.key_path
+    raw_key: str = PromptFields.file_key
+    result_key: Optional[str] = PromptFields.file_key
     status: PromptStatus = PromptFields.status
     created_at: datetime = PromptFields.created_at
     updated_at: datetime = PromptFields.updated_at
 
 
 # Messages - Rabbit
-class PutPromptMessage(BasePrompt):
+class RawPromptMessage(BasePrompt):
     id: UUID = PromptFields.id
-    raw_key: str = PromptFields.key_path
+    raw_key: str = PromptFields.file_key
+
+
+class ResultPromptMessage(BasePrompt):
+    id: UUID = PromptFields.id
+    result_key: str = PromptFields.file_key

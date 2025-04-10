@@ -6,6 +6,7 @@ from app.internal.repository.repository import BaseRepository
 from app.pkg.clients.rabbitmq.producer import RabbitMQProducer
 from app.pkg.clients.s3 import S3PrompterClient
 from app.pkg.clients.s3.base_client import BaseS3AsyncClient
+from app.pkg.logger import get_logger
 from app.pkg.models import (
     ActiveUser,
     ConfirmPromptRequest,
@@ -13,7 +14,8 @@ from app.pkg.models import (
     PresignedPostRequest,
     Prompt,
     PromptObjectType,
-    PutPromptMessage,
+    RawPromptMessage,
+    ResultPromptMessage,
 )
 from app.pkg.models.exceptions import (
     CannotProcessPrompt,
@@ -22,6 +24,8 @@ from app.pkg.models.exceptions import (
     RawPromptNowFound,
 )
 from app.pkg.models.exceptions.repository import UniqueViolation
+
+logger = get_logger(__name__)
 
 
 class PromptService:
@@ -76,7 +80,7 @@ class PromptService:
                 ),
             )
             await self.producer.publish_message(
-                PutPromptMessage(**prompt.to_dict()),
+                RawPromptMessage(**prompt.to_dict()),
                 self.raw_queue_name,
             )
         except UniqueViolation:
@@ -86,11 +90,32 @@ class PromptService:
 
         return prompt
 
-    async def mock_handle_raw(self, data: PutPromptMessage):
-        pass
+    # TODO: УДАЛИТЬ MOCK
+    async def mock_handle_raw(self, data: RawPromptMessage):
+
+        link = self.s3_prompter_client.parse_path(data.raw_key)
+        file_key = f"results/user_{link.user_id}/prompt_{link.prompt_id}"
+        try:
+            with open("app/internal/services/result.png", "rb") as file:
+                await self.s3_prompter_client.upload_file_mock(
+                    file_key=file_key,
+                    data=file,
+                )
+            await self.producer.publish_message(
+                ResultPromptMessage(result_key=file_key, id=data.id),
+                "result_prompts",
+            )
+        except Exception as e:
+            logger.error(e)
+            raise e
 
     async def test(self):
+        prompt_uuid = uuid.uuid4().hex[:10]
         await self.producer.publish_message(
-            PutPromptMessage(id=uuid.uuid4(), raw_key="test"),
+            RawPromptMessage(
+                id=uuid.uuid4(),
+                raw_key=f"raw/user_69/prompt_{prompt_uuid}",
+            ),
             self.raw_queue_name,
         )
+        print("AHAHAHAHAHAH", prompt_uuid)

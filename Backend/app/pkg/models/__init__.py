@@ -12,7 +12,8 @@ from app.pkg.models.app.prompts import (
     Prompt,
     PromptLink,
     PromptObjectType,
-    PutPromptMessage,
+    RawPromptMessage,
+    ResultPromptMessage,
     ValidatePromptPath,
 )
 from app.pkg.models.app.refresh_token import (

@@ -63,3 +63,6 @@ class S3PrompterClient(S3AsyncClient):
 
     async def object_exists(self, link: PromptLink) -> bool:
         return await self._object_exists(link.key_path)
+
+    async def upload_file_mock(self, file_key: str, data):
+        return await self._upload_file(file_key, data)

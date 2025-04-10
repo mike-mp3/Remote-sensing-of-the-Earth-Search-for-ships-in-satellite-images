@@ -18,11 +18,6 @@ def init_worker(pkg_name):
     __containers__.wire_packages(pkg_name=pkg_name)
 
 
-def call(body: dict):
-    # some logic
-    pass
-
-
 @inject
 async def listen(
     consumer: RabbitMQConsumer = Provide[RabbitMQClient.consumer],
@@ -40,5 +35,5 @@ if __name__ == "__main__":
         try:
             asyncio.run(listen())
         except Exception as exc:
-            logger.error(str(exc))
+            logger.error(exc)
             sleep(10)
