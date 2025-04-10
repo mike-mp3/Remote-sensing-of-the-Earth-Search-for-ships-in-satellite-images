@@ -4,13 +4,12 @@ from functools import wraps
 from typing import List, Type, Union
 
 import pydantic
-from psycopg2.extras import RealDictRow  # type: ignore
-
 from app.internal.repository.postgresql.handlers.handle_exception import (
     handle_exception,
 )
 from app.pkg.models.base import Model
 from app.pkg.models.exceptions.repository import EmptyResult
+from psycopg2.extras import RealDictRow  # type: ignore
 
 __all__ = ["collect_response"]
 
@@ -75,10 +74,14 @@ def collect_response(fn):
         if not response:
             raise EmptyResult
 
-        return pydantic.validate_python(
-            (ann := fn.__annotations__["return"]),
-            await __convert_response(response=response, annotations=str(ann)),
+        ann = fn.__annotations__["return"]
+        data = await __convert_response(
+            response=response,
+            annotations=str(ann),
         )
+
+        adapter = pydantic.TypeAdapter(ann)
+        return adapter.validate_python(data)
 
     return inner
 

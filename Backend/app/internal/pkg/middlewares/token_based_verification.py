@@ -1,10 +1,9 @@
 """Authentication middleware for token-based authentication."""
 
-from fastapi import Security
-from fastapi.security import APIKeyHeader
-
 from app.pkg.models.exceptions.token_verification import InvalidCredentials
 from app.pkg.settings import settings
+from fastapi import Security
+from fastapi.security import APIKeyHeader
 
 __all__ = ["token_based_verification"]
 

@@ -1,0 +1,13 @@
+{
+  "id": "create-ml-user-41fba64f",
+  "created": "2025-04-02T16:28:12.950643",
+  "order": 3,
+  "actions": [
+    {
+      "type": "create_user",
+      "username": "$S3__ML_USER_NAME",
+      "password": "$S3__ML_USER_PASSWORD",
+      "policy": "main_for_user_prompts_results"
+    }
+  ]
+}

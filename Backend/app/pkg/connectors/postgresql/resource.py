@@ -1,7 +1,6 @@
 """Async resource for PostgresSQL connector."""
 
 import aiopg
-
 from app.pkg.connectors.resources import BaseAsyncResource
 
 __all__ = ["Postgresql"]

@@ -9,3 +9,6 @@
 ![photo_2025-02-23_23-25-50](https://github.com/user-attachments/assets/31f8c786-d89d-49ad-b87b-d192661de38f)
 ![photo_2025-02-23_23-25-49](https://github.com/user-attachments/assets/a6a5fbc6-addf-4acb-ba62-e59c47279c95)
 ![photo_2025-02-23_23-25-46](https://github.com/user-attachments/assets/1608141c-0f23-45c0-bb10-5c185e8b7c10)
+
+
+This project builds on [Ultralytics YOLO](https://github.com/ultralytics/ultralytics), licensed under AGPL-3.0.

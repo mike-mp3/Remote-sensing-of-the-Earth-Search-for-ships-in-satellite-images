@@ -6,6 +6,7 @@ Notes:
 """
 
 from abc import abstractmethod
+from contextlib import asynccontextmanager
 
 __all__ = ["BaseConnector"]
 
@@ -14,18 +15,10 @@ class BaseConnector:
     """Abstract connector."""
 
     @abstractmethod
-    async def get_connect(self, *args, **kwargs):
-        """Getting connection pool in asynchronous.
-
-        Args:
-            *args: Positional arguments for ``get_connect`` method.
-            **kwargs: Keyword arguments for ``get_connect`` method.
-        """
-
-        raise NotImplementedError
-
-    @abstractmethod
-    async def close(self, *args, **kwargs):
-        """Close connection."""
-
-        raise NotImplementedError
+    @asynccontextmanager
+    async def get_connect(self):
+        """Getting connection pool in asynchronous context."""
+        try:
+            yield
+        finally:
+            raise NotImplementedError

@@ -15,7 +15,7 @@ RUN pip install poetry
 
 COPY poetry.lock pyproject.toml /usr/src/postgres_migrations/
 
-RUN poetry install --only main --no-root --no-cache
+RUN poetry install --only main --no-root
 
 COPY . /usr/src/postgres_migrations/
 
@@ -24,4 +24,4 @@ ENV PYTHONUNBUFFERED 1
 
 RUN chmod +x scripts/wait-for-server.sh
 
-RUN dos2unix scripts/*
+RUN dos2unix scripts/wait-for-server.sh scripts/migrate.py

@@ -2,12 +2,9 @@
 instance that contains all routers in your application."""
 
 
-from fastapi import APIRouter
-
+from app.internal.routes import auth, prompt, user
 from app.pkg.models.core.routes import Routes
-from app.internal.routes import (
-    user
-)
+from fastapi import APIRouter
 
 __all__ = [
     "__routes__",
@@ -17,6 +14,8 @@ __routes__ = Routes(
     routers=(
         (
             user.router,
+            auth.router,
+            prompt.router,
         )
     ),
 )

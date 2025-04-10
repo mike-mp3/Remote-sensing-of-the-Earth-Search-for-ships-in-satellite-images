@@ -9,6 +9,26 @@ Examples:
         ...     status_code = status.HTTP_400_BAD_REQUEST
 """
 
+from app.pkg.models.exceptions.auth import (
+    IncorrectUsernameOrPassword,
+    UserIsNotActivated,
+)
+from app.pkg.models.exceptions.jwt import (
+    AlgorithIsNotSupported,
+    IncorrectTokenPlace,
+    TokenTimeExpired,
+    UnAuthorized,
+    WrongToken,
+)
+from app.pkg.models.exceptions.prompt import (
+    CannotProcessPrompt,
+    InvalidPromptPath,
+    RawPromptAlreadyExists,
+    RawPromptNowFound,
+)
 from app.pkg.models.exceptions.user import (
-    UserAlreadyExists
+    CodeNotFound,
+    IncorrectCode,
+    UserAlreadyExists,
+    UserNotFound,
 )

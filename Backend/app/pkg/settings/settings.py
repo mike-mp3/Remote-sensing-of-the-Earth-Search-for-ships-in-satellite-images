@@ -5,11 +5,11 @@ import typing
 import urllib.parse
 from functools import lru_cache
 
+from app.pkg.models.core.logger import LoggerLevel
 from dotenv import find_dotenv
-from pydantic import PostgresDsn, model_validator, field_validator
+from pydantic import AnyUrl, PostgresDsn, RedisDsn, field_validator, model_validator
 from pydantic.types import PositiveInt, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from app.pkg.models.core.logger import LoggerLevel
 
 __all__ = ["Settings", "get_settings"]
 
@@ -50,7 +50,7 @@ class _Settings(BaseSettings):
         env_file_encoding="utf-8",
         case_sensitive=True,
         env_nested_delimiter="__",
-        extra='allow',
+        extra="allow",
     )
 
 
@@ -74,26 +74,6 @@ class Postgresql(_Settings):
 
     @model_validator(mode="after")
     def build_dsn(cls, values: "Postgresql"):  # pylint: disable=no-self-argument
-        """Build DSN for postgresql.
-
-        Args:
-            values: dict with all settings.
-
-        Notes:
-            This method is called before any other validation.
-            I use it to build DSN for postgresql.
-
-        See Also:
-            About validators:
-                https://pydantic-docs.helpmanual.io/usage/validators/#root-validators
-
-            About DSN:
-                https://pydantic-docs.helpmanual.io/usage/types/#postgresdsn
-
-        Returns:
-            dict with all settings and DSN.
-        """
-
         values.DSN = PostgresDsn.build(
             scheme="postgresql",
             username=f"{values.USER}",
@@ -103,6 +83,39 @@ class Postgresql(_Settings):
             path=f"{values.DATABASE_NAME}",
         )
         return values
+
+
+class Redis(_Settings):
+    """Redis settings."""
+
+    HOST: str = "localhost"
+    PORT: PositiveInt = 6379
+    PASSWORD: SecretStr = SecretStr("redis")
+
+    #: str: Concatenation all settings for Redis in one string. (DSN)
+    #  Builds in `root_validator` method.
+    DSN: typing.Optional[str] = None
+
+    @model_validator(mode="after")
+    def build_dsn(cls, values: "Redis"):  # pylint: disable=no-self-argument
+        values.DSN = RedisDsn.build(
+            scheme="redis",
+            password=f"{urllib.parse.quote_plus(values.PASSWORD.get_secret_value())}",
+            host=f"{values.HOST}",
+            port=int(f"{values.PORT}"),
+        )
+        return values
+
+
+class JWT(_Settings):
+    """JWT settings."""
+
+    #: str: Refresh token name in headers/body/cookies.
+    REFRESH_TOKEN_NAME: str = "refresh_token"
+    #: str: Access token name in headers/body/cookies.
+    ACCESS_TOKEN_NAME: str = "access_token"
+    #: SecretStr: Key for encrypt payload in jwt.
+    SECRET_KEY: SecretStr = SecretStr("<KEY>")
 
 
 class Logging(_Settings):
@@ -125,6 +138,55 @@ class Logging(_Settings):
         return v
 
 
+class SMTP(_Settings):
+    """SMTP settings."""
+
+    # --- SMTP SETTINGS ---
+    HOST: str
+    PORT: int = 587
+    USE_TLS: bool = True
+
+    # --- SENDER ACCOUNT SETTINGS --
+    USERNAME: str
+    PASSWORD: SecretStr
+
+
+class S3(_Settings):
+    """S3 settings."""
+
+    # --- S3 SETTINGS ---
+    URL: AnyUrl
+    REQUESTER_USER_NAME: str
+    REQUESTER_USER_PASSWORD: SecretStr
+
+
+class Rabbit(_Settings):
+    """RabbitMQ settings."""
+
+    # --- RabbitMQ SETTINGS ---
+    HOST: str = "localhost"
+    PORT: PositiveInt = 5672
+    USER: str = "guest"
+    PASSWORD: SecretStr = SecretStr("guest")
+    VIRTUAL_HOST: str = "/"
+    HEARTBEAT: int = 300
+
+    #: str: Queue with tasks with raw prompts
+    RAW_PROMPTS_QUEUE_NAME: str = "raw_prompts"
+
+    DSN: typing.Optional[str] = None
+
+    @model_validator(mode="after")
+    def build_dsn(cls, values: "Rabbit"):  # pylint: disable=no-self-argument
+        password = urllib.parse.quote_plus(values.PASSWORD.get_secret_value())
+        values.DSN = (
+            f"amqp://{values.USER}:{password}"
+            f"@{values.HOST}:{values.PORT}"
+            f"/{values.VIRTUAL_HOST}"
+        )
+        return values
+
+
 class APIServer(_Settings):
     """API settings."""
 
@@ -134,13 +196,10 @@ class APIServer(_Settings):
     PORT: PositiveInt = 5000
 
     # --- SECURITY SETTINGS ---
-    #: SecretStr: Secret key for token auth.
     X_ACCESS_TOKEN: SecretStr = SecretStr("secret")
 
     # --- OTHER SETTINGS ---
-    #: Logging: Logging settings.
     LOGGER: Logging
-
 
 
 class Settings(_Settings):
@@ -153,8 +212,23 @@ class Settings(_Settings):
     #: APIServer: API settings. Contains all settings for API.
     API: APIServer
 
+    #: JWT: JWT settings.
+    JWT: JWT
+
     #: Postgresql: Postgresql settings.
     POSTGRES: Postgresql
+
+    #: Redis: Redis settings.
+    REDIS: Redis
+
+    #: SMTP: SMTP settings.
+    SMTP: SMTP
+
+    #: S3: S3 settings.
+    S3: S3
+
+    #: Rabbit: Rabbit settings.
+    RABBIT: Rabbit
 
 
 # TODO: Возможно даже lru_cache не стоит использовать. Стоит использовать meta sigleton.
