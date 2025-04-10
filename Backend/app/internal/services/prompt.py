@@ -1,3 +1,5 @@
+import uuid
+
 from aio_pika.exceptions import AMQPConnectionError, ChannelClosed
 from app.internal.repository.postgresql import PromptRepository
 from app.internal.repository.repository import BaseRepository
@@ -83,3 +85,9 @@ class PromptService:
             raise CannotProcessPrompt
 
         return prompt
+
+    async def test(self):
+        await self.producer.publish_message(
+            PutPromptMessage(id=uuid.uuid4(), raw_key="test"),
+            self.raw_queue_name,
+        )
