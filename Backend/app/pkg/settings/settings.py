@@ -171,6 +171,11 @@ class Rabbit(_Settings):
     VIRTUAL_HOST: str = "/"
     HEARTBEAT: int = 300
 
+    # --- Dead Letter Queue Settings ---
+    RABBIT__DLX_EXCHANGE_NAME: str
+    RABBIT__DLQ_NAME: str
+    RABBIT__DLQ_ROUTING_KEY: str
+
     #: str: Queue with tasks with raw prompts
     RAW_PROMPTS_QUEUE_NAME: str = "raw_prompts"
 

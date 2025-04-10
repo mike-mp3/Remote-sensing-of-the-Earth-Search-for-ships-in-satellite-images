@@ -19,6 +19,10 @@ class RabbitMQProducer:
                 queue = await channel.declare_queue(
                     queue_name,
                     durable=True,
+                    arguments={
+                        "x-dead-letter-exchange": "dlx_exchange",
+                        "x-dead-letter-routing-key": "dlq_route",
+                    },
                 )
                 await channel.default_exchange.publish(
                     aio_pika.Message(

@@ -9,6 +9,7 @@ from aio_pika.exceptions import AMQPConnectionError, ChannelClosed
 from app.pkg.connectors.rabbitmq.connector import RabbitMQConnector
 from app.pkg.logger import get_logger
 from app.pkg.models.base import BaseModel
+from app.pkg.settings import settings
 
 logger = get_logger(__name__)
 
@@ -32,20 +33,38 @@ class RabbitMQConsumer:
                 queue: AbstractRobustQueue = await channel.declare_queue(
                     queue_name,
                     durable=True,
+                    arguments={
+                        "x-dead-letter-exchange": settings.RABBIT.DLX_EXCHANGE_NAME,
+                        "x-dead-letter-routing-key": settings.RABBIT.DLQ_ROUTING_KEY,
+                    },
                 )
                 async with queue.iterator() as queue_iter:
                     async for message in queue_iter:
-                        async with message.process():
-                            await self._process_message(
-                                message,
-                                callback,
-                                model_class,
+                        try:
+                            async with message.process():
+                                await self._process_message(
+                                    message,
+                                    callback,
+                                    model_class,
+                                )
+                                logger.debug(
+                                    "Message %s successfully processed",
+                                    message.message_id,
+                                )
+                        except Exception as e:
+                            logger.error(
+                                "Message %s processing failed: %s",
+                                message.message_id,
+                                e,
                             )
 
         except (AMQPConnectionError, ChannelClosed) as e:
             raise e from e
         except Exception as e:
-            logger.error("Consuming error: %s", e)
+            logger.error(
+                "Error while processing message: %s",
+                e,
+            )
 
     async def _process_message(
         self,
@@ -69,12 +88,9 @@ class RabbitMQConsumer:
             )
             return
 
-        try:
-            result = callback(model_instance)
-            if asyncio.iscoroutine(result):
-                await result
-        except Exception as e:
-            logger.error("Error while processing message: %s", e)
+        result = callback(model_instance)
+        if asyncio.iscoroutine(result):
+            await result
 
     @staticmethod
     def _parse_message_body(body: bytes) -> Dict[str, Any]:
