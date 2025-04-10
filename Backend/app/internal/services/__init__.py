@@ -4,11 +4,9 @@ from app.internal.repository import Repositories
 from app.internal.repository import async_redis as async_redis_module
 from app.internal.repository import postgresql as postgres_module
 from app.internal.services.auth import AuthService
-from app.internal.services.city import CityService
 from app.internal.services.prompt import PromptService
 from app.internal.services.user import UserService
 from app.pkg.clients import Clients
-from app.pkg.connectors import RabbitMQ
 from app.pkg.settings import settings
 from dependency_injector import containers, providers
 
@@ -25,11 +23,6 @@ class Services(containers.DeclarativeContainer):
     )
 
     clients: Clients = providers.Container(Clients)
-
-    city_service = providers.Factory(
-        CityService,
-        city_repository=repositories.city_repository,
-    )
 
     user_service = providers.Factory(
         UserService,

@@ -2,7 +2,9 @@
 name = "Ships"
 version = "1.0.0"
 authors = ["@alg3bra"]
-package-mode=false
+packages = [
+    { include = "app" }
+]
 
 
 [tool.poetry.dependencies]

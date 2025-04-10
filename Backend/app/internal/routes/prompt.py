@@ -61,3 +61,13 @@ async def confirm(
         request=req,
         active_user=user,
     )
+
+
+@router.post(
+    "/test",
+)
+@inject
+async def test(
+    prompt_service: PromptService = Depends(Provide[Services.prompt_service]),
+):
+    return await prompt_service.test()
