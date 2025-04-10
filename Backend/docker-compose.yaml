@@ -146,6 +146,21 @@ services:
       - ship__rabbitmq_data:/var/lib/rabbitmq
 
 
+  ship__consumer:
+    container_name: ${CONSUMER__HOST}
+    build:
+      context: .
+      dockerfile: docker/consumer/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    command: [
+      "poetry", "run", "python", "app/internal/workers/prompt_results/run.py",
+    ]
+    depends_on:
+      - ship__rabbitmq
+
+
 networks:
   default:
     driver: bridge
