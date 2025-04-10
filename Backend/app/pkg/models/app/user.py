@@ -1,5 +1,3 @@
-from unittest.mock import DEFAULT
-
 from app.pkg.models.app.user_roles import UserRoleEnum, UserRoleID, UserRoleName
 from app.pkg.models.base import BaseModel
 from pydantic import (
@@ -24,6 +22,7 @@ __all__ = [
     "ResendUserConfirmationCodeRequest",
     "ReadUserByEmailCommand",
     "ActiveUser",
+    "WebSocketUser",
 ]
 
 
@@ -152,3 +151,7 @@ class ActiveUser(BaseUser):
     email: EmailStr = UserFields.email
     role_name: UserRoleName = UserFields.role_name
     is_activated: bool = UserFields.is_activated
+
+
+class WebSocketUser(BaseUser):
+    id: PositiveInt = UserFields.id

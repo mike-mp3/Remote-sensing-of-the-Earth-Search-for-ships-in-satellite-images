@@ -20,6 +20,7 @@ __all__ = [
     "PresignedPostResponse",
     "RawPromptMessage",
     "ResultPromptMessage",
+    "UpdatePromptStatusCommand",
 ]
 
 
@@ -130,6 +131,12 @@ class CreatePromptCommand(BasePrompt):
     user_id: PositiveInt = PromptFields.user_id
     prompt_id: str = PromptFields.prompt_id
     raw_key: str = PromptFields.file_key
+
+
+class UpdatePromptStatusCommand(BasePrompt):
+    id: UUID = PromptFields.id
+    result_key: str = PromptFields.file_key
+    status: PromptStatus = PromptFields.status
 
 
 class Prompt(BasePrompt):

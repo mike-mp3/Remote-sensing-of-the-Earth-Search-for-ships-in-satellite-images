@@ -42,5 +42,6 @@ class Services(containers.DeclarativeContainer):
         s3_prompter_client=clients.s3.prompter,
         prompt_repository=repositories.prompt_repository,
         producer=clients.rabbit_mq.producer,
+        websocket_manager=clients.websocket.manager,
         raw_queue_name=settings.RABBIT.RAW_PROMPTS_QUEUE_NAME,
     )

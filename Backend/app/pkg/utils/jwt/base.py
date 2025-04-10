@@ -3,6 +3,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Any, Dict, Optional, Set, Tuple
 from uuid import uuid4
 
+from app.pkg.extend.fastapi import APIKeyWebSocketCookie
 from app.pkg.models.exceptions.jwt import (
     AlgorithIsNotSupported,
     IncorrectTokenPlace,
@@ -48,6 +49,16 @@ class JwtAuthBase(ABC):
         def __init__(self, *args: Any, **kwargs: Any):
             HTTPBearer.__init__(self, *args, auto_error=False, **kwargs)
 
+    class JwtAccessWebSocketCookie(APIKeyWebSocketCookie):
+        def __init__(self, *args: Any, **kwargs: Any):
+            APIKeyWebSocketCookie.__init__(
+                self,
+                *args,
+                name=settings.JWT.ACCESS_TOKEN_NAME,
+                auto_error=False,
+                **kwargs,
+            )
+
     def __init__(
         self,
         secret_key: SecretStr,
@@ -69,7 +80,7 @@ class JwtAuthBase(ABC):
         self.places = places or {"header"}
         self.auto_error = auto_error
         self.algorithm = algorithm
-        self.access_expires_delta = access_expires_delta or timedelta(minutes=30)
+        self.access_expires_delta = access_expires_delta or timedelta(hours=6)
         self.refresh_expires_delta = refresh_expires_delta or timedelta(days=30)
 
     @classmethod

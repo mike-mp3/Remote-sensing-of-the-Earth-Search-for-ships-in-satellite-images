@@ -1,7 +1,12 @@
+from datetime import timedelta
 from functools import wraps
 
 from app.pkg import models
-from app.pkg.models.exceptions.jwt import TokenTimeExpired, UnAuthorized, WrongToken
+from app.pkg.models.exceptions.jwt import (
+    TokenTimeExpired,
+    UnAuthorized,
+    WrongToken,
+)
 from app.pkg.settings import settings
 from dependency_injector import containers, providers
 from dependency_injector.providers import Factory
@@ -9,6 +14,7 @@ from dependency_injector.wiring import Provide, inject
 from fastapi import Depends, Security
 
 from .access import JwtAccessCookie
+from .access_websocket import JwtAccessWebSocketCookie
 from .credentionals import JwtAuthorizationCredentials
 from .refresh import JwtRefreshCookie
 
@@ -24,11 +30,14 @@ __all__ = [
     "TokenTimeExpired",
     "WrongToken",
     "get_current_user",
+    "get_current_user_websocket",
 ]
 
 
 access_security = JwtAccessCookie(secret_key=settings.JWT.SECRET_KEY)
 refresh_security = JwtRefreshCookie(secret_key=settings.JWT.SECRET_KEY)
+
+access_websocket_security = JwtAccessWebSocketCookie(secret_key=settings.JWT.SECRET_KEY)
 
 
 class JWT(containers.DeclarativeContainer):
@@ -74,5 +83,11 @@ def update_jwt(func):
 
 def get_current_user(
     jwt: JwtAuthorizationCredentials = Security(access_security),
+) -> models.ActiveUser:
+    return jwt.get_user()
+
+
+def get_current_user_websocket(
+    jwt: JwtAuthorizationCredentials = Security(access_websocket_security),
 ) -> models.ActiveUser:
     return jwt.get_user()

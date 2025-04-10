@@ -14,6 +14,7 @@ from app.pkg.models.app.prompts import (
     PromptObjectType,
     RawPromptMessage,
     ResultPromptMessage,
+    UpdatePromptStatusCommand,
     ValidatePromptPath,
 )
 from app.pkg.models.app.refresh_token import (
@@ -36,5 +37,6 @@ from app.pkg.models.app.user import (
     ResendUserConfirmationCodeRequest,
     UpdateUserStatusCommand,
     User,
+    WebSocketUser,
 )
 from app.pkg.models.app.user_roles import UserRoleEnum, UserRoleID, UserRoleName

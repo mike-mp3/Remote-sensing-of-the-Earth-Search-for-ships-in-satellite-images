@@ -8,12 +8,12 @@ from aio_pika.abc import AbstractIncomingMessage, AbstractRobustQueue
 from aio_pika.exceptions import AMQPConnectionError, ChannelClosed
 from app.pkg.connectors.rabbitmq.connector import RabbitMQConnector
 from app.pkg.logger import get_logger
-from app.pkg.models.base import BaseModel
+from app.pkg.models.base import BaseModel, Model
 from app.pkg.settings import settings
 
 logger = get_logger(__name__)
 
-Callback = Callable[[BaseModel], Union[Awaitable[None], Any]]
+Callback = Callable[[Model], Union[Awaitable[None], Any]]
 
 
 class RabbitMQConsumer:
@@ -26,10 +26,12 @@ class RabbitMQConsumer:
         callback: Callback,
     ) -> None:
         model_class = self._get_callback_model(callback)
-
         try:
             async with self.connector.get_channel() as channel:
-                logger.debug("Connected to RabbitMQ")
+                logger.debug(
+                    "Connected to RabbitMQ. Consuming %s queue",
+                    queue_name,
+                )
                 queue: AbstractRobustQueue = await channel.declare_queue(
                     queue_name,
                     durable=True,
@@ -70,7 +72,7 @@ class RabbitMQConsumer:
         self,
         message: AbstractIncomingMessage,
         callback: Callback,
-        model_class: Type[BaseModel],
+        model_class: Type[Model],
     ):
         try:
             data: dict = self._parse_message_body(message.body)
@@ -103,7 +105,7 @@ class RabbitMQConsumer:
             raise ValueError(f"Invalid message. Message: {data}")
 
     @staticmethod
-    def _get_callback_model(callback: Callback) -> Type[BaseModel]:
+    def _get_callback_model(callback: Callback) -> Type[Model]:
         sig = inspect.signature(callback)
         params = list(sig.parameters.values())
         if not params:

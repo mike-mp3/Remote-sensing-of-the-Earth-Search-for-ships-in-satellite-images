@@ -1,6 +1,8 @@
 from app.internal.pkg.handlers import with_errors
 from app.internal.services import Services
 from app.internal.services.prompt import PromptService
+from app.pkg.clients import Clients
+from app.pkg.clients.websocket.manager import WebSocketManager
 from app.pkg.models import (
     ActiveUser,
     ConfirmPromptRequest,
@@ -14,9 +16,9 @@ from app.pkg.models.exceptions import (
     RawPromptAlreadyExists,
     RawPromptNowFound,
 )
-from app.pkg.utils.jwt import get_current_user
+from app.pkg.utils.jwt import get_current_user, get_current_user_websocket
 from dependency_injector.wiring import Provide, inject
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect, status
 
 router = APIRouter(prefix="/prompt", tags=["Prompt"])
 
@@ -61,6 +63,22 @@ async def confirm(
         request=req,
         active_user=user,
     )
+
+
+@router.websocket("/result")
+@inject
+async def refresh_prompt_status(
+    websocket: WebSocket,
+    user: ActiveUser = Depends(get_current_user_websocket),
+    ws_manager: WebSocketManager = Depends(Provide[Clients.websocket.manager]),
+):
+    await ws_manager.connect(user.id, websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            await ws_manager.send_personal_message(user.id, f"You said: {data}")
+    except WebSocketDisconnect:
+        ws_manager.disconnect(user.id, websocket)
 
 
 @router.post(

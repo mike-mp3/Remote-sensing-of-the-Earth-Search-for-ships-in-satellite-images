@@ -176,8 +176,10 @@ class Rabbit(_Settings):
     RABBIT__DLQ_NAME: str
     RABBIT__DLQ_ROUTING_KEY: str
 
-    #: str: Queue with tasks with raw prompts
+    #: str: Queue with raw prompts
     RAW_PROMPTS_QUEUE_NAME: str = "raw_prompts"
+    #: str: Queue with result of processing prompts
+    RESULT_PROMPTS_QUEUE_NAME: str = "result_prompts"
 
     DSN: typing.Optional[str] = None
 

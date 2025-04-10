@@ -23,9 +23,15 @@ async def listen(
     consumer: RabbitMQConsumer = Provide[RabbitMQClient.consumer],
     prompt_service: PromptService = Provide[Services.prompt_service],
 ):
-    await consumer.consume_messages(
-        queue_name=settings.RABBIT.RAW_PROMPTS_QUEUE_NAME,
-        callback=prompt_service.mock_handle_raw,
+    await asyncio.gather(
+        consumer.consume_messages(
+            queue_name=settings.RABBIT.RAW_PROMPTS_QUEUE_NAME,
+            callback=prompt_service.mock_handle_raw,
+        ),
+        consumer.consume_messages(
+            queue_name=settings.RABBIT.RESULT_PROMPTS_QUEUE_NAME,
+            callback=prompt_service.callback_handle_raw,
+        ),
     )
 
 
