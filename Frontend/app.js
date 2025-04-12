@@ -1,106 +1,98 @@
-document.addEventListener('DOMContentLoaded', () => {//тут что-то объявид вроде работает даже
-    const form = document.getElementById('upload-form');
-    const fileInput = document.getElementById('file-input');
-    const imagesContainer = document.querySelector('.images-container');
-    let uploadedImages = [];
-
-    // Обработчик события отправки формы
-    form.addEventListener('submit', (event) => { //нажатие на кнопку 
-        event.preventDefault();
-
-        if (fileInput.files.length > 0) {
-            for (let i = 0; i < fileInput.files.length && i < 3; i++) { // Ограничение до трех изображений (не знаю, можно и снять ограничение)
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const img = document.createElement('img');
-                    img.src = event.target.result;
-                    img.classList.add('uploaded-image'); //говорим в какакой класс закинуть 
-                    imagesContainer.appendChild(img);
-                    uploadedImages.push(img); // Сохраняем ссылку на добавленное изображение
-                    console.log(img)
-                };
-                reader.readAsDataURL(fileInput.files[i]); // Читаем файл
-            }
-        }
+// Страница регистрации
+if (document.getElementById("signupForm")) {
+    document.getElementById("signupForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+  
+      // Сохраняем email для подтверждения
+      localStorage.setItem("userEmail", email);
+      
+      // В реальном приложении здесь отправка кода на email
+      alert(`Код подтверждения отправлен на ${email} (в реальном приложении)`);
+      
+      // Переход на страницу подтверждения
+      window.location.href = "verify.html";
     });
-})
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Элементы
-    const authBtn = document.getElementById('auth-btn');
-    const modal = document.getElementById('auth-modal');
-    const closeBtn = document.querySelector('.close-btn');
-    const loginForm = document.getElementById('login-form');
-    const registerForm = document.getElementById('register-form');
-    const showLoginBtn = document.getElementById('show-login');
-    const showRegisterBtn = document.getElementById('show-register');
-
-    // Открытие модального окна
-    authBtn.addEventListener('click', function() {
-        modal.style.display = 'block';
-        // По умолчанию показываем форму входа
-        showLoginForm();
+  }
+  
+  // Страница подтверждения
+  if (document.getElementById("verifyForm")) {
+    // Показываем email пользователя
+    document.getElementById("userEmail").textContent = localStorage.getItem("userEmail");
+  
+    document.getElementById("verifyForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const code = document.getElementById("code").value;
+  
+      // Проверка кода (в реальном приложении — запрос к серверу)
+      if (code === "123456") { // Пример кода
+        alert("Email подтверждён! Регистрация завершена.");
+        window.location.href = "/"; // Перенаправление на главную
+      } else {
+        alert("Неверный код. Попробуйте снова.");
+      }
     });
+  }
 
-    // Закрытие модального окна
-    closeBtn.addEventListener('click', closeModal);
-    window.addEventListener('click', function(event) {
-        if (event.target === modal) closeModal();
+  // Функция для "отправки" данных на сервер (эмуляция)
+async function checkEmailExists(email) {
+    // В реальном проекте здесь будет fetch-запрос к API
+    console.log("Проверяем email на сервере...");
+    
+    // Имитация ответа сервера
+    const fakeUsers = [
+      { email: "test@example.com" },
+      { email: "user@gmail.com" }
+    ];
+    
+    const userExists = fakeUsers.some(user => user.email === email);
+    
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          status: userExists ? 400 : 200, // 400 = email занят, 200 = свободен
+          message: userExists ? "Email уже используется" : "Email свободен"
+        });
+      }, 1000); // Имитация задержки сети
     });
-
-    // Переключение между формами
-    showLoginBtn.addEventListener('click', showLoginForm);
-    showRegisterBtn.addEventListener('click', showRegisterForm);
-
-    // Обработка формы входа
-    loginForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        
-        // Здесь должна быть проверка авторизации
-        console.log('Вход:', username, password);
-        
-        closeModal();
-        authBtn.textContent = 'Выйти';
-        // Добавьте здесь логику выхода при повторном клике
+  }
+  
+  // Страница регистрации
+  if (document.getElementById("signupForm")) {
+    document.getElementById("signupForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+  
+      // Проверяем email
+      const response = await checkEmailExists(email);
+      
+      if (response.status === 400) {
+        alert("Ошибка: " + response.message);
+        return;
+      }
+  
+      // Если email свободен — сохраняем и переходим дальше
+      localStorage.setItem("userEmail", email);
+      alert("Код подтверждения отправлен на " + email);
+      window.location.href = "verify.html";
     });
-
-    // Обработка формы регистрации
-    registerForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const username = document.getElementById('reg-username').value;
-        const password = document.getElementById('reg-password').value;
-        const confirmPassword = document.getElementById('confirm-password').value;
-        
-        if (password !== confirmPassword) {
-            alert('Пароли не совпадают!');
-            return;
-        }
-        
-        // Здесь должна быть логика регистрации
-        console.log('Регистрация:', username, password);
-        
-        alert('Регистрация успешна! Теперь вы можете войти.');
-        showLoginForm();
+  }
+  
+  // Страница подтверждения (без изменений)
+  if (document.getElementById("verifyForm")) {
+    document.getElementById("userEmail").textContent = localStorage.getItem("userEmail");
+    
+    document.getElementById("verifyForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const code = document.getElementById("code").value;
+      
+      if (code === "123456") {
+        alert("Регистрация завершена!");
+        window.location.href = "/";
+      } else {
+        alert("Неверный код. Попробуйте снова.");
+      }
     });
-
-    // Функции
-    function closeModal() {
-        modal.style.display = 'none';
-    }
-
-    function showLoginForm() {
-        loginForm.style.display = 'block';
-        registerForm.style.display = 'none';
-        showLoginBtn.classList.add('active');
-        showRegisterBtn.classList.remove('active');
-    }
-
-    function showRegisterForm() {
-        loginForm.style.display = 'none';
-        registerForm.style.display = 'block';
-        showLoginBtn.classList.remove('active');
-        showRegisterBtn.classList.add('active');
-    }
-});
+  }

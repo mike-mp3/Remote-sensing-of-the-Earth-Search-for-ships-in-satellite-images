@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Подтверждение email</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="logo">
+        <img src="assets/logo.svg" alt="Логотип" width="150">
+      </div>
+      <h1>Подтвердите email</h1>
+      <p class="subtitle">Мы отправили код на <span id="userEmail"></span></p>
+      
+      <form id="verifyForm" class="form">
+        <div class="input-group">
+          <i class="fas fa-key icon"></i>
+          <input type="text" id="code" placeholder="Введите код из письма" required>
+        </div>
+        
+        <button type="submit" class="btn">Подтвердить</button>
+      </form>
+      
+      <p class="resend-link">Не получили код? <a href="#">Отправить снова</a></p>
+    </div>
+  </div>
+  
+  <script src="script.js"></script>
+</body>
+</html>

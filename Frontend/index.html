@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Регистрация</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="logo">
+        <img src="assets/logo.svg" alt="Логотип" width="150">
+      </div>
+      <h1>Создать аккаунт</h1>
+      <p class="subtitle">Это быстро и просто.</p>
+      
+      <form id="signupForm" class="form">
+        <div class="input-group">
+          <i class="fas fa-envelope icon"></i>
+          <input type="email" id="email" placeholder="Электронная почта" required>
+        </div>
+        
+        <div class="input-group">
+          <i class="fas fa-lock icon"></i>
+          <input type="password" id="password" placeholder="Новый пароль" required>
+        </div>
+        
+        <button type="submit" class="btn">Продолжить</button>
+      </form>
+      
+      <p class="auth-link">Уже есть аккаунт? <a href="#">Войти</a></p>
+    </div>
+  </div>
+  
+  <script src="script.js"></script>
+</body>
+</html>
