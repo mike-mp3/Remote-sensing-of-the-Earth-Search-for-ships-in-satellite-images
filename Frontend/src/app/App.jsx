@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import { useState } from 'react'
-import './App.css'
+import '@/shared/global_styles/App.css'
+
 
 function App() {
   const [count, setCount] = useState(0)
