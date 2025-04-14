@@ -6,7 +6,7 @@ from app.pkg.models.base import BaseAPIException
 # Global error registry for endpoints.
 # This registry uses a unique key for each endpoint function,
 # composed of the module and qualified name.
-ERROR_REGISTRY = {}
+__error_registry__ = {}
 
 
 def with_errors(*excs: Type[BaseAPIException]):
@@ -58,18 +58,24 @@ def with_errors(*excs: Type[BaseAPIException]):
     """
 
     def decorator(func):
+        grouped_excs = dict()
+        for exc in excs:
+            grouped_excs[exc.status_code] = (
+                grouped_excs.get(exc.status_code, []) + [exc.message]
+            )
+
         unique_key = f"{func.__module__}.{func.__qualname__}"
-        ERROR_REGISTRY[unique_key] = [
+        __error_registry__[unique_key] = [
             {
-                "status_code": exc.status_code,
-                "description": exc.message,
+                "status_code": status,
+                "description": status,
                 "content": {
                     "application/json": {
-                        "example": {"detail": exc.message},
+                        "example": {"detail": message},
                     },
                 },
             }
-            for exc in excs
+            for status, message in grouped_excs.items()
         ]
 
         @wraps(func)

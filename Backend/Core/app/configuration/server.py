@@ -1,10 +1,9 @@
 """Server configuration."""
 
 from app.configuration.events import on_shutdown, on_startup
-from app.internal.pkg.handlers import ERROR_REGISTRY
+from app.internal.pkg.handlers import __error_registry__
 from app.internal.pkg.middlewares.handle_http_exceptions import (
     handle_api_exceptions,
-    handle_drivers_exceptions,
     handle_internal_exception,
 )
 from app.internal.routes import __routes__
@@ -155,6 +154,5 @@ class Server:
         for route in app.routes:
             if isinstance(route, APIRoute):
                 unique_key = f"{route.endpoint.__module__}.{route.endpoint.__qualname__}"
-                if unique_key in ERROR_REGISTRY:
-                    for error in ERROR_REGISTRY[unique_key]:
-                        route.responses[error["status_code"]] = error
+                for error in __error_registry__.get(unique_key, ()):
+                    route.responses[error["status_code"]] = error
