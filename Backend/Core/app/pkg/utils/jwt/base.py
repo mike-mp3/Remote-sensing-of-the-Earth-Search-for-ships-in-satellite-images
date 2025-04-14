@@ -98,14 +98,14 @@ class JwtAuthBase(ABC):
                 algorithms=[self.algorithm],
                 options={"leeway": 10},
             )
-        except jwt.ExpiredSignatureError as e:
+        except jwt.ExpiredSignatureError:
             if self.auto_error:
-                raise TokenTimeExpired(e)
+                raise TokenTimeExpired
             else:
                 return None
-        except jwt.JWTError as e:
+        except jwt.JWTError:
             if self.auto_error:
-                raise WrongToken(e)
+                raise WrongToken
             else:
                 return None
         else:
