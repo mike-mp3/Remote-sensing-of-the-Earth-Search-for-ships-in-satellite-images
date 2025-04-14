@@ -15,6 +15,7 @@ from app.pkg.models import (
 from app.pkg.models.exceptions import (
     CannotProcessPrompt,
     InvalidPromptPath,
+    PromptNotFound,
     RawPromptAlreadyExists,
     RawPromptNowFound,
 )
@@ -73,7 +74,7 @@ async def confirm(
     response_model=List[Prompt],
     description="Get prompts with pagination",
 )
-@with_errors()
+@with_errors(PromptNotFound)
 @inject
 async def get_prompt_page(
     query: PaginationQuery = Query(),
