@@ -1,7 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import { useState } from 'react'
-import '@/shared/global_styles/App.css'
-
+// import '@/shared/global_styles/App.css'
+import '@/shared/global_styles/_global.module.scss'
 
 function App() {
   const [count, setCount] = useState(0)

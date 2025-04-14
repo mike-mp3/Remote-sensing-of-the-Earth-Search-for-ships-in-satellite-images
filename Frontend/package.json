@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "types:scss": "npx typed-scss-modules src --pattern '**/*.module.scss'"
   },
   "dependencies": {
     "react": "^19.0.0",
@@ -24,6 +25,7 @@
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^15.15.0",
     "sass": "^1.86.3",
+    "typed-scss-modules": "^8.1.1",
     "vite": "^6.2.0"
   }
 }
