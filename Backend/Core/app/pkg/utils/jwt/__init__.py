@@ -1,4 +1,3 @@
-from datetime import timedelta
 from functools import wraps
 
 from app.pkg import models
@@ -29,7 +28,6 @@ __all__ = [
     "TokenTimeExpired",
     "WrongToken",
     "get_current_user",
-    "get_current_user_websocket",
 ]
 
 

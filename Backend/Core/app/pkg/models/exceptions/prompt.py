@@ -6,6 +6,7 @@ __all__ = [
     "RawPromptNowFound",
     "RawPromptAlreadyExists",
     "CannotProcessPrompt",
+    "PromptNotFound",
 ]
 
 
@@ -31,3 +32,8 @@ class RawPromptAlreadyExists(BaseAPIException):
 class CannotProcessPrompt(BaseAPIException):
     message = "Sorry. Now we can't process your request. Try again later"
     status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+
+
+class PromptNotFound(BaseAPIException):
+    message = "Prompt(s) not found."
+    status_code = status.HTTP_404_NOT_FOUND

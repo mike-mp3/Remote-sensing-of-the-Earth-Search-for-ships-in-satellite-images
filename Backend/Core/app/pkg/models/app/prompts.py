@@ -1,12 +1,12 @@
 """Models of user prompts S3 objects."""
 from datetime import datetime
 from enum import Enum
-from typing import Optional
+from typing import Any, Optional
 from uuid import UUID
 
 from app.pkg.models.app.user import UserFields
 from app.pkg.models.base import BaseModel
-from pydantic import AnyUrl, Field, PositiveInt
+from pydantic import AnyUrl, Field, PositiveInt, model_validator
 
 __all__ = [
     "PromptObjectType",
@@ -21,6 +21,11 @@ __all__ = [
     "RawPromptMessage",
     "ResultPromptMessage",
     "UpdatePromptStatusCommand",
+    "PaginationQuery",
+    "PromptPageRequest",
+    "ReadPromptCommand",
+    "ReadPromptPageCommand",
+    "PromptPageRequest",
 ]
 
 
@@ -53,6 +58,10 @@ class PromptFields:
     updated_at = Field(
         description="Prompt status update time",
         examples=[""],
+    )
+    page_size = Field(
+        description="Prompt page size",
+        examples=["30"],
     )
 
 
@@ -104,6 +113,39 @@ class ConfirmPromptRequest(BasePrompt):
     key_path: str = PromptFields.file_key
 
 
+class PaginationQuery(BaseModel):
+    size: PositiveInt = Field(
+        default=30,
+        le=100,
+        description="Prompts quantity, no more than 100",
+    )
+    created_at: Optional[datetime] = Field(
+        default=None,
+        description="Timestamp-ISO cursor for the next page",
+    )
+    prompt_id: Optional[UUID] = Field(
+        default=None,
+        description="Prompt uuid",
+    )
+
+    @model_validator(mode="after")
+    def check_cursor_options(self):
+        are_received = (
+            bool(self.created_at),
+            bool(self.prompt_id),
+        )
+        if any(are_received) and not all(are_received):
+            raise ValueError("All cursor options must be given")
+        return self
+
+
+# Service external requests
+class PromptPageRequest(BasePrompt):
+    size: PositiveInt
+    created_at: Optional[datetime] = None
+    prompt_id: Optional[UUID] = None
+
+
 # Path Strategy
 class GeneratePrompt(BasePrompt):
     object_type: PromptObjectType
@@ -137,6 +179,18 @@ class UpdatePromptStatusCommand(BasePrompt):
     id: UUID = PromptFields.id
     result_key: str = PromptFields.file_key
     status: PromptStatus = PromptFields.status
+
+
+class ReadPromptCommand(BasePrompt):
+    user_id: PositiveInt = PromptFields.user_id
+    size: PositiveInt = PromptFields.page_size
+
+
+class ReadPromptPageCommand(BasePrompt):
+    user_id: PositiveInt = PromptFields.user_id
+    size: PositiveInt = PromptFields.page_size
+    prompt_id: UUID = PromptFields.id
+    created_at: datetime = PromptFields.created_at
 
 
 class Prompt(BasePrompt):
