@@ -5,5 +5,3 @@ Note:
 """
 
 # ruff: noqa
-
-from app.pkg.models.core.containers import Container, Containers
