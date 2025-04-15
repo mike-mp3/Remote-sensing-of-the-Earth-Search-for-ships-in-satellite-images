@@ -1,12 +1,17 @@
 """Models of user prompts S3 objects."""
+from datetime import datetime
+from enum import Enum
+from typing import Optional
 from uuid import UUID
 
 from app.pkg.models.app.user import UserFields
 from app.pkg.models.base import BaseModel
-from pydantic import Field
+from pydantic import Field, PositiveInt
 
 __all__ = [
     "PromptFields",
+    "PromptStatus",
+    "Prompt",
     "RawPromptMessage",
     "ResultPromptMessage",
 ]
@@ -46,6 +51,24 @@ class PromptFields:
 
 class BasePrompt(BaseModel):
     """Prompt base model"""
+
+
+class PromptStatus(str, Enum):
+    pending = "pending"
+    success = "success"
+    error = "error"
+    cancelled = "cancelled"
+
+
+class Prompt(BasePrompt):
+    id: UUID = PromptFields.id
+    user_id: PositiveInt = PromptFields.user_id
+    prompt_id: str = PromptFields.prompt_id
+    raw_key: str = PromptFields.file_key
+    result_key: Optional[str] = PromptFields.file_key
+    status: PromptStatus = PromptFields.status
+    created_at: datetime = PromptFields.created_at
+    updated_at: datetime = PromptFields.updated_at
 
 
 # Messages - Rabbit
