@@ -17,4 +17,3 @@ function App() {
 }
 
 export default App
-u

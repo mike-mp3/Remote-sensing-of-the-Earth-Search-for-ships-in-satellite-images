@@ -1,6 +1,20 @@
 @use '@/shared/global_styles/vars' as *;
 
 
-.form_container_button{
-    background-color: $dark-blue;
+.form__button{
+
+    background-color: $light-blue;
+    width: 300px;
+    height: 45px;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 20px;
+    border-radius: 10px;
+    border: 1px solid $grey;
+
+    &:hover {
+        background-color: $light-blue-hover;
+        transform: scale(1.05);
+
+    }
 }
