@@ -11,9 +11,11 @@
     "types:scss": "npx typed-scss-modules src --pattern '**/*.module.scss'"
   },
   "dependencies": {
+    "formik": "^2.4.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.5.0"
+    "react-router-dom": "^7.5.0",
+    "yup": "^1.6.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
