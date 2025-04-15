@@ -1,0 +1,1 @@
+export {default as SubmitButton} from '@/shared/ui/shared/SubmitButton/ui/SubmitButton'
