@@ -4,7 +4,6 @@ from enum import Enum
 from typing import Optional
 from uuid import UUID
 
-from app.pkg.models.app.user import UserFields
 from app.pkg.models.base import BaseModel
 from pydantic import Field, PositiveInt
 
@@ -26,7 +25,10 @@ class PromptFields:
         description="Prompt id",
         examples=["some-id"],
     )
-    user_id = UserFields.id
+    user_id = Field(
+        description="User ID",
+        examples=[1],
+    )
     file_key = Field(
         description="Key path to object",
         examples=["raw/user_{some-id}/prompt_{some-id}"],
@@ -75,8 +77,14 @@ class Prompt(BasePrompt):
 class RawPromptMessage(BasePrompt):
     id: UUID = PromptFields.id
     raw_key: str = PromptFields.file_key
+    user_id: PositiveInt = PromptFields.user_id
+    prompt_id: str = PromptFields.prompt_id
+    status: PromptStatus = PromptFields.status
 
 
 class ResultPromptMessage(BasePrompt):
     id: UUID = PromptFields.id
     result_key: str = PromptFields.file_key
+    user_id: PositiveInt = PromptFields.user_id
+    prompt_id: str = PromptFields.prompt_id
+    status: PromptStatus = PromptFields.status
