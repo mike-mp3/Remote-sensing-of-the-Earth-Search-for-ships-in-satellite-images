@@ -117,30 +117,12 @@ class Rabbit(_Settings):
         return values
 
 
-class APIServer(_Settings):
-    """API settings."""
-
-    # --- API SETTINGS ---
-    INSTANCE_APP_NAME: str = "project_name"
-    HOST: str = "project_host"
-    PORT: PositiveInt = 5000
-
-    # --- SECURITY SETTINGS ---
-    X_ACCESS_TOKEN: SecretStr = SecretStr("secret")
-
-    # --- OTHER SETTINGS ---
-    LOGGER: Logging
-
-
 class Settings(_Settings):
     """Server settings.
 
     Formed from `.env` or `.env.dev` if server running with parameter
     `dev`.
     """
-
-    #: APIServer: API settings. Contains all settings for API.
-    API: APIServer
 
     #: S3: S3 settings.
     S3: S3
