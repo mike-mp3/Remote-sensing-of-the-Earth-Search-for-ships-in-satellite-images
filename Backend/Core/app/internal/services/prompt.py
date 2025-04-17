@@ -11,6 +11,8 @@ from app.pkg.models import (
     ActiveUser,
     ConfirmPromptRequest,
     CreatePromptCommand,
+    PresidnedGetResponse,
+    PresignedGetRequest,
     PresignedPostRequest,
     Prompt,
     PromptObjectType,
@@ -18,7 +20,6 @@ from app.pkg.models import (
     RawPromptMessage,
     ReadPromptCommand,
     ReadPromptPageCommand,
-    ResultPromptMessage,
 )
 from app.pkg.models.exceptions import (
     CannotProcessPrompt,
@@ -94,7 +95,6 @@ class PromptService:
 
         return prompt
 
-
     async def get_page(
         self,
         request: PromptPageRequest,
@@ -120,6 +120,28 @@ class PromptService:
             return prompts
         except EmptyResult:
             raise PromptNotFound
+
+    async def generate_presigned_get(
+        self,
+        request: PresignedGetRequest,
+        active_user: ActiveUser,
+    ):
+        prompts = []
+        for prompt_id in request.prompt_ids:
+            link = self.s3_prompter_client.get_result_prompt_link(
+                user_id=active_user.id,
+                prompt_id=prompt_id,
+            )
+            url = await self.s3_prompter_client.create_presigned_get(
+                link=link,
+            )
+            prompts.append(
+                PresidnedGetResponse(
+                    prompt_id=prompt_id,
+                    url=url,
+                ),
+            )
+        return prompts
 
     async def test(self):
         prompt_uuid = uuid.uuid4().hex[:10]

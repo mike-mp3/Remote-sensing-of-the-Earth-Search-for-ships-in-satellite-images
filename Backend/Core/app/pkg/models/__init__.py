@@ -1,6 +1,4 @@
 """Business models."""
-# ruff: noqa
-
 
 from app.pkg.models.app.auth import AuthRequest
 from app.pkg.models.app.prompts import (
@@ -8,6 +6,8 @@ from app.pkg.models.app.prompts import (
     CreatePromptCommand,
     GeneratePrompt,
     PaginationQuery,
+    PresidnedGetResponse,
+    PresignedGetRequest,
     PresignedPostRequest,
     PresignedPostResponse,
     Prompt,

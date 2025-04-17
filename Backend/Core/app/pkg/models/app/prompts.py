@@ -1,7 +1,7 @@
 """Models of user prompts S3 objects."""
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any, List, Optional
 from uuid import UUID
 
 from app.pkg.models.app.user import UserFields
@@ -26,6 +26,8 @@ __all__ = [
     "ReadPromptCommand",
     "ReadPromptPageCommand",
     "PromptPageRequest",
+    "PresidnedGetResponse",
+    "PresignedGetRequest",
 ]
 
 
@@ -137,6 +139,15 @@ class PaginationQuery(BaseModel):
         if any(are_received) and not all(are_received):
             raise ValueError("All cursor options must be given")
         return self
+
+
+class PresignedGetRequest(BasePrompt):
+    prompt_ids: List[str]
+
+
+class PresidnedGetResponse(BasePrompt):
+    prompt_id: str = PromptFields.prompt_id
+    url: AnyUrl = Field(examples=["https://example.com"])
 
 
 # Service external requests

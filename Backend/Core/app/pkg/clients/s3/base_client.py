@@ -87,6 +87,22 @@ class S3AsyncClient(ABC):
             logger.error("Error creating presigned post: %s", e)
             raise e from e
 
+    async def _create_presigned_get(
+        self,
+        file_key: str,
+        expires_in: int = 3600,
+    ):
+        try:
+            async with self.__get_client() as client:
+                return await client.generate_presigned_url(
+                    ClientMethod="get_object",
+                    Params={"Bucket": self.bucket_name, "Key": file_key},
+                    ExpiresIn=expires_in,
+                )
+        except ClientError as e:
+            logger.error("Error creating presigned download URL: %s", e)
+            raise e from e
+
     async def _object_exists(self, file_key: str) -> bool:
         try:
             async with self.__get_client() as client:

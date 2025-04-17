@@ -60,9 +60,11 @@ def with_errors(*excs: Type[BaseAPIException]):
     def decorator(func):
         grouped_excs = dict()
         for exc in excs:
+            # fmt: off
             grouped_excs[exc.status_code] = (
                 grouped_excs.get(exc.status_code, []) + [exc.message]
             )
+            # fmt: on
 
         unique_key = f"{func.__module__}.{func.__qualname__}"
         __error_registry__[unique_key] = [
