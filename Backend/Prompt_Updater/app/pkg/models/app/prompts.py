@@ -14,6 +14,7 @@ __all__ = [
     "RawPromptMessage",
     "ResultPromptMessage",
     "UpdatePromptStatusCommand",
+    "PromptStatus",
 ]
 
 
@@ -68,7 +69,7 @@ class BasePrompt(BaseModel):
 # Commands - SQL
 class UpdatePromptStatusCommand(BasePrompt):
     id: UUID = PromptFields.id
-    result_key: str = PromptFields.file_key
+    result_key: Optional[str] = PromptFields.file_key
     status: PromptStatus = PromptFields.status
 
 

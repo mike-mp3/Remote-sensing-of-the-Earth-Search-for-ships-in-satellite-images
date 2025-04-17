@@ -4,6 +4,7 @@
 from app.pkg.models.app.prompts import (
     Prompt,
     PromptObjectType,
+    PromptStatus,
     RawPromptMessage,
     ResultPromptMessage,
     UpdatePromptStatusCommand,
