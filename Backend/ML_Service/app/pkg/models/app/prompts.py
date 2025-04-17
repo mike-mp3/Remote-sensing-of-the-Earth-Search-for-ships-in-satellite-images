@@ -1,16 +1,14 @@
 """Models of user prompts S3 objects."""
-from datetime import datetime
 from enum import Enum
-from typing import Optional
 from uuid import UUID
 
 from app.pkg.models.base import BaseModel
-from pydantic import Field, PositiveInt
+from pydantic import Field
 
 __all__ = [
-    "PromptFields",
-    "PromptStatus",
-    "Prompt",
+    "PromptObjectType",
+    "GeneratePrompt",
+    "PromptLink",
     "RawPromptMessage",
     "ResultPromptMessage",
 ]
@@ -26,8 +24,8 @@ class PromptFields:
         examples=["some-id"],
     )
     user_id = Field(
-        description="User ID",
-        examples=[1],
+        description="User id",
+        examples=["some-id"],
     )
     file_key = Field(
         description="Key path to object",
@@ -37,54 +35,38 @@ class PromptFields:
         description="Key path to object without last postfix",
         examples=["user_{some-id}"],
     )
-    status = Field(
-        description="Prompt status",
-        examples=["pending", "success", "error", "cancelled"],
-    )
-    created_at = Field(
-        description="Prompt creation time",
-        examples=[""],
-    )
-    updated_at = Field(
-        description="Prompt status update time",
-        examples=[""],
-    )
+
+
+class PromptObjectType(str, Enum):
+    RAW = "raw"
+    RESULT = "results"
 
 
 class BasePrompt(BaseModel):
     """Prompt base model"""
 
 
-class PromptStatus(str, Enum):
-    pending = "pending"
-    success = "success"
-    error = "error"
-    cancelled = "cancelled"
-
-
-class Prompt(BasePrompt):
-    id: UUID = PromptFields.id
-    user_id: PositiveInt = PromptFields.user_id
+# Path Strategy
+class GeneratePrompt(BasePrompt):
+    object_type: PromptObjectType
+    user_id: str = PromptFields.user_id
     prompt_id: str = PromptFields.prompt_id
-    raw_key: str = PromptFields.file_key
-    result_key: Optional[str] = PromptFields.file_key
-    status: PromptStatus = PromptFields.status
-    created_at: datetime = PromptFields.created_at
-    updated_at: datetime = PromptFields.updated_at
+
+
+class PromptLink(BasePrompt):
+    object_type: PromptObjectType
+    prompt_id: str = PromptFields.prompt_id
+    user_id: str = PromptFields.user_id
+    key_path: str = PromptFields.file_key
+    key_starts_with: str = PromptFields.key_starts_with
 
 
 # Messages - Rabbit
 class RawPromptMessage(BasePrompt):
     id: UUID = PromptFields.id
     raw_key: str = PromptFields.file_key
-    user_id: PositiveInt = PromptFields.user_id
-    prompt_id: str = PromptFields.prompt_id
-    status: PromptStatus = PromptFields.status
 
 
 class ResultPromptMessage(BasePrompt):
     id: UUID = PromptFields.id
     result_key: str = PromptFields.file_key
-    user_id: PositiveInt = PromptFields.user_id
-    prompt_id: str = PromptFields.prompt_id
-    status: PromptStatus = PromptFields.status

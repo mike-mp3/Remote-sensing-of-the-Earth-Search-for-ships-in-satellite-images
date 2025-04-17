@@ -1,28 +1,23 @@
 services:
-  ship__updater:
-    container_name: ${API__HOST}
+  ship__worker:
+    container_name: ${WORKER__HOST}
     build:
       context: .
-      dockerfile: docker/api/Dockerfile
-
+      dockerfile: docker/worker/Dockerfile
     restart: unless-stopped
-
     env_file:
       - .env
-    ports:
-      - ${API__PORT}:5000
     command: [
-      "poetry", "run", "uvicorn", "app:create_app",
-      "--host", "0.0.0.0",
-      "--port", "5000",
-      "--log-level", "debug",
-      "--factory",
-      "--reload",
+      "poetry", "run", "python", "app/internal/run.py",
     ]
     volumes:
-      - ./app:/usr/src/app/app
+      # - ship__ml_model_data:${ML_MODEL__LOCAL_PATH_DIR}
+      - /Users/alexandr/all/python_proj/ships/Backend/ML_Service/ml_models:${ML_MODEL__LOCAL_PATH_DIR}
 
 networks:
   default:
     name: shared-ship-network
     external: true
+
+#volumes:
+#  ship__ml_model_data:

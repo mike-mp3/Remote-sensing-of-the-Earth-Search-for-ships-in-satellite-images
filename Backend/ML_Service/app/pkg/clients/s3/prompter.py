@@ -29,11 +29,15 @@ class S3PrompterClient(S3AsyncClient):
         )
         self._path_strategy = path_strategy
 
-    def generate_new_raw_prompt_link(self, user_id: PositiveInt) -> PromptLink:
-        prompt_id = uuid4().hex[:10]
+    def get_result_prompt_link(
+        self,
+        user_id: str,
+        prompt_id: str,
+    ) -> PromptLink:
+
         return self._path_strategy.generate_path(
             cmd=GeneratePrompt(
-                object_type=PromptObjectType.RAW.value,
+                object_type=PromptObjectType.RESULT.value,
                 user_id=user_id,
                 prompt_id=prompt_id,
             ),
@@ -42,30 +46,8 @@ class S3PrompterClient(S3AsyncClient):
     def parse_path(self, path: str) -> Optional[PromptLink]:
         return self._path_strategy.parse(path)
 
-    async def create_presigned_post(
-        self,
-        link: PromptLink,
-    ):
-        fields_ = {
-            "Content-Type": "image/",
-        }
-        conditions = [
-            ["content-length-range", 1024, 10 * 1024 * 1024],  # 10 MB
-            ["starts-with", "$Content-Type", "image/"],
-        ]
-        presigned_data = await self._create_presigned_post(
-            file_key=link.key_path,
-            fields=fields_,
-            conditions=conditions,
-            expires_in=600,
-        )
-        return presigned_data
-
-    async def object_exists(self, link: PromptLink) -> bool:
-        return await self._object_exists(link.key_path)
-
-    async def upload_result(self, file_key: str, data: bytes):
+    async def upload_image(self, file_key: str, data):
         return await self._upload_file(file_key, data)
 
-    async def download_image(self, image_key: str) -> bytes:
-        return await self._download_file(image_key)
+    async def download_image(self, file_key: str) -> bytes:
+        return await self._download_file(file_key)

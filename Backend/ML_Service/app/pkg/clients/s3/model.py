@@ -1,6 +1,8 @@
-from .base_client import S3AsyncClient
-from pydantic import AnyUrl, PositiveInt, SecretStr
 from typing import Optional
+
+from pydantic import AnyUrl, SecretStr
+
+from .base_client import S3AsyncClient
 
 
 class S3ModelClient(S3AsyncClient):
@@ -11,6 +13,7 @@ class S3ModelClient(S3AsyncClient):
         base_url: AnyUrl,
         aws_access_key_id: str,
         aws_secret_access_key: SecretStr,
+        key_path: str,
         region_name: Optional[str] = None,
     ):
         super().__init__(
@@ -19,9 +22,7 @@ class S3ModelClient(S3AsyncClient):
             aws_secret_access_key,
             region_name,
         )
+        self.key_path = key_path
 
-    async def download_model(self, model_key: str, local_path: str) -> None:
-        """Загружает модель из бакета ml-models."""
-        model_bytes = await self._download_file(model_key)
-        with open(local_path, "wb") as f:
-            f.write(model_bytes)
+    async def download(self) -> bytes:
+        return await self._download_file(self.key_path)

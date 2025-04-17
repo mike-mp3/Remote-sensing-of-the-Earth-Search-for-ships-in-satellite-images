@@ -1,5 +1,5 @@
 """S3 Clients."""
-
+from app.pkg.clients.s3.model import S3ModelClient
 from app.pkg.clients.s3.path_strategies import PathStrategies
 from app.pkg.clients.s3.prompter import S3PrompterClient
 from app.pkg.settings import settings
@@ -14,7 +14,15 @@ class S3Clients(containers.DeclarativeContainer):
     prompter: S3PrompterClient = providers.Factory(
         S3PrompterClient,
         base_url=settings.S3.URL,
-        aws_access_key_id=settings.S3.REQUESTER_USER_NAME,
-        aws_secret_access_key=settings.S3.REQUESTER_USER_PASSWORD,
+        aws_access_key_id=settings.S3.RESULTER_USER_NAME,
+        aws_secret_access_key=settings.S3.RESULTER_USER_PASSWORD,
         path_strategy=path_strategies.Prompter,
+    )
+
+    model: S3ModelClient = providers.Factory(
+        S3ModelClient,
+        base_url=settings.S3.URL,
+        aws_access_key_id=settings.S3.RESULTER_USER_NAME,
+        aws_secret_access_key=settings.S3.RESULTER_USER_PASSWORD,
+        key_path=settings.ML_MODEL.S3_KEY_PATH,
     )

@@ -1,11 +1,10 @@
 """LoggerLevel model."""
-
-from app.pkg.models.base import BaseEnum
+from enum import Enum
 
 __all__ = ["LoggerLevel"]
 
 
-class LoggerLevel(BaseEnum):
+class LoggerLevel(str, Enum):
     WARNING = "WARNING"
     INFO = "INFO"
     ERROR = "ERROR"

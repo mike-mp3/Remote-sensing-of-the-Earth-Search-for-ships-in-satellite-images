@@ -8,8 +8,7 @@ from typing import Any, Dict, List, Tuple, TypeVar
 from uuid import UUID
 
 import pydantic
-from app.pkg.models import types
-from pydantic import UUID4, ConfigDict
+from pydantic import ConfigDict
 
 __all__ = ["BaseModel", "Model"]
 

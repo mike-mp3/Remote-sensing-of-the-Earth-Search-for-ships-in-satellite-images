@@ -12,13 +12,17 @@ class PathStrategy(ABC, Generic[Command, Output]):
     @property
     @abstractmethod
     def _template(self) -> str:
-        raise NotImplementedError
+        pass
+
+    @property
+    @abstractmethod
+    def _pattern(self) -> str:
+        pass
 
     @classmethod
-    @abstractmethod
     def generate_path(cls, cmd: Command) -> Output:
-        raise NotImplementedError
+        pass
 
     @classmethod
     def parse(cls, path: str) -> Output:
-        raise NotImplementedError
+        pass

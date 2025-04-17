@@ -1,11 +1,8 @@
 """Business models."""
-# ruff: noqa
-
-
 from app.pkg.models.app.prompts import (
-    PromptFields,
-    PromptStatus,
-    Prompt,
+    GeneratePrompt,
+    PromptLink,
+    PromptObjectType,
     RawPromptMessage,
     ResultPromptMessage,
 )

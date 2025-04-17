@@ -25,7 +25,7 @@ class RabbitMQConsumer:
         queue_name: str,
         callback: Callback,
     ) -> None:
-        model_class = self._get_callback_model(callback)
+        msg_model_class = self._get_callback_msg_model(callback)
         try:
             async with self.connector.get_channel() as channel:
                 logger.debug(
@@ -47,7 +47,7 @@ class RabbitMQConsumer:
                                 await self._process_message(
                                     message,
                                     callback,
-                                    model_class,
+                                    msg_model_class,
                                 )
                                 logger.debug(
                                     "Message %s successfully processed",
@@ -105,7 +105,7 @@ class RabbitMQConsumer:
             raise ValueError(f"Invalid message. Message: {data}")
 
     @staticmethod
-    def _get_callback_model(callback: Callback) -> Type[Model]:
+    def _get_callback_msg_model(callback: Callback) -> Type[Model]:
         sig = inspect.signature(callback)
         params = list(sig.parameters.values())
         if not params:

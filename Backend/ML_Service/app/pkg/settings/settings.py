@@ -7,7 +7,14 @@ from functools import lru_cache
 
 from app.pkg.models.core.logger import LoggerLevel
 from dotenv import find_dotenv
-from pydantic import AnyUrl, PostgresDsn, RedisDsn, field_validator, model_validator
+from pydantic import (
+    AnyUrl,
+    PostgresDsn,
+    RedisDsn,
+    computed_field,
+    field_validator,
+    model_validator,
+)
 from pydantic.types import PositiveInt, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -79,8 +86,25 @@ class S3(_Settings):
 
     # --- S3 SETTINGS ---
     URL: AnyUrl
-    REQUESTER_USER_NAME: str
-    REQUESTER_USER_PASSWORD: SecretStr
+    RESULTER_USER_NAME: str
+    RESULTER_USER_PASSWORD: SecretStr
+
+
+class MLModel(_Settings):
+    """ML model settings."""
+
+    # --- ML MODEL SETTINGS ---
+    #: str: S3 file key for model that the program will take
+    S3_KEY_PATH: str = "actual-yoyo.pt"
+    #: pathlib.Path: Path where model will be stored in container
+    LOCAL_PATH_DIR: pathlib.Path
+    # bool: If true, the model will be downloaded from S3 despite existing locally
+    DOWNLOAD: bool = False
+
+    @computed_field
+    @property
+    def LOCAL_FULL_PATH(self) -> pathlib.Path:
+        return self.LOCAL_PATH_DIR / self.S3_KEY_PATH
 
 
 class Rabbit(_Settings):
@@ -117,6 +141,21 @@ class Rabbit(_Settings):
         return values
 
 
+class APIServer(_Settings):
+    """API settings."""
+
+    # --- API SETTINGS ---
+    INSTANCE_APP_NAME: str = "project_name"
+    HOST: str = "project_host"
+    PORT: PositiveInt = 5000
+
+    # --- SECURITY SETTINGS ---
+    X_ACCESS_TOKEN: SecretStr = SecretStr("secret")
+
+    # --- OTHER SETTINGS ---
+    LOGGER: Logging
+
+
 class Settings(_Settings):
     """Server settings.
 
@@ -124,11 +163,17 @@ class Settings(_Settings):
     `dev`.
     """
 
+    #: APIServer: API settings. Contains all settings for API.
+    API: APIServer
+
     #: S3: S3 settings.
     S3: S3
 
     #: Rabbit: Rabbit settings.
     RABBIT: Rabbit
+
+    #: MLModel: ML_MODEL settings.
+    ML_MODEL: MLModel
 
 
 # TODO: Возможно даже lru_cache не стоит использовать. Стоит использовать meta sigleton.
