@@ -40,6 +40,15 @@
             "Resource": [
               "arn:aws:s3:::user-prompts"
             ]
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "s3:GetObject"
+            ],
+            "Resource": [
+              "arn:aws:s3:::ml-models/*"
+            ]
           }
         ]
       }
