@@ -14,16 +14,20 @@ from app.pkg.models import (
     PresignedPostRequest,
     Prompt,
     PromptObjectType,
+    PromptPageRequest,
     RawPromptMessage,
+    ReadPromptCommand,
+    ReadPromptPageCommand,
     ResultPromptMessage,
 )
 from app.pkg.models.exceptions import (
     CannotProcessPrompt,
     InvalidPromptPath,
+    PromptNotFound,
     RawPromptAlreadyExists,
     RawPromptNowFound,
 )
-from app.pkg.models.exceptions.repository import UniqueViolation
+from app.pkg.models.exceptions.repository import EmptyResult, UniqueViolation
 
 logger = get_logger(__name__)
 
@@ -89,6 +93,33 @@ class PromptService:
             raise CannotProcessPrompt
 
         return prompt
+
+
+    async def get_page(
+        self,
+        request: PromptPageRequest,
+        active_user: ActiveUser,
+    ):
+        try:
+            if request.created_at and request.prompt_id:
+                prompts = await self.prompt_repository.read_page(
+                    cmd=ReadPromptPageCommand(
+                        user_id=active_user.id,
+                        size=request.size,
+                        prompt_id=request.prompt_id,
+                        created_at=request.created_at,
+                    ),
+                )
+            else:
+                prompts = await self.prompt_repository.read(
+                    cmd=ReadPromptCommand(
+                        user_id=active_user.id,
+                        size=request.size,
+                    ),
+                )
+            return prompts
+        except EmptyResult:
+            raise PromptNotFound
 
     async def test(self):
         prompt_uuid = uuid.uuid4().hex[:10]

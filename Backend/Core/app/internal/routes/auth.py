@@ -10,8 +10,10 @@ from app.pkg.models import (
 )
 from app.pkg.models.exceptions import (
     IncorrectUsernameOrPassword,
+    TokenTimeExpired,
     UnAuthorized,
     UserIsNotActivated,
+    WrongToken,
 )
 from app.pkg.utils.jwt import (
     JWT,
@@ -150,9 +152,14 @@ async def logout(
 @router.get(
     "/test",
     status_code=status.HTTP_200_OK,
-    description="Logout user",
+    description="test",
 )
 @inject
+@with_errors(
+    UnAuthorized,
+    TokenTimeExpired,
+    WrongToken,
+)
 async def test(
     user: ActiveUser = Depends(get_current_user),
 ):

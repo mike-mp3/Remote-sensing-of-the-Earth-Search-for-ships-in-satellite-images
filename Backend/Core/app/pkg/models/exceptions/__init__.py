@@ -23,6 +23,7 @@ from app.pkg.models.exceptions.jwt import (
 from app.pkg.models.exceptions.prompt import (
     CannotProcessPrompt,
     InvalidPromptPath,
+    PromptNotFound,
     RawPromptAlreadyExists,
     RawPromptNowFound,
 )

@@ -1,22 +1,27 @@
+from typing import List
+
 from app.internal.pkg.handlers import with_errors
 from app.internal.services import Services
 from app.internal.services.prompt import PromptService
 from app.pkg.models import (
     ActiveUser,
     ConfirmPromptRequest,
+    PaginationQuery,
     PresignedPostRequest,
     PresignedPostResponse,
     Prompt,
+    PromptPageRequest,
 )
 from app.pkg.models.exceptions import (
     CannotProcessPrompt,
     InvalidPromptPath,
+    PromptNotFound,
     RawPromptAlreadyExists,
     RawPromptNowFound,
 )
 from app.pkg.utils.jwt import get_current_user
 from dependency_injector.wiring import Provide, inject
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 
 router = APIRouter(prefix="/prompt", tags=["Prompt"])
 
@@ -63,8 +68,29 @@ async def confirm(
     )
 
 
+@router.get(
+    "",
+    status_code=status.HTTP_200_OK,
+    response_model=List[Prompt],
+    description="Get prompts with pagination",
+)
+@with_errors(PromptNotFound)
+@inject
+async def get_prompt_page(
+    query: PaginationQuery = Query(),
+    prompt_service: PromptService = Depends(Provide[Services.prompt_service]),
+    user: ActiveUser = Depends(get_current_user),
+):
+    return await prompt_service.get_page(
+        request=PromptPageRequest(
+            **query.model_dump(),
+        ),
+        active_user=user,
+    )
+
+
 @router.post(
-    "/test",
+    "/test_send_to_rabbit",
 )
 @inject
 async def test(
