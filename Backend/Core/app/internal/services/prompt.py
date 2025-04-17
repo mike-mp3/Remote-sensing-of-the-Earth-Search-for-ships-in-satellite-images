@@ -94,24 +94,6 @@ class PromptService:
 
         return prompt
 
-    # TODO: УДАЛИТЬ MOCK
-    async def mock_handle_raw(self, data: RawPromptMessage):
-
-        link = self.s3_prompter_client.parse_path(data.raw_key)
-        file_key = f"results/user_{link.user_id}/prompt_{link.prompt_id}"
-        try:
-            with open("app/internal/services/result.png", "rb") as file:
-                await self.s3_prompter_client.upload_file_mock(
-                    file_key=file_key,
-                    data=file,
-                )
-            await self.producer.publish_message(
-                ResultPromptMessage(result_key=file_key, id=data.id),
-                "result_prompts",
-            )
-        except Exception as e:
-            logger.error(e)
-            raise e
 
     async def get_page(
         self,

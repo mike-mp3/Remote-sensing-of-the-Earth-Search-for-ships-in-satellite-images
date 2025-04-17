@@ -1,0 +1,58 @@
+[tool.poetry]
+name = "ML Service"
+version = "1.0.0"
+authors = ["@alg3bra"]
+packages = [
+    { include = "app" }
+]
+
+
+[tool.poetry.dependencies]
+python = "^3.13"
+pydantic = {extras = ["email"], version = "^2.10.2"}
+dependency-injector = "^4.43.0"
+setuptools = ">=68.0.0"
+pydantic-settings = "^2.6.1"
+aioboto3 = "^13.4.0"
+aio-pika = "^9.5.5"
+opencv-python-headless = "^4.10.0.84"
+ultralytics = "^8.3.108"
+
+
+[tool.poetry.group.formatters.dependencies]
+autoflake = "^2.3.1"
+isort = "^5.13.2"
+black = "^24.10.0"
+docformatter = "^1.7.5"
+add-trailing-comma = "^3.1.0"
+
+
+[tool.poetry.group.sasts.dependencies]
+itsdangerous = "^2.2.0"
+bandit = "^1.7.10"
+safety = "^3.2.8"
+
+
+[tool.poetry.group.linters.dependencies]
+flake8 = "^7.1.1"
+mypy = "^1.11.2"
+pylint = "^3.3.1"
+ruff = "^0.6.9"
+pylint-pytest = "2.0.0a0"
+
+
+[tool.poetry.group.tests.dependencies]
+pytest-asyncio = "^0.24.0"
+coverage = "^7.6.2"
+pytest-cov = "^5.0.0"
+pytest-repeat = "^0.9.3"
+
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^4.2.0"
+MarkupSafe = "^2.1.0"

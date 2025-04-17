@@ -4,11 +4,12 @@ from app.pkg.clients.rabbitmq.producer import RabbitMQProducer
 from app.pkg.clients.websocket.manager import WebSocketManager
 from app.pkg.logger import get_logger
 from app.pkg.models import (
+    PromptStatus,
+    RawPromptMessage,
     ResultPromptMessage,
     UpdatePromptStatusCommand,
 )
-from app.pkg.models.app.prompts import PromptStatus
-from app.pkg.models.exceptions.repository import EmptyResult, UniqueViolation
+from app.pkg.models.exceptions.repository import EmptyResult
 
 logger = get_logger(__name__)
 
@@ -41,7 +42,24 @@ class PromptService:
                 ),
             )
         except EmptyResult:
-            return "empty result"
+            return
+
+        user_id = prompt.user_id
+
+        if self.ws_manager.is_user_connected(user_id):
+            await self.ws_manager.send_personal_message(user_id, prompt)
+
+    async def callback_handle_errors(self, message: RawPromptMessage):
+        try:
+            prompt = await self.prompt_repository.update_status(
+                cmd=UpdatePromptStatusCommand(
+                    id=message.id,
+                    result_key=None,
+                    status=PromptStatus.error,
+                ),
+            )
+        except EmptyResult:
+            return
 
         user_id = prompt.user_id
 

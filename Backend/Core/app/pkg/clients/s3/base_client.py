@@ -43,35 +43,6 @@ class S3AsyncClient(ABC):
         ) as client:
             yield client
 
-    # TODO: УДАЛИТЬ MOCK
-    @asynccontextmanager
-    async def __get_ml_client_mock(self):
-        async with self.__session.client(
-            service_name="s3",
-            endpoint_url="http://ship-minio:9000",
-            aws_access_key_id="ml_user",
-            aws_secret_access_key="password",
-        ) as client:
-            yield client
-
-    async def _upload_file(
-        self,
-        file_key: str,
-        data: bytes,
-        content_type: str = "image/",
-    ) -> None:
-        try:
-            async with self.__get_ml_client_mock() as client:
-                await client.put_object(
-                    Bucket=self.bucket_name,
-                    Key=file_key,
-                    Body=data,
-                    ContentType=content_type,
-                )
-        except ClientError as e:
-            logger.error("Error uploading file: %s", e)
-            raise e from e
-
     async def _download_file(self, file_key: str):
         try:
             async with self.__get_client() as client:

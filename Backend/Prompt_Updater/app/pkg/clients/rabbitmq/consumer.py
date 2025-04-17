@@ -4,7 +4,11 @@ import json
 from typing import Any, Awaitable, Callable, Dict, Type, Union
 
 import pydantic
-from aio_pika.abc import AbstractIncomingMessage, AbstractRobustQueue
+from aio_pika.abc import (
+    AbstractIncomingMessage,
+    AbstractRobustChannel,
+    AbstractRobustQueue,
+)
 from aio_pika.exceptions import AMQPConnectionError, ChannelClosed
 from app.pkg.connectors.rabbitmq.connector import RabbitMQConnector
 from app.pkg.logger import get_logger
@@ -24,6 +28,7 @@ class RabbitMQConsumer:
         self,
         queue_name: str,
         callback: Callback,
+        is_dlq: bool = False,
     ) -> None:
         model_class = self._get_callback_model(callback)
         try:
@@ -32,14 +37,13 @@ class RabbitMQConsumer:
                     "Connected to RabbitMQ. Consuming %s queue",
                     queue_name,
                 )
-                queue: AbstractRobustQueue = await channel.declare_queue(
-                    queue_name,
-                    durable=True,
-                    arguments={
-                        "x-dead-letter-exchange": settings.RABBIT.DLX_EXCHANGE_NAME,
-                        "x-dead-letter-routing-key": settings.RABBIT.DLQ_ROUTING_KEY,
-                    },
+
+                queue: AbstractRobustQueue = await self._declare_queue(
+                    channel=channel,
+                    queue_name=queue_name,
+                    is_dlq=is_dlq,
                 )
+
                 async with queue.iterator() as queue_iter:
                     async for message in queue_iter:
                         try:
@@ -67,6 +71,25 @@ class RabbitMQConsumer:
                 "Error while processing message: %s",
                 e,
             )
+
+    @staticmethod
+    async def _declare_queue(
+        channel: AbstractRobustChannel,
+        queue_name: str,
+        is_dlq: bool = False,
+    ) -> AbstractRobustQueue:
+        queue_args = {}
+        if not is_dlq:
+            queue_args = {
+                "x-dead-letter-exchange": settings.RABBIT.DLX_EXCHANGE_NAME,
+                "x-dead-letter-routing-key": settings.RABBIT.DLQ_ROUTING_KEY,
+            }
+        queue = await channel.declare_queue(
+            queue_name,
+            durable=True,
+            arguments=queue_args,
+        )
+        return queue
 
     async def _process_message(
         self,
