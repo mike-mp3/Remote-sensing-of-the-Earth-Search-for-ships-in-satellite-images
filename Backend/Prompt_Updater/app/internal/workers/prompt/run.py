@@ -1,3 +1,4 @@
+import asyncio
 from time import sleep
 
 from app.internal.services import PromptService, Services
@@ -15,9 +16,16 @@ async def listen(
     consumer: RabbitMQConsumer = Provide[RabbitMQClient.consumer],
     prompt_service: PromptService = Provide[Services.prompt_service],
 ):
-    await consumer.consume_messages(
-        queue_name=settings.RABBIT.RESULT_PROMPTS_QUEUE_NAME,
-        callback=prompt_service.callback_handle_results,
+    await asyncio.gather(
+        consumer.consume_messages(
+            queue_name=settings.RABBIT.RESULT_PROMPTS_QUEUE_NAME,
+            callback=prompt_service.callback_handle_results,
+        ),
+        consumer.consume_messages(
+            queue_name=settings.RABBIT.RABBIT__DLQ_NAME,
+            callback=prompt_service.callback_handle_errors,
+            is_dlq=True,
+        ),
     )
 
 
