@@ -1,0 +1,12 @@
+{
+  "id": "create-ml_model-bucket-61748953",
+  "created": "2025-04-17T18:33:20.963880",
+  "order": 0,
+  "actions": [
+    {
+      "type": "create_bucket",
+      "bucket": "ml-models",
+      "private": "true"
+    }
+  ]
+}
