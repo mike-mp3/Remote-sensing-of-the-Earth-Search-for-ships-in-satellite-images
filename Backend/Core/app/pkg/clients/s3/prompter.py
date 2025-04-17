@@ -39,13 +39,23 @@ class S3PrompterClient(S3AsyncClient):
             ),
         )
 
+    def get_result_prompt_link(
+        self,
+        user_id: str,
+        prompt_id: str,
+    ) -> PromptLink:
+        return self._path_strategy.generate_path(
+            cmd=GeneratePrompt(
+                object_type=PromptObjectType.RESULT.value,
+                user_id=user_id,
+                prompt_id=prompt_id,
+            ),
+        )
+
     def parse_path(self, path: str) -> Optional[PromptLink]:
         return self._path_strategy.parse(path)
 
-    async def create_presigned_post(
-        self,
-        link: PromptLink,
-    ):
+    async def create_presigned_post(self, link: PromptLink):
         fields_ = {
             "Content-Type": "image/",
         }
@@ -60,6 +70,12 @@ class S3PrompterClient(S3AsyncClient):
             expires_in=600,
         )
         return presigned_data
+
+    async def create_presigned_get(self, link: PromptLink):
+        return await self._create_presigned_get(
+            file_key=link.key_path,
+            expires_in=1200,
+        )
 
     async def object_exists(self, link: PromptLink) -> bool:
         return await self._object_exists(link.key_path)

@@ -7,6 +7,8 @@ from app.pkg.models import (
     ActiveUser,
     ConfirmPromptRequest,
     PaginationQuery,
+    PresidnedGetResponse,
+    PresignedGetRequest,
     PresignedPostRequest,
     PresignedPostResponse,
     Prompt,
@@ -28,7 +30,7 @@ router = APIRouter(prefix="/prompt", tags=["Prompt"])
 
 @router.post(
     "/generate-s3-presigned-post",
-    status_code=status.HTTP_201_CREATED,
+    status_code=status.HTTP_200_OK,
     response_model=PresignedPostResponse,
     description="Generate presigned post url and data to upload to S3",
 )
@@ -85,6 +87,24 @@ async def get_prompt_page(
         request=PromptPageRequest(
             **query.model_dump(),
         ),
+        active_user=user,
+    )
+
+
+@router.post(
+    "/generate-s3-presigned-get",
+    status_code=status.HTTP_200_OK,
+    response_model=List[PresidnedGetResponse],
+    description="Generate presigned get url for downloading image(s)",
+)
+@inject
+async def generate_s3_presigned_get(
+    req: PresignedGetRequest,
+    prompt_service: PromptService = Depends(Provide[Services.prompt_service]),
+    user: ActiveUser = Depends(get_current_user),
+):
+    return await prompt_service.generate_presigned_get(
+        request=req,
         active_user=user,
     )
 
