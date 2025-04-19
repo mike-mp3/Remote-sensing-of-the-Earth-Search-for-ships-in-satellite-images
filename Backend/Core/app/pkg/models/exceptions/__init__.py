@@ -26,6 +26,7 @@ from app.pkg.models.exceptions.prompt import (
     PromptNotFound,
     RawPromptAlreadyExists,
     RawPromptNowFound,
+    UnknownPromptStatus,
 )
 from app.pkg.models.exceptions.user import (
     CodeNotFound,

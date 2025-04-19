@@ -28,6 +28,7 @@ __all__ = [
     "PromptPageRequest",
     "PresidnedGetResponse",
     "PresignedGetRequest",
+    "PromptStatus",
 ]
 
 
@@ -141,8 +142,13 @@ class PaginationQuery(BaseModel):
         return self
 
 
+class PromptWithStatus(BasePrompt):
+    prompt_id: str
+    status: PromptStatus = PromptFields.status
+
+
 class PresignedGetRequest(BasePrompt):
-    prompt_ids: List[str]
+    prompts: List[PromptWithStatus]
 
 
 class PresidnedGetResponse(BasePrompt):

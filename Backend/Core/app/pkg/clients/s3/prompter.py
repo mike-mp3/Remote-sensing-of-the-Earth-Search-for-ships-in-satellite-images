@@ -39,14 +39,15 @@ class S3PrompterClient(S3AsyncClient):
             ),
         )
 
-    def get_result_prompt_link(
+    def get_prompt_link(
         self,
         user_id: str,
         prompt_id: str,
+        prompt_type: PromptObjectType,
     ) -> PromptLink:
         return self._path_strategy.generate_path(
             cmd=GeneratePrompt(
-                object_type=PromptObjectType.RESULT.value,
+                object_type=prompt_type,
                 user_id=user_id,
                 prompt_id=prompt_id,
             ),

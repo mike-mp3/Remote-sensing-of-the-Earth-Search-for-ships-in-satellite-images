@@ -17,6 +17,7 @@ from app.pkg.models import (
     Prompt,
     PromptObjectType,
     PromptPageRequest,
+    PromptStatus,
     RawPromptMessage,
     ReadPromptCommand,
     ReadPromptPageCommand,
@@ -27,6 +28,7 @@ from app.pkg.models.exceptions import (
     PromptNotFound,
     RawPromptAlreadyExists,
     RawPromptNowFound,
+    UnknownPromptStatus,
 )
 from app.pkg.models.exceptions.repository import EmptyResult, UniqueViolation
 
@@ -127,17 +129,28 @@ class PromptService:
         active_user: ActiveUser,
     ):
         prompts = []
-        for prompt_id in request.prompt_ids:
-            link = self.s3_prompter_client.get_result_prompt_link(
-                user_id=active_user.id,
-                prompt_id=prompt_id,
-            )
+        for prompt in request.prompts:
+            if prompt.status in (PromptStatus.pending.value, PromptStatus.success.value):
+                link = self.s3_prompter_client.get_prompt_link(
+                    user_id=active_user.id,
+                    prompt_id=prompt.prompt_id,
+                    prompt_type=PromptObjectType.RAW.value,
+                )
+            elif prompt.status == PromptStatus.success.value:
+                link = self.s3_prompter_client.get_prompt_link(
+                    user_id=active_user.id,
+                    prompt_id=prompt.prompt_id,
+                    prompt_type=PromptObjectType.RESULT.value,
+                )
+            else:
+                raise UnknownPromptStatus
+
             url = await self.s3_prompter_client.create_presigned_get(
                 link=link,
             )
             prompts.append(
                 PresidnedGetResponse(
-                    prompt_id=prompt_id,
+                    prompt_id=prompt.prompt_id,
                     url=url,
                 ),
             )
