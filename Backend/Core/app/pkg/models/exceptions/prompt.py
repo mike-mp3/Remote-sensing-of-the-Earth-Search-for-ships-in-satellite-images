@@ -7,6 +7,7 @@ __all__ = [
     "RawPromptAlreadyExists",
     "CannotProcessPrompt",
     "PromptNotFound",
+    "UnknownPromptStatus",
 ]
 
 
@@ -35,5 +36,10 @@ class CannotProcessPrompt(BaseAPIException):
 
 
 class PromptNotFound(BaseAPIException):
-    message = "Prompt(s) not found."
+    message = "Prompt(s) not found"
     status_code = status.HTTP_404_NOT_FOUND
+
+
+class UnknownPromptStatus(BaseAPIException):
+    message = "Unknown prompt status"
+    status_code = status.HTTP_422_UNPROCESSABLE_ENTITY

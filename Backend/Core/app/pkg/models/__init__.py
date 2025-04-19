@@ -14,6 +14,7 @@ from app.pkg.models.app.prompts import (
     PromptLink,
     PromptObjectType,
     PromptPageRequest,
+    PromptStatus,
     RawPromptMessage,
     ReadPromptCommand,
     ReadPromptPageCommand,
