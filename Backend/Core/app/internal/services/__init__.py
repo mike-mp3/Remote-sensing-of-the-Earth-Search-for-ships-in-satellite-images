@@ -27,7 +27,7 @@ class Services(containers.DeclarativeContainer):
     user_service = providers.Factory(
         UserService,
         user_repository=repositories.user_repository,
-        email_confirmation=clients.email.user_confirmation,
+        email_client=clients.email.client,
         user_redis_repository=async_redis.user_repository,
     )
 

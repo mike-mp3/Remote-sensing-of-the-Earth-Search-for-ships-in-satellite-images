@@ -1,16 +1,12 @@
+from app.pkg.clients.email_client.base.dispatcher import BaseEmailDispatcher
 from pydantic import EmailStr, SecretStr
 
-from ..base.dispatcher import BaseEmailDispatcher
-from ..base.template import BaseEmailTemplate, T
 
-
-class ConfirmationT(BaseEmailTemplate[T]):
-    """Класс для отправки email для подтверждения почты пользователя."""
-
+class EmailClient:
     def __init__(self, dispatcher: BaseEmailDispatcher):
         self.dispatcher = dispatcher
 
-    async def send(self, to_email: EmailStr, confirmation_code: SecretStr):
+    async def send_confirmation(self, to_email: EmailStr, confirmation_code: SecretStr):
         subject = "Подтверждение почты"
         body = (
             f"Ваш код подтверждения: {confirmation_code.get_secret_value()}\n\n"

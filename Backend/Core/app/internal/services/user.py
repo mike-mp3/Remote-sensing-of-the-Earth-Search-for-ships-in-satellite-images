@@ -3,10 +3,10 @@ from app.internal.repository.postgresql import UserRepository
 from app.internal.repository.repository import BaseRepository
 from app.internal.workers.background import background_worker
 from app.pkg import models
-from app.pkg.clients.email_client.base.template import BaseEmailTemplate
+from app.pkg.clients.email_client import EmailClient
 from app.pkg.logger import get_logger
 from app.pkg.models.exceptions import UserAlreadyExists
-from app.pkg.models.exceptions.repository import EmptyResult, UniqueViolation
+from app.pkg.models.exceptions.repository import EmptyResult
 from app.pkg.models.exceptions.user import CodeNotFound, IncorrectCode, UserNotFound
 from app.pkg.utils.confirmation_code import generate_secure_code, verify_secure_code
 from app.pkg.utils.password import hash_password
@@ -20,16 +20,16 @@ class UserService:
 
     user_repository: UserRepository
     user_redis_repository: UserAsyncRedisRepository
-    email_confirmation: BaseEmailTemplate
+    email_client: EmailClient
 
     def __init__(
         self,
         user_repository: BaseRepository,
         user_redis_repository: BaseRepository,
-        email_confirmation: BaseEmailTemplate,
+        email_client: EmailClient,
     ):
         self.user_repository = user_repository
-        self.email_confirmation = email_confirmation
+        self.email_client = email_client
         self.user_redis_repository = user_redis_repository
 
     async def create_user(self, request: models.CreateUserRequest):
@@ -96,7 +96,7 @@ class UserService:
             ),
         )
         await background_worker.put(
-            self.email_confirmation.send,
+            self.email_client.send_confirmation,
             email,
             confirmation_code,
         )
