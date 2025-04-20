@@ -161,6 +161,24 @@ services:
       "poetry", "run", "python", "scripts/init_rabbit.py"
     ]
 
+
+  background_worker:
+    container_name: ${BACKGROUND_WORKER__HOST}
+    build:
+      context: .
+      dockerfile: docker/background_worker/Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - ship__redis
+    command: [
+      "celery", "-A", "app.pkg.tasks.celery.celery_app", "worker",
+      "--loglevel", "info",
+      "--concurrency", "${BACKGROUND_WORKER__CONCURRENCY}",
+      "--hostname", "worker1@%h"
+    ]
+
+
 networks:
   default:
     name: shared-ship-network

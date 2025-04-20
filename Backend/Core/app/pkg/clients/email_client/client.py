@@ -6,10 +6,10 @@ class EmailClient:
     def __init__(self, dispatcher: BaseEmailDispatcher):
         self.dispatcher = dispatcher
 
-    async def send_confirmation(self, to_email: EmailStr, confirmation_code: SecretStr):
+    async def send_confirmation(self, to_email: EmailStr, confirmation_code: str):
         subject = "Подтверждение почты"
         body = (
-            f"Ваш код подтверждения: {confirmation_code.get_secret_value()}\n\n"
+            f"Ваш код подтверждения: {confirmation_code}\n\n"
             f"Введите его в приложении для завершения регистрации."
         )
         await self.dispatcher.send(to_email, subject, body)
