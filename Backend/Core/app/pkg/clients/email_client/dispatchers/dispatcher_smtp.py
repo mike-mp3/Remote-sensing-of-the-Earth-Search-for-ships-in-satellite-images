@@ -54,9 +54,8 @@ class SMTPEmailDispatcher(BaseEmailDispatcher):
 
             try:
                 await conn.send_message(msg)
-                logger.info(f"Email was sent to {to_email}")
             except aiosmtplib.SMTPException as e:
-                logger.error(f"SMTP error: {e}")
-                raise e from Exception
+                logger.error("SMTP error: %s", e)
+                raise e from e
             except Exception as e:
-                logger.error(f"Failed to send email to {to_email}: {e}")
+                logger.error("Failed to send email to %s: %s", to_email, e)
