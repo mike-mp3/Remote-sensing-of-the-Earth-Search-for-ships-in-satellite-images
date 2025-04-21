@@ -43,7 +43,7 @@ class S3AsyncClient(ABC):
         ) as client:
             yield client
 
-    async def _download_file(self, file_key: str):
+    async def _download_file(self, file_key: str) -> Optional[bytes]:
         try:
             async with self.__get_client() as client:
                 response = await client.get_object(
@@ -53,8 +53,8 @@ class S3AsyncClient(ABC):
                 data = await response["Body"].read()
                 return data
         except ClientError as e:
-            logger.error("Error downloading file: %s", e)
-            raise e from e
+            logger.warning("Error downloading file: %s", e)
+            return None
 
     async def _delete_file(self, file_key: str):
         try:

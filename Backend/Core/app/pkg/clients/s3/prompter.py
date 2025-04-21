@@ -80,3 +80,6 @@ class S3PrompterClient(S3AsyncClient):
 
     async def object_exists(self, link: PromptLink) -> bool:
         return await self._object_exists(link.key_path)
+
+    async def download_image(self, link: PromptLink) -> Optional[bytes]:
+        return await self._download_file(link.key_path)
