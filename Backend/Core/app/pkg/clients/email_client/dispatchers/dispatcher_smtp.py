@@ -1,5 +1,5 @@
 from email.message import EmailMessage
-from typing import Optional
+from typing import List, Optional, Tuple
 
 import aiosmtplib
 from aiosmtplib import SMTP
@@ -42,20 +42,40 @@ class SMTPEmailDispatcher(BaseEmailDispatcher):
             timeout=self.timeout,
         )
 
-    # todo: добавить в body возможность приема SecretStr, SecretBytes
-    # todo: а так же парсер body
-    async def send(self, to_email: EmailStr, subject: str, body: str):
+    async def __send_message(self, msg: EmailMessage) -> None:
         async with self.get_connection() as conn:
-            msg = EmailMessage()
-            msg["From"] = self.username
-            msg["To"] = to_email
-            msg["Subject"] = subject
-            msg.set_content(body)
-
             try:
                 await conn.send_message(msg)
             except aiosmtplib.SMTPException as e:
                 logger.error("SMTP error: %s", e)
                 raise e from e
             except Exception as e:
-                logger.error("Failed to send email to %s: %s", to_email, e)
+                to = msg.get("To")
+                logger.error("Failed to send email to %s: %s", to, e)
+
+    # todo: добавить в body возможность приема SecretStr, SecretBytes
+    # todo: а так же парсер body
+    async def send(
+        self,
+        to_email: EmailStr,
+        subject: str,
+        body: str,
+        attachments: Optional[List[Tuple[bytes, str, str]]] = None,
+    ):
+        msg = EmailMessage()
+        msg["From"] = self.username
+        msg["To"] = to_email
+        msg["Subject"] = subject
+        msg.set_content(body)
+
+        if attachments:
+            for data, mime_type, filename in attachments:
+                maintype, subtype = mime_type.split("/", 1)
+                msg.add_attachment(
+                    data,
+                    maintype=maintype,
+                    subtype=subtype,
+                    filename=filename,
+                )
+
+        await self.__send_message(msg)
