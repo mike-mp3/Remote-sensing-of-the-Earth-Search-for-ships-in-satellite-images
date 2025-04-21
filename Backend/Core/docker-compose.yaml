@@ -162,7 +162,7 @@ services:
     ]
 
 
-  background_worker:
+  ship__background_worker:
     container_name: ${BACKGROUND_WORKER__HOST}
     build:
       context: .
@@ -173,7 +173,7 @@ services:
       - ship__redis
     command: [
       "celery", "-A", "app.pkg.tasks.celery.celery_app", "worker",
-      "--loglevel", "info",
+      "--loglevel", "warning",
       "--concurrency", "${BACKGROUND_WORKER__CONCURRENCY}",
       "--hostname", "worker1@%h"
     ]
