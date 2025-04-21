@@ -2,7 +2,6 @@ from app.internal.repository.async_redis import UserAsyncRedisRepository
 from app.internal.repository.postgresql import UserRepository
 from app.internal.repository.repository import BaseRepository
 from app.pkg import models
-from app.pkg.clients.email_client import EmailClient
 from app.pkg.logger import get_logger
 from app.pkg.models.exceptions import UserAlreadyExists
 from app.pkg.models.exceptions.repository import EmptyResult
