@@ -2,8 +2,10 @@
 
 from app.pkg.models.app.auth import AuthRequest
 from app.pkg.models.app.prompts import (
+    BinaryPrompt,
     ConfirmPromptRequest,
     CreatePromptCommand,
+    DividedBinaryPrompt,
     GeneratePrompt,
     PaginationQuery,
     PresidnedGetResponse,
@@ -18,7 +20,9 @@ from app.pkg.models.app.prompts import (
     RawPromptMessage,
     ReadPromptCommand,
     ReadPromptPageCommand,
+    ReadPromptWithFilters,
     ResultPromptMessage,
+    SendPromptReportRequest,
     UpdatePromptStatusCommand,
     ValidatePromptPath,
 )
