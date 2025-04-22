@@ -13,6 +13,7 @@ from app.pkg.models import (
     PresignedPostResponse,
     Prompt,
     PromptPageRequest,
+    SendPromptReportRequest,
 )
 from app.pkg.models.exceptions import (
     CannotProcessPrompt,
@@ -110,10 +111,17 @@ async def generate_s3_presigned_get(
 
 
 @router.post(
-    "/test_send_to_rabbit",
+    "/pdf",
+    status_code=status.HTTP_200_OK,
+    description="Generate pdf report and send to email",
 )
 @inject
-async def test(
+async def send_report(
+    req: SendPromptReportRequest,
     prompt_service: PromptService = Depends(Provide[Services.prompt_service]),
+    user: ActiveUser = Depends(get_current_user),
 ):
-    return await prompt_service.test()
+    return await prompt_service.generate_and_send_report(
+        request=req,
+        active_user=user,
+    )

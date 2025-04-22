@@ -46,4 +46,5 @@ class Services(containers.DeclarativeContainer):
         prompt_repository=repositories.prompt_repository,
         producer=clients.rabbit_mq.producer,
         raw_queue_name=settings.RABBIT.RAW_PROMPTS_QUEUE_NAME,
+        prompt_tasks=celery.prompt_tasks,
     )
