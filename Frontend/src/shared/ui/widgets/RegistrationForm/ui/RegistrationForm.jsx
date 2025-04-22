@@ -1,10 +1,9 @@
 import React from "react";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
-import { Link } from "react-router-dom";
 import * as classes from "@/shared/ui/widgets/LoginForm/ui/LoginForm.module.scss";
 
-const LoginForm = () => {
+const RegistrationForm = () => {
   const initialValues = {
     email: "",
     password: "",
@@ -12,7 +11,7 @@ const LoginForm = () => {
 
   const validationSchema = Yup.object({
     email: Yup.string()
-      .email("Invalid email")
+      .email("invalid email")
       .required("Email is empty"),
     password: Yup.string()
       .min(8, "Invalid (min 8 chars and 1 digit)")
@@ -20,38 +19,13 @@ const LoginForm = () => {
       .required("Password is emty"),
   });
 
-  const handleSubmit = async (values, { setSubmitting, setErrors }) => {
-    try {
-      const response = await fetch("/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
-      });
-  
-      const data = await response.json();
-  
-      if (response.ok) {
-        console.log("Successful authorization:", data);
-        // TODO: redirect, set auth state, etc.
-      } else if (response.status === 403) {
-        setErrors({ password: "User not verified" });
-      } else if (response.status === 404) {
-        setErrors({ email: "Incorrect email or password", password: " " });
-      } else if (response.status === 422) {
-        setErrors({ email: "Data validation error" });
-      } else {
-        console.error("Unhandled error", data);
-      }
-    } catch (error) {
-      console.error("Error sending request:", error);
-      setErrors({ email: "Network or server error" });
-    } finally {
+  const handleSubmit = (values, { setSubmitting }) => {
+    console.log("sending data to the server:", values);
+    setTimeout(() => {
       setSubmitting(false);
-    }
+    }, 1000);
   };
-  
+
   return (
     <Formik
       initialValues={initialValues}
@@ -70,7 +44,7 @@ const LoginForm = () => {
             <Field
               type="password"
               name="password"
-              placeholder="Enter your password..."
+              placeholder="Create your password..."
               className={classes.form__input}
             />
 
@@ -92,12 +66,8 @@ const LoginForm = () => {
               className={classes.form__button}
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Loading..." : "Log in"}
+              {isSubmitting ? "Loading..." : "Sign up"}
             </button>
-
-            <div className={classes.form__link}>
-              Don't have an account? <Link to="/signup">Register</Link>
-            </div>
           </div>
         </Form>
       )}
@@ -105,4 +75,4 @@ const LoginForm = () => {
   );
 };
 
-export default LoginForm;
+export default RegistrationForm;

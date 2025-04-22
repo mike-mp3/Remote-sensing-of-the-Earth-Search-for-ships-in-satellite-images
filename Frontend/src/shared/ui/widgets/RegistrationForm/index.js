@@ -1,0 +1,1 @@
+export {default as RegistrationForm} from "@/shared/ui/widgets/RegistrationForm/ui/RegistrationForm"
