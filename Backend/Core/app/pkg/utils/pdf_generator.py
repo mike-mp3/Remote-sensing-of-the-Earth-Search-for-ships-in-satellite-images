@@ -93,9 +93,9 @@ def __calculate_layout(
         # Ensure scaled dimensions meet minimum size requirements
         if (
             raw_h * scale >= MIN_IMAGE_SIZE
-            and result_h * scale >= MIN_IMAGE_SIZE
-            and raw_w * scale >= MIN_IMAGE_SIZE
-            and result_w * scale >= MIN_IMAGE_SIZE
+            and result_h * scale >= MIN_IMAGE_SIZE  # noqa: W503
+            and raw_w * scale >= MIN_IMAGE_SIZE  # noqa: W503
+            and result_w * scale >= MIN_IMAGE_SIZE  # noqa: W503
         ):
             return "horizontal", scale
 
