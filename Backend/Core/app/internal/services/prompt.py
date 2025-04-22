@@ -1,5 +1,3 @@
-import uuid
-
 from aio_pika.exceptions import AMQPConnectionError, ChannelClosed
 from app.internal.repository.postgresql import PromptRepository
 from app.internal.repository.repository import BaseRepository
@@ -21,6 +19,7 @@ from app.pkg.models import (
     RawPromptMessage,
     ReadPromptCommand,
     ReadPromptPageCommand,
+    SendPromptReportRequest,
 )
 from app.pkg.models.exceptions import (
     CannotProcessPrompt,
@@ -31,6 +30,7 @@ from app.pkg.models.exceptions import (
     UnknownPromptStatus,
 )
 from app.pkg.models.exceptions.repository import EmptyResult, UniqueViolation
+from app.pkg.tasks.celery.prompt import PromptTasks
 
 logger = get_logger(__name__)
 
@@ -40,6 +40,7 @@ class PromptService:
     prompt_repository: PromptRepository
     producer: RabbitMQProducer
     raw_queue_name: str
+    prompt_tasks: PromptTasks
 
     def __init__(
         self,
@@ -47,11 +48,13 @@ class PromptService:
         prompt_repository: BaseRepository,
         producer: RabbitMQProducer,
         raw_queue_name: str,
+        prompt_tasks: PromptTasks,
     ):
         self.s3_prompter_client = s3_prompter_client
         self.prompt_repository = prompt_repository
         self.producer = producer
         self.raw_queue_name = raw_queue_name
+        self.prompt_tasks = prompt_tasks
 
     async def generate_presigned_post(
         self,
@@ -156,12 +159,15 @@ class PromptService:
             )
         return prompts
 
-    async def test(self):
-        prompt_uuid = uuid.uuid4().hex[:10]
-        await self.producer.publish_message(
-            RawPromptMessage(
-                id=uuid.uuid4(),
-                raw_key=f"raw/user_69/prompt_{prompt_uuid}",
-            ),
-            self.raw_queue_name,
+    async def generate_and_send_report(
+        self,
+        request: SendPromptReportRequest,
+        active_user: ActiveUser,
+    ):
+        self.prompt_tasks.generate_and_send_report.delay(
+            user_id=active_user.id,
+            email=active_user.email,
+            start_time=request.start_time,
+            end_time=request.end_time,
+            limit=request.limit,
         )

@@ -8,6 +8,7 @@ from app.internal.services.prompt import PromptService
 from app.internal.services.user import UserService
 from app.pkg.clients import Clients
 from app.pkg.settings import settings
+from app.pkg.tasks.celery import Celery
 from dependency_injector import containers, providers
 
 
@@ -24,10 +25,12 @@ class Services(containers.DeclarativeContainer):
 
     clients: Clients = providers.Container(Clients)
 
+    celery: Celery = providers.Container(Celery)
+
     user_service = providers.Factory(
         UserService,
         user_repository=repositories.user_repository,
-        email_confirmation=clients.email.user_confirmation,
+        email_tasks=celery.email_tasks,
         user_redis_repository=async_redis.user_repository,
     )
 
@@ -43,4 +46,5 @@ class Services(containers.DeclarativeContainer):
         prompt_repository=repositories.prompt_repository,
         producer=clients.rabbit_mq.producer,
         raw_queue_name=settings.RABBIT.RAW_PROMPTS_QUEUE_NAME,
+        prompt_tasks=celery.prompt_tasks,
     )

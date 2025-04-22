@@ -29,6 +29,10 @@ __all__ = [
     "PresidnedGetResponse",
     "PresignedGetRequest",
     "PromptStatus",
+    "ReadPromptWithFilters",
+    "BinaryPrompt",
+    "DividedBinaryPrompt",
+    "SendPromptReportRequest",
 ]
 
 
@@ -56,11 +60,11 @@ class PromptFields:
     )
     created_at = Field(
         description="Prompt creation time",
-        examples=[""],
+        examples=["2025-01-31T18:30:00.050001+00:00"],
     )
     updated_at = Field(
         description="Prompt status update time",
-        examples=[""],
+        examples=["2025-01-31T18:30:00.050001+00:00"],
     )
     page_size = Field(
         description="Prompt page size",
@@ -156,6 +160,12 @@ class PresidnedGetResponse(BasePrompt):
     url: AnyUrl = Field(examples=["https://example.com"])
 
 
+class SendPromptReportRequest(BasePrompt):
+    start_time: Optional[datetime] = Field(None)
+    end_time: Optional[datetime] = Field(None)
+    limit: Optional[PositiveInt] = Field(None)
+
+
 # Service external requests
 class PromptPageRequest(BasePrompt):
     size: PositiveInt
@@ -210,6 +220,14 @@ class ReadPromptPageCommand(BasePrompt):
     created_at: datetime = PromptFields.created_at
 
 
+class ReadPromptWithFilters(BasePrompt):
+    user_id: PositiveInt = PromptFields.user_id
+    start_time: Optional[datetime] = PromptFields.created_at
+    end_time: Optional[datetime] = PromptFields.created_at
+    status: Optional[PromptStatus] = PromptFields.status
+    limit: Optional[PositiveInt] = PromptFields.page_size
+
+
 class Prompt(BasePrompt):
     id: UUID = PromptFields.id
     user_id: PositiveInt = PromptFields.user_id
@@ -230,3 +248,14 @@ class RawPromptMessage(BasePrompt):
 class ResultPromptMessage(BasePrompt):
     id: UUID = PromptFields.id
     result_key: str = PromptFields.file_key
+
+
+# Tasks - Celery
+class BinaryPrompt(BasePrompt):
+    created_at: datetime = PromptFields.created_at
+    data: bytes
+
+
+class DividedBinaryPrompt(BasePrompt):
+    raw: List[BinaryPrompt]
+    results: List[BinaryPrompt]
