@@ -1,10 +1,12 @@
 import React from "react";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import * as classes from "@/shared/ui/widgets/LoginForm/ui/LoginForm.module.scss";
 
 const LoginForm = () => {
+  const navigate = useNavigate();
+  
   const initialValues = {
     email: "",
     password: "",
@@ -34,7 +36,7 @@ const LoginForm = () => {
   
       if (response.ok) {
         console.log("Successful authorization:", data);
-        // TODO: redirect, set auth state, etc.
+        navigate("/home");
       } else if (response.status === 403) {
         setErrors({ password: "User not verified" });
       } else if (response.status === 404) {
@@ -74,7 +76,6 @@ const LoginForm = () => {
               className={classes.form__input}
             />
 
-            {/* рендеринг блока ошибок */}
 
             {(errors.email && touched.email) || (errors.password && touched.password) ? (
               <div className={classes.form__errors}>
@@ -96,7 +97,7 @@ const LoginForm = () => {
             </button>
 
             <div className={classes.form__link}>
-              Don't have an account? <Link to="/signup">Register</Link>
+              Don't have an account? <Link to="/signup">Sign up</Link>
             </div>
           </div>
         </Form>

@@ -1,36 +1,7 @@
 @use '@/shared/global_styles/vars' as *;
 
 
-// .form_container_{
-//     display: flex;
-//     flex-direction: column;
-//     background-color: $bg-color;
-//     width: 350px;
-//     height: 300px;
-//     // justify-content: center; 
-//     // align-items: center;     
-//     // min-height: 100vh;      
-//     // margin: 0;              
-// }
 
-
-// .form_precontainer_{
-//     display: flex;
-//   justify-content: center; /* Центр по горизонтали */
-//   align-items: center;     /* Центр по вертикали */
-//   min-height: 100vh;     
-// }
-
-
-// .form_inputfield{
-//     display: flex;
-//     flex-direction: column;
-
-// }
-
-
-
-// form.scss
 .form {
     &__container {
       display: flex;
@@ -96,16 +67,6 @@
       }
     }
   
-    &__errors{
-      // color: #e53935;
-      // font-size: 14px;
-      // background: #fff3f3;
-      // padding: 6px 10px;
-      // border-radius: 6px;
-      // border: 1px solid #e53935;
-      // width: 300px;
-      // text-align: center;
-    }
   }
 
 

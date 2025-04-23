@@ -1,6 +1,7 @@
 import React from "react";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
+import { Link } from "react-router-dom";
 import * as classes from "@/shared/ui/widgets/LoginForm/ui/LoginForm.module.scss";
 
 const RegistrationForm = () => {
@@ -68,6 +69,10 @@ const RegistrationForm = () => {
             >
               {isSubmitting ? "Loading..." : "Sign up"}
             </button>
+
+            <div className={classes.form__link}>
+              Have an account? <Link to="/">Log in</Link>
+            </div>
           </div>
         </Form>
       )}

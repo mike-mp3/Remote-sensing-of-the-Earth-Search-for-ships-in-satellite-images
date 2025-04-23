@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useState } from 'react'
 import '@/shared/global_styles/_global.module.scss';
 import { LoginPage } from '@/pages/LoginPage';
