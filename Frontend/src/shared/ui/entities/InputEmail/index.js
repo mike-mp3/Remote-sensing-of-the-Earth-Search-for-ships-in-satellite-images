@@ -1,0 +1,1 @@
+export {default as InputEmail} from "@/shared/ui/entities/InputEmail/ui/InputEmail";

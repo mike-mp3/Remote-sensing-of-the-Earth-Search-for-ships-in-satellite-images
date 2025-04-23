@@ -1,0 +1,1 @@
+export {default as LoginShema} from "@/shared/lib/validation/LoginShema";
