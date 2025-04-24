@@ -13,7 +13,7 @@ router = APIRouter(prefix="/user", tags=["User"])
     "",
     response_model=models.CreateUserResponse,
     status_code=status.HTTP_201_CREATED,
-    description="Create user",
+    description="Create user and async send email",
 )
 @with_errors(excs.UserAlreadyExists)
 @inject
@@ -24,10 +24,10 @@ async def create_user(
     return await user_service.create_user(req)
 
 
-@router.post(
-    "/confirm",
+@router.patch(
+    "/confirmation",
     status_code=status.HTTP_200_OK,
-    description="Confirm user email after registration with code",
+    description="Confirm user email with code after registration",
 )
 @with_errors(excs.CodeNotFound, excs.IncorrectCode)
 @inject
@@ -39,9 +39,9 @@ async def confirm_user_email(
 
 
 @router.post(
-    "/confirm/resend-email",
-    status_code=status.HTTP_200_OK,
-    description="Resend confirmation code to user email",
+    "/confirmation/email",
+    status_code=status.HTTP_202_ACCEPTED,
+    description="Send confirmation code to user email",
 )
 @inject
 async def resend_user_email(

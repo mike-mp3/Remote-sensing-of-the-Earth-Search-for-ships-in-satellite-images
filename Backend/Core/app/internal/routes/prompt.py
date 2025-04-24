@@ -30,7 +30,7 @@ router = APIRouter(prefix="/prompt", tags=["Prompt"])
 
 
 @router.post(
-    "/generate-s3-presigned-post",
+    "/s3/presigned-post",
     status_code=status.HTTP_200_OK,
     response_model=PresignedPostResponse,
     description="Generate presigned post url and data to upload to S3",
@@ -48,7 +48,7 @@ async def generate_s3_presigned_post(
 
 
 @router.post(
-    "/confirm",
+    "",
     status_code=status.HTTP_201_CREATED,
     response_model=Prompt,
     description="Start to process the prompt",
@@ -93,7 +93,7 @@ async def get_prompt_page(
 
 
 @router.post(
-    "/generate-s3-presigned-get",
+    "/s3/presigned-get",
     status_code=status.HTTP_200_OK,
     response_model=List[PresidnedGetResponse],
     description="Generate presigned get url for downloading image(s)",
@@ -112,7 +112,7 @@ async def generate_s3_presigned_get(
 
 @router.post(
     "/pdf",
-    status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_202_ACCEPTED,
     description="Generate pdf report and send to email",
 )
 @inject
