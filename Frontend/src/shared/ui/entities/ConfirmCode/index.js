@@ -1,0 +1,1 @@
+export {default as ConfirmCode} from "@/shared/ui/entities/ConfirmCode/ui/ConfirmCode";
