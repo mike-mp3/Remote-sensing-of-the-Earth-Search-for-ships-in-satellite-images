@@ -1,0 +1,1 @@
+export {default as ConfirmPage} from "@/pages/ConfirmPage/ui/ConfirmPage";
