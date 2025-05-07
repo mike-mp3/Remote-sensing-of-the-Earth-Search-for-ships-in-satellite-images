@@ -41,12 +41,16 @@ class UserService:
                     password=encrypted_password,
                 ),
             )
-            await self.__send_confirmation_code(request.email)
-
         except EmptyResult:
             raise UserAlreadyExists
         except Exception as err:
-            logger.error("Failed to create user: %s", err)
+            logger.error("Failed to create user id database: %s", err)
+
+        try:
+            await self.__send_confirmation_code(request.email)
+        except Exception as err:
+            logger.error("Failed to send confirmation code: %s", err)
+
         return user
 
     async def confirm_email(
@@ -94,7 +98,7 @@ class UserService:
                 confirmation_code=confirmation_code,
             ),
         )
-        await self.email_tasks.send_confirmation_code.delay(
+        self.email_tasks.send_confirmation_code.delay(
             to_email=email,
             confirmation_code=confirmation_code.get_secret_value(),
         )
