@@ -22,6 +22,7 @@ def async_to_sync(task: Any) -> Callable[[Any], Any]:
     @wraps(task)
     def wrapper(*args: Any, **kwargs: Any) -> Any:
         return asyncio.run(
-            task(*args, **kwargs)
+            task(*args, **kwargs),
         )
+
     return wrapper
