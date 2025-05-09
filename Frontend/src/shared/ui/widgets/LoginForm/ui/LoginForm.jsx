@@ -3,9 +3,11 @@ import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import { Link, useNavigate } from "react-router-dom";
 import * as classes from "@/shared/ui/widgets/LoginForm/ui/LoginForm.module.scss";
+import { useUser } from "@/shared/lib/context/UserContext";
 
 const LoginForm = () => {
   const navigate = useNavigate();
+  const { updateUserEmail } = useUser();
   
   const initialValues = {
     email: "",
@@ -24,7 +26,7 @@ const LoginForm = () => {
 
   const handleSubmit = async (values, { setSubmitting, setErrors }) => {
     try {
-      const response = await fetch("/auth/login", {
+      const response = await fetch("http://localhost:8500/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -36,6 +38,7 @@ const LoginForm = () => {
   
       if (response.ok) {
         console.log("Successful authorization:", data);
+        updateUserEmail(values.email);
         navigate("/home");
       } else if (response.status === 403) {
         setErrors({ password: "User not verified" });
@@ -75,7 +78,6 @@ const LoginForm = () => {
               placeholder="Enter your password..."
               className={classes.form__input}
             />
-
 
             {(errors.email && touched.email) || (errors.password && touched.password) ? (
               <div className={classes.form__errors}>

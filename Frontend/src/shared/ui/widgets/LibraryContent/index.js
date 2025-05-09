@@ -1,0 +1,1 @@
+export {default as LibraryContent} from "@/shared/ui/widgets/LibraryContent/ui/LibraryContent";
