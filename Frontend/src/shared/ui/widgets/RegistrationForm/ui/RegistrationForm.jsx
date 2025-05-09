@@ -27,14 +27,14 @@ const RegistrationForm = () => {
     setServerError(""); 
 
     try {
-      const response = await fetch("/user", {
+      const response = await fetch("http://localhost:8500/user", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
       });
 
       if (response.status === 201) {
-        navigate("/confirm", { state: { email } }); 
+        navigate("/confirm", { state: { email: values.email } });
       } else if (response.status === 409) {
         const data = await response.json();
         setServerError(data.detail?.[0] || "User already exists");

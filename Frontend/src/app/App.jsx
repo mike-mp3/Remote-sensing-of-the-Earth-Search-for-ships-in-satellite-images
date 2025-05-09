@@ -4,16 +4,21 @@ import '@/shared/global_styles/_global.module.scss';
 import { LoginPage } from '@/pages/LoginPage';
 import { RegistrationPage } from '@/pages/RegistrationPage';
 import { ConfirmPage } from "@/pages/ConfirmPage";
+import { HomePage } from "@/pages/HomePage";
+import { UserProvider } from "@/shared/lib/context/UserContext";
 
 function App() {
   const [count, setCount] = useState(0)
 
   return (
-    <Routes>
-    <Route path="/" element={<LoginPage/>}/>
-    <Route path="/signup" element={< RegistrationPage/>} />
-    <Route path="/confirm" element={< ConfirmPage/>} />
-  </Routes>
+    <UserProvider>
+      <Routes>
+        <Route path="/" element={<LoginPage/>}/>
+        <Route path="/signup" element={< RegistrationPage/>} />
+        <Route path="/confirm" element={< ConfirmPage/>} />
+        <Route path="/home" element={<HomePage/>} />
+      </Routes>
+    </UserProvider>
   )
 }
 

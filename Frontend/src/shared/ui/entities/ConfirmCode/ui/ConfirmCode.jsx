@@ -51,7 +51,7 @@ const ConfirmCode = () => {
     console.log("Sending verification code:", code, "email:", email);
 
     try {
-      const response = await fetch("/user/confirm", {
+      const response = await fetch("http://localhost:8500/user/confirm", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

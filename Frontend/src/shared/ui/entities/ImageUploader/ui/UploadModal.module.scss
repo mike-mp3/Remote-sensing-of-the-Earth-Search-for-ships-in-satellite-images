@@ -1,0 +1,81 @@
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal {
+    background-color: #232324;
+    border-radius: 12px;
+    padding: 24px;
+    width: 400px;
+    position: relative;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.closeButton {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+
+    &:hover {
+        color: #ef4444;
+    }
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.title {
+    color: white;
+    font-size: 20px;
+    font-weight: 500;
+    margin: 0;
+}
+
+.fileName {
+    color: #94a3b8;
+    font-size: 16px;
+    margin: 0;
+    word-break: break-all;
+    text-align: center;
+}
+
+.sendButton {
+    background-color: #3577df;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+        background-color: #1e509f;
+    }
+
+    &:active {
+        transform: scale(0.98);
+    }
+} 
