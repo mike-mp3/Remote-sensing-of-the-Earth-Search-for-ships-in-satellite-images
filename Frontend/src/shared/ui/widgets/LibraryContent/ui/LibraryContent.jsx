@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import * as classes from "./LibraryContent.module.scss";
 import { ModelCard } from "@/shared/ui/entities/ModelCard";
 import { ImageUploader } from "@/shared/ui/entities/ImageUploader";
@@ -8,81 +8,112 @@ const LibraryContent = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
+  const wsRef = useRef(null);
+
+  const fetchPromptsWithUrls = async () => {
+    try {
+      const response = await fetch("https://fd5c-89-191-234-252.ngrok-free.app/s3/prompt");
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error("maybe there are no prompts");
+        }
+        if (response.status === 422) {
+          throw new Error("Error try again later");
+        }
+        throw new Error(`Unexpected error: ${response.status}`);
+      }
+
+      const promptData = await response.json();
+      if (!Array.isArray(promptData)) {
+        throw new Error("Expected an array of prompts");
+      }
+
+      if (promptData.length === 0) {
+        setPrompts([]);
+        return;
+      }
+
+      const body = {
+        prompts: promptData.map((p) => ({
+          prompt_id: p.prompt_id,
+          status: p.status,
+        })),
+      };
+
+      const urlResponse = await fetch(
+        "https://fd5c-89-191-234-252.ngrok-free.app/s3/prompt/s3/presigned-get",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        }
+      );
+
+      if (!urlResponse.ok) {
+        if (urlResponse.status === 422) {
+          throw new Error("Error downloading data");
+        }
+        throw new Error(`Unexpected error: ${urlResponse.status}`);
+      }
+
+      const urls = await urlResponse.json();
+      const promptsWithUrls = promptData.map((p) => {
+        const match = urls.find((u) => u.prompt_id === p.prompt_id);
+        return {
+          ...p,
+          url: match ? match.url : null,
+        };
+      });
+
+      setPrompts(promptsWithUrls);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchPrompts = async () => {
-      try {
-        console.log("Fetching prompts...");
-        const response = await fetch("/models.json");
-        console.log("Response status:", response.status);
-        console.log("Response headers:", Object.fromEntries(response.headers.entries()));
-
-        if (!response.ok) {
-          // обработка статус-кодов
-          if (response.status === 404) {
-            const errorData = await response.json();
-            const detail = errorData?.detail?.[0] || "Prompts not found";
-            console.error("Error 404:", detail);
-            throw new Error(detail);
-          }
-
-          if (response.status === 422) {
-            const errorData = await response.json();
-            const messages = errorData?.detail?.map(err => err.msg).join(", ") || "Validation error";
-            console.error("Error 422:", messages);
-            throw new Error(messages);
-          }
-
-          throw new Error(`Unexpected error: ${response.status}`);
-        }
-
-        // Проверяем тип контента
-        const contentType = response.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-          console.error("Invalid content type:", contentType);
-          throw new Error("Server returned non-JSON response");
-        }
-
-        // Обработка пустого тела
-        const text = await response.text();
-        console.log("Response text:", text);
-
-        if (!text) {
-          console.error("Empty response from server");
-          throw new Error("Empty response from server");
-        }
-
-        let data;
-        try {
-          data = JSON.parse(text);
-          console.log("Parsed data:", data);
-        } catch (jsonErr) {
-          console.error("Failed to parse JSON:", jsonErr.message);
-          console.error("Raw text:", text);
-          throw new Error("Invalid JSON format");
-        }
-
-        if (!Array.isArray(data)) {
-          console.error("Data is not an array:", data);
-          throw new Error("Expected array of prompts");
-        }
-
-        setPrompts(data);
-      } catch (err) {
-        console.error("Fetch error:", err.message);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPrompts();
+    fetchPromptsWithUrls();
   }, []);
 
   const handleImageSelect = (file) => {
     setSelectedImage(file);
-    // TODO: Здесь будет логика отправки файла на сервер
-    console.log('Selected image:', file);
+    console.log("Selected image:", file);
+  };
+
+  const handleUploadStart = () => {
+    console.log("Загрузка началась. Открываем WebSocket...");
+
+    // Закрыть предыдущее соединение если есть
+    if (wsRef.current) {
+      wsRef.current.close();
+    }
+
+    // TODO: заменить на реальный адрес вашего WebSocket-сервера
+    const ws = new WebSocket("wss://fd5c-89-191-234-252.ngrok-free.app/ws/prompt");
+
+    ws.onopen = () => {
+      console.log("✅ WebSocket соединение открыто");
+    };
+
+    ws.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      console.log("📨 Сообщение из WebSocket:", message);
+      // TODO: required message =============================================>>>>>>>>>> блять 
+      // if (message.status === 'done') fetchPromptsWithUrls();
+    };
+
+    ws.onerror = (error) => {
+      console.error("❌ WebSocket ошибка:", error);
+    };
+
+    ws.onclose = () => {
+      console.log("🔌 WebSocket соединение закрыто");
+    };
+
+    wsRef.current = ws;
   };
 
   if (loading) {
@@ -93,12 +124,15 @@ const LibraryContent = () => {
     return <div className={classes.error}>{error}</div>;
   }
 
-  if (prompts.length === 0) {
+  if (!Array.isArray(prompts) || prompts.length === 0) {
     return (
       <div className={classes.emptyState}>
         <h2 className={classes.emptyStateTitle}>Create your first prompt!</h2>
         <div className={classes.uploaderContainer}>
-          <ImageUploader onImageSelect={handleImageSelect} />
+          <ImageUploader
+            onImageSelect={handleImageSelect}
+            onUploadStart={handleUploadStart}
+          />
         </div>
       </div>
     );
@@ -107,12 +141,15 @@ const LibraryContent = () => {
   return (
     <div className={classes.container}>
       <div className={classes.header}>
-        <ImageUploader onImageSelect={handleImageSelect} />
+        <ImageUploader
+          onImageSelect={handleImageSelect}
+          onUploadStart={handleUploadStart}
+        />
       </div>
       <div className={classes.grid}>
         {prompts.map((prompt) => (
           <ModelCard
-            key={prompt.id}
+            key={prompt.prompt_id}
             id={prompt.id}
             user_id={prompt.user_id}
             prompt_id={prompt.prompt_id}

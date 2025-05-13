@@ -6,26 +6,23 @@ import UploadModal from './UploadModal';
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const MAX_ASPECT_RATIO = 5; // Максимальное соотношение сторон (например, 5:1 или 1:5)
 
-const ImageUploader = ({ onImageSelect }) => {
+const ImageUploader = ({ onImageSelect, onUploadStart }) => {
     const [error, setError] = useState(null);
     const [selectedFile, setSelectedFile] = useState(null);
     const fileInputRef = useRef(null);
 
     const validateImage = (file) => {
         return new Promise((resolve, reject) => {
-            // Проверка типа файла
             if (!file.type.startsWith('image/')) {
                 reject('Unsupported image type');
                 return;
             }
 
-            // Проверка размера
             if (file.size > MAX_FILE_SIZE) {
                 reject('Image size exceeds 10MB limit');
                 return;
             }
 
-            // Проверка соотношения сторон
             const img = new Image();
             img.onload = () => {
                 const aspectRatio = img.width / img.height;
@@ -69,10 +66,64 @@ const ImageUploader = ({ onImageSelect }) => {
         }
     };
 
-    const handleSend = () => {
-        if (selectedFile) {
-            onImageSelect(selectedFile);
+    const handleSend = async () => {
+        if (!selectedFile) return;
+
+        try {
+            // Сообщаем родителю о начале загрузки
+            if (typeof onUploadStart === 'function') {
+                onUploadStart();
+            }
+
+            // 1. Получаем presigned POST данные
+            const presignedRes = await fetch("/prompt/s3/presigned-post", {
+                method: "POST"
+            });
+
+            if (!presignedRes.ok) {
+                throw new Error("Failed to get presigned POST data");
+            }
+
+            const presignedData = await presignedRes.json();
+            const { url, fields } = presignedData;
+
+            // 2. Собираем форму
+            const formData = new FormData();
+            Object.entries(fields).forEach(([key, value]) => {
+                formData.append(key, value);
+            });
+            formData.append("file", selectedFile);
+
+            // 3. Загружаем на S3
+            const uploadRes = await fetch(url, {
+                method: "POST",
+                body: formData
+            });
+
+            if (!uploadRes.ok) {
+                throw new Error("Failed to upload image to S3");
+            }
+
+            // 4. Уведомляем бэкенд
+            const notifyRes = await fetch("/prompt", {
+                method: "POST"
+            });
+
+            if (!notifyRes.ok) {
+                throw new Error("Failed to notify backend");
+            }
+
+            console.log("Image uploaded and backend notified successfully.");
+
+            // Уведомляем родителя, если нужно продолжать
+            if (typeof onImageSelect === 'function') {
+                onImageSelect(selectedFile);
+            }
+
             handleClose();
+        } catch (err) {
+            setError(err.message);
+            console.error("Upload error:", err);
         }
     };
 
@@ -107,4 +158,4 @@ const ImageUploader = ({ onImageSelect }) => {
     );
 };
 
-export default ImageUploader; 
+export default ImageUploader;
