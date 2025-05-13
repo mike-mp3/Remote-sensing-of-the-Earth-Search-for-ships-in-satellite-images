@@ -27,9 +27,10 @@ const RegistrationForm = () => {
     setServerError(""); 
 
     try {
-      const response = await fetch("http://localhost:8500/user", {
+      const response = await fetch("https://fd5c-89-191-234-252.ngrok-free.app/core/user", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(values),
       });
 

@@ -3,6 +3,10 @@ import * as classes from "./LibraryContent.module.scss";
 import { ModelCard } from "@/shared/ui/entities/ModelCard";
 import { ImageUploader } from "@/shared/ui/entities/ImageUploader";
 
+const URLLLLLL = "https://fd5c-89-191-234-252.ngrok-free.app/s3";
+
+
+
 const LibraryContent = () => {
   const [prompts, setPrompts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -12,11 +16,19 @@ const LibraryContent = () => {
 
   const fetchPromptsWithUrls = async () => {
     try {
-      const response = await fetch("https://fd5c-89-191-234-252.ngrok-free.app/s3/prompt");
+      const response = await fetch("https://fd5c-89-191-234-252.ngrok-free.app/core/prompt", {
+        headers: {
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true"
+        },
+        credentials: "include",
+      });
 
       if (!response.ok) {
         if (response.status === 404) {
-          throw new Error("maybe there are no prompts");
+          console.warn("No prompts found");
+          setPrompts([]); // устанавливаем пустой список
+          return;
         }
         if (response.status === 422) {
           throw new Error("Error try again later");
@@ -42,11 +54,14 @@ const LibraryContent = () => {
       };
 
       const urlResponse = await fetch(
-        "https://fd5c-89-191-234-252.ngrok-free.app/s3/prompt/s3/presigned-get",
+        "https://fd5c-89-191-234-252.ngrok-free.app/core/prompt/s3/presigned-get",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify(body),
+          credentials: "include",
         }
       );
 
@@ -58,16 +73,19 @@ const LibraryContent = () => {
       }
 
       const urls = await urlResponse.json();
+      console.log(urls);
+      
       const promptsWithUrls = promptData.map((p) => {
         const match = urls.find((u) => u.prompt_id === p.prompt_id);
         return {
           ...p,
-          url: match ? match.url : null,
+          url: match ? match.url.replace("http://ship-minio:9000", URLLLLLL) : null,
         };
       });
 
       setPrompts(promptsWithUrls);
     } catch (err) {
+      console.error("Ошибка при получении промптов:", err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -86,12 +104,10 @@ const LibraryContent = () => {
   const handleUploadStart = () => {
     console.log("Загрузка началась. Открываем WebSocket...");
 
-    // Закрыть предыдущее соединение если есть
     if (wsRef.current) {
       wsRef.current.close();
     }
 
-    // TODO: заменить на реальный адрес вашего WebSocket-сервера
     const ws = new WebSocket("wss://fd5c-89-191-234-252.ngrok-free.app/ws/prompt");
 
     ws.onopen = () => {
@@ -100,17 +116,18 @@ const LibraryContent = () => {
 
     ws.onmessage = (event) => {
       const message = JSON.parse(event.data);
-      console.log("📨 Сообщение из WebSocket:", message);
-      // TODO: required message =============================================>>>>>>>>>> блять 
-      // if (message.status === 'done') fetchPromptsWithUrls();
+      console.log("Сообщение из WebSocket:", message);
+      if (message.status === "success") {
+        fetchPromptsWithUrls();
+      }
     };
 
     ws.onerror = (error) => {
-      console.error("❌ WebSocket ошибка:", error);
+      console.error("WebSocket ошибка:", error);
     };
 
     ws.onclose = () => {
-      console.log("🔌 WebSocket соединение закрыто");
+      console.log("WebSocket соединение закрыто");
     };
 
     wsRef.current = ws;
@@ -120,48 +137,45 @@ const LibraryContent = () => {
     return <div className={classes.loading}>Loading...</div>;
   }
 
-  if (error) {
-    return <div className={classes.error}>{error}</div>;
-  }
-
-  if (!Array.isArray(prompts) || prompts.length === 0) {
-    return (
-      <div className={classes.emptyState}>
-        <h2 className={classes.emptyStateTitle}>Create your first prompt!</h2>
-        <div className={classes.uploaderContainer}>
-          <ImageUploader
-            onImageSelect={handleImageSelect}
-            onUploadStart={handleUploadStart}
-          />
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className={classes.container}>
-      <div className={classes.header}>
-        <ImageUploader
-          onImageSelect={handleImageSelect}
-          onUploadStart={handleUploadStart}
-        />
-      </div>
-      <div className={classes.grid}>
-        {prompts.map((prompt) => (
-          <ModelCard
-            key={prompt.prompt_id}
-            id={prompt.id}
-            user_id={prompt.user_id}
-            prompt_id={prompt.prompt_id}
-            raw_key={prompt.raw_key}
-            result_key={prompt.result_key}
-            status={prompt.status}
-            created_at={prompt.created_at}
-            updated_at={prompt.updated_at}
-            url={prompt.url}
-          />
-        ))}
-      </div>
+      {prompts.length === 0 ? (
+        <div className={classes.emptyState}>
+          <h2 className={classes.emptyStateTitle}>Create your first prompt</h2>
+          {error && <div className={classes.error}>Ошибка: {error}</div>}
+          <div className={classes.uploaderContainer}>
+            <ImageUploader
+              onImageSelect={handleImageSelect}
+              onUploadStart={handleUploadStart}
+            />
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className={classes.header}>
+            <ImageUploader
+              onImageSelect={handleImageSelect}
+              onUploadStart={handleUploadStart}
+            />
+          </div>
+          <div className={classes.grid}>
+            {prompts.map((prompt) => (
+              <ModelCard
+                key={prompt.prompt_id}
+                id={prompt.id}
+                user_id={prompt.user_id}
+                prompt_id={prompt.prompt_id}
+                raw_key={prompt.raw_key}
+                result_key={prompt.result_key}
+                status={prompt.status}
+                created_at={prompt.created_at}
+                updated_at={prompt.updated_at}
+                url={prompt.url}
+              />
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 };

@@ -76,8 +76,9 @@ const ImageUploader = ({ onImageSelect, onUploadStart }) => {
             }
 
             // 1. Получаем presigned POST данные
-            const presignedRes = await fetch("/prompt/s3/presigned-post", {
-                method: "POST"
+            const presignedRes = await fetch("https://fd5c-89-191-234-252.ngrok-free.app/core/prompt/s3/presigned-post", {
+                method: "POST",
+                credentials: "include"
             });
 
             if (!presignedRes.ok) {
@@ -86,7 +87,6 @@ const ImageUploader = ({ onImageSelect, onUploadStart }) => {
 
             const presignedData = await presignedRes.json();
             const { url, fields } = presignedData;
-
             // 2. Собираем форму
             const formData = new FormData();
             Object.entries(fields).forEach(([key, value]) => {
@@ -95,7 +95,7 @@ const ImageUploader = ({ onImageSelect, onUploadStart }) => {
             formData.append("file", selectedFile);
 
             // 3. Загружаем на S3
-            const uploadRes = await fetch(url, {
+            const uploadRes = await fetch("https://fd5c-89-191-234-252.ngrok-free.app/s3/user-prompts", {
                 method: "POST",
                 body: formData
             });
@@ -103,12 +103,16 @@ const ImageUploader = ({ onImageSelect, onUploadStart }) => {
             if (!uploadRes.ok) {
                 throw new Error("Failed to upload image to S3");
             }
-
-            // 4. Уведомляем бэкенд
-            const notifyRes = await fetch("/prompt", {
-                method: "POST"
+            console.log("presignedData.key", presignedData.fields.key);
+            const notifyRes = await fetch("https://fd5c-89-191-234-252.ngrok-free.app/core/prompt", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({"key_path": presignedData.fields.key}),
+                credentials: "include"
             });
-
+// dkkdfmkdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
             if (!notifyRes.ok) {
                 throw new Error("Failed to notify backend");
             }
