@@ -5,10 +5,10 @@ import { useUser } from "@/shared/lib/context/UserContext";
 const Header = () => {
     const navigate = useNavigate();
     const { userEmail } = useUser();
-
+    const URL = import.meta.env.VITE_API_BASE_URL;
     const handleLogout = async () => {
         try {
-            const response = await fetch("/auth/logout", {
+            const response = await fetch(`${URL}/core/auth/logout`, {
                 method: "POST",
                 credentials: "include",
             });

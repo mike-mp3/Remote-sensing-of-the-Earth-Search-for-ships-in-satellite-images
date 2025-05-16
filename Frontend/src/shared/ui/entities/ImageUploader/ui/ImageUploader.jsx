@@ -4,7 +4,9 @@ import * as classes from './ImageUploader.module.scss';
 import UploadModal from './UploadModal';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const MAX_ASPECT_RATIO = 5; // Максимальное соотношение сторон (например, 5:1 или 1:5)
+const MAX_ASPECT_RATIO = 5; 
+
+const URL = import.meta.env.VITE_API_BASE_URL;
 
 const ImageUploader = ({ onImageSelect, onUploadStart }) => {
     const [error, setError] = useState(null);
@@ -76,7 +78,7 @@ const ImageUploader = ({ onImageSelect, onUploadStart }) => {
             }
 
             // 1. Получаем presigned POST данные
-            const presignedRes = await fetch("https://fd5c-89-191-234-252.ngrok-free.app/core/prompt/s3/presigned-post", {
+            const presignedRes = await fetch(`${URL}/core/prompt/s3/presigned-post`, {
                 method: "POST",
                 credentials: "include"
             });
@@ -95,7 +97,7 @@ const ImageUploader = ({ onImageSelect, onUploadStart }) => {
             formData.append("file", selectedFile);
 
             // 3. Загружаем на S3
-            const uploadRes = await fetch("https://fd5c-89-191-234-252.ngrok-free.app/s3/user-prompts", {
+            const uploadRes = await fetch(`${URL}/s3/user-prompts`, {
                 method: "POST",
                 body: formData
             });
@@ -104,7 +106,7 @@ const ImageUploader = ({ onImageSelect, onUploadStart }) => {
                 throw new Error("Failed to upload image to S3");
             }
             console.log("presignedData.key", presignedData.fields.key);
-            const notifyRes = await fetch("https://fd5c-89-191-234-252.ngrok-free.app/core/prompt", {
+            const notifyRes = await fetch(`${URL}/core/prompt`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

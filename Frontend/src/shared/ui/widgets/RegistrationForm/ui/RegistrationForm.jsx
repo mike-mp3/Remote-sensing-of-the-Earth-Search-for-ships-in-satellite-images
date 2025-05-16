@@ -7,6 +7,8 @@ import { Link, useNavigate } from "react-router-dom";
 const RegistrationForm = () => {
   const navigate = useNavigate();
   const [serverError, setServerError] = useState("");
+  
+  const URL = import.meta.env.VITE_API_BASE_URL;
 
   const initialValues = {
     email: "",
@@ -27,7 +29,7 @@ const RegistrationForm = () => {
     setServerError(""); 
 
     try {
-      const response = await fetch("https://fd5c-89-191-234-252.ngrok-free.app/core/user", {
+      const response = await fetch(`${URL}/core/user`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

@@ -8,7 +8,8 @@ import { useUser } from "@/shared/lib/context/UserContext";
 const LoginForm = () => {
   const navigate = useNavigate();
   const { updateUserEmail } = useUser();
-  
+  const URL = import.meta.env.VITE_API_BASE_URL;
+
   const initialValues = {
     email: "",
     password: "",
@@ -26,7 +27,7 @@ const LoginForm = () => {
 
   const handleSubmit = async (values, { setSubmitting, setErrors }) => {
     try {
-      const response = await fetch("https://fd5c-89-191-234-252.ngrok-free.app/core/auth/login", {
+      const response = await fetch(`${URL}/core/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

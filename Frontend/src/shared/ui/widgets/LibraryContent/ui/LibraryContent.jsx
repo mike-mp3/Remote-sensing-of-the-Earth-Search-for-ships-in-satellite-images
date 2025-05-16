@@ -3,7 +3,6 @@ import * as classes from "./LibraryContent.module.scss";
 import { ModelCard } from "@/shared/ui/entities/ModelCard";
 import { ImageUploader } from "@/shared/ui/entities/ImageUploader";
 
-const URLLLLLL = "https://fd5c-89-191-234-252.ngrok-free.app/s3";
 
 
 
@@ -13,10 +12,14 @@ const LibraryContent = () => {
   const [error, setError] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const wsRef = useRef(null);
+  const URL = import.meta.env.VITE_API_BASE_URL;
+
+  const URLLLLLL = URL + "/s3";
+
 
   const fetchPromptsWithUrls = async () => {
     try {
-      const response = await fetch("https://fd5c-89-191-234-252.ngrok-free.app/core/prompt", {
+      const response = await fetch(`${URL}/core/prompt`, {
         headers: {
           "Content-Type": "application/json",
           "ngrok-skip-browser-warning": "true"
@@ -53,8 +56,7 @@ const LibraryContent = () => {
         })),
       };
 
-      const urlResponse = await fetch(
-        "https://fd5c-89-191-234-252.ngrok-free.app/core/prompt/s3/presigned-get",
+      const urlResponse = await fetch(`${URL}/core/prompt/s3/presigned-get`,
         {
           method: "POST",
           headers: {
@@ -107,8 +109,8 @@ const LibraryContent = () => {
     if (wsRef.current) {
       wsRef.current.close();
     }
-
-    const ws = new WebSocket("wss://fd5c-89-191-234-252.ngrok-free.app/ws/prompt");
+    const WS_API = URL.replace("https", "wss");
+    const ws = new WebSocket(`${WS_API}/ws/prompt`);
 
     ws.onopen = () => {
       console.log("✅ WebSocket соединение открыто");
