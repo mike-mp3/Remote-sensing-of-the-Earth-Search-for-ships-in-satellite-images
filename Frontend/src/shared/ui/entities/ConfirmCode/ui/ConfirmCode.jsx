@@ -6,7 +6,9 @@ const ConfirmCode = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const email = location.state?.email || "example@gmail.com";
-// import '@/shared/global_styles/index.css'
+
+  const URL = import.meta.env.VITE_API_BASE_URL;
+
 
   const inputCount = 6;
   const [values, setValues] = useState(Array(inputCount).fill(""));
@@ -52,7 +54,7 @@ const ConfirmCode = () => {
     console.log("Sending verification code:", code, "email:", email);
 
     try {
-      const response = await fetch("https://fd5c-89-191-234-252.ngrok-free.app/core/user/confirmation", {
+      const response = await fetch(`${URL}/core/user/confirmation`, {
         method: "PATCH"  ,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
