@@ -1,3 +1,5 @@
+import asyncio
+
 from app.internal.services import Services
 from app.pkg.clients.websocket.manager import WebSocketManager
 from app.pkg.models import (
@@ -20,6 +22,9 @@ async def refresh_prompt_status(
     await ws_manager.connect(user.id, websocket)
     try:
         while True:
-            pass
-    except WebSocketDisconnect:
+            data = await asyncio.wait_for(websocket.receive_text(), timeout=60)
+            if data == "ping":
+                await websocket.send_text("pong")
+
+    except (asyncio.TimeoutError, WebSocketDisconnect):
         ws_manager.disconnect(user.id, websocket)

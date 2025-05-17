@@ -43,7 +43,6 @@ class Server:
         self.__app = app
         self._register_routes(app)
         self._register_events(app)
-        self._register_middlewares(app)
         self._register_http_exceptions(app)
         self._register_open_api_errors(app)
 

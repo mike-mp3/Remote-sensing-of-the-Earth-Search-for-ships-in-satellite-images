@@ -137,13 +137,13 @@ class PromptService:
                 link = self.s3_prompter_client.get_prompt_link(
                     user_id=active_user.id,
                     prompt_id=prompt.prompt_id,
-                    prompt_type=PromptObjectType.RAW.value,
+                    prompt_type=PromptObjectType.RESULT.value,
                 )
-            elif prompt.status == PromptStatus.success.value:
+            elif prompt.status == PromptStatus.error.value:
                 link = self.s3_prompter_client.get_prompt_link(
                     user_id=active_user.id,
                     prompt_id=prompt.prompt_id,
-                    prompt_type=PromptObjectType.RESULT.value,
+                    prompt_type=PromptObjectType.RAW.value,
                 )
             else:
                 raise UnknownPromptStatus

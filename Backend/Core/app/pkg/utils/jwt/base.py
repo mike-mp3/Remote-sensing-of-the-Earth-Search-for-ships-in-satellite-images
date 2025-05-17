@@ -220,7 +220,7 @@ class JwtAuthBase(ABC):
         response.set_cookie(
             key=settings.JWT.ACCESS_TOKEN_NAME,
             value=access_token,
-            httponly=True,
+            httponly=False,
             max_age=seconds_expires,
             samesite="none",
             secure=True,  # type: ignore

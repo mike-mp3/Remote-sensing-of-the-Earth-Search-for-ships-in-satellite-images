@@ -116,7 +116,7 @@ services:
     env_file:
       - .env
     environment:
-      - MINIO_HOST=http://${MINIO__HOST}:9000
+      - MINIO_HOST=http://ship__minio:9000
       - MINIO_ROOT_USER=${S3__ROOT_USER}
       - MINIO_ROOT_PASSWORD=${S3__ROOT_PASSWORD}
       - MINIO_MIGRATION_DIR=./migrations_minio/
@@ -173,8 +173,8 @@ services:
       - ship__redis
     command: [
       "celery", "-A", "app.pkg.tasks.celery.celery_app", "worker",
+      "-P", "solo",
       "--loglevel", "warning",
-      "--concurrency", "1",
       "--hostname", "worker1@%h"
     ]
 
