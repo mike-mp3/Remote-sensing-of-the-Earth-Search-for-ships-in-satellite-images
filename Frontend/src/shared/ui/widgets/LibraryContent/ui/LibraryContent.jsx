@@ -1,21 +1,16 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import * as classes from "./LibraryContent.module.scss";
 import { ModelCard } from "@/shared/ui/entities/ModelCard";
 import { ImageUploader } from "@/shared/ui/entities/ImageUploader";
-
-
-
 
 const LibraryContent = () => {
   const [prompts, setPrompts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
-  const wsRef = useRef(null);
+
   const URL = import.meta.env.VITE_API_BASE_URL;
-
   const URLLLLLL = URL + "/s3";
-
 
   const fetchPromptsWithUrls = async () => {
     try {
@@ -30,7 +25,7 @@ const LibraryContent = () => {
       if (!response.ok) {
         if (response.status === 404) {
           console.warn("No prompts found");
-          setPrompts([]); // устанавливаем пустой список
+          setPrompts([]);
           return;
         }
         if (response.status === 422) {
@@ -56,16 +51,15 @@ const LibraryContent = () => {
         })),
       };
 
-      const urlResponse = await fetch(`${URL}/core/prompt/s3/presigned-get`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(body),
-          credentials: "include",
-        }
-      );
+      const urlResponse = await fetch(`${URL}/core/prompt/s3/presigned-get`, {
+        method: "POST",
+        headers: {
+          "ngrok-skip-browser-warning": "1",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+        credentials: "include",
+      });
 
       if (!urlResponse.ok) {
         if (urlResponse.status === 422) {
@@ -75,8 +69,7 @@ const LibraryContent = () => {
       }
 
       const urls = await urlResponse.json();
-      console.log(urls);
-      
+
       const promptsWithUrls = promptData.map((p) => {
         const match = urls.find((u) => u.prompt_id === p.prompt_id);
         return {
@@ -104,35 +97,18 @@ const LibraryContent = () => {
   };
 
   const handleUploadStart = () => {
-    console.log("Загрузка началась. Открываем WebSocket...");
+    console.log("Загрузка началась. Ждём завершения через WebSocket...");
+  };
 
-    if (wsRef.current) {
-      wsRef.current.close();
+  const handleProcessingDone = async () => {
+    console.log("✅ Обработка изображения завершена. Загружаем обновлённый список...");
+
+    try {
+      await fetchPromptsWithUrls();
+      // 🔁 <-- Сюда можно вставить свой кастомный код отрисовки или действий после загрузки
+    } catch (error) {
+      console.error("Ошибка при обновлении после обработки:", error);
     }
-    const WS_API = URL.replace("https", "wss");
-    const ws = new WebSocket(`${WS_API}/ws/prompt`);
-
-    ws.onopen = () => {
-      console.log("✅ WebSocket соединение открыто");
-    };
-
-    ws.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-      console.log("Сообщение из WebSocket:", message);
-      if (message.status === "success") {
-        fetchPromptsWithUrls();
-      }
-    };
-
-    ws.onerror = (error) => {
-      console.error("WebSocket ошибка:", error);
-    };
-
-    ws.onclose = () => {
-      console.log("WebSocket соединение закрыто");
-    };
-
-    wsRef.current = ws;
   };
 
   if (loading) {
@@ -149,6 +125,7 @@ const LibraryContent = () => {
             <ImageUploader
               onImageSelect={handleImageSelect}
               onUploadStart={handleUploadStart}
+              onProcessingDone={handleProcessingDone}
             />
           </div>
         </div>
@@ -158,6 +135,7 @@ const LibraryContent = () => {
             <ImageUploader
               onImageSelect={handleImageSelect}
               onUploadStart={handleUploadStart}
+              onProcessingDone={handleProcessingDone}
             />
           </div>
           <div className={classes.grid}>

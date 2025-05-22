@@ -4,12 +4,10 @@ import * as classes from "./HomePage.module.scss";
 
 const HomePage = () => {
     return (
-        <>
+        <main className={classes.main}>
             <Header />
-            <main className={classes.main}>
-                <LibraryContent />
-            </main>
-        </>
+            <LibraryContent />
+        </main>
     );
 };
 
