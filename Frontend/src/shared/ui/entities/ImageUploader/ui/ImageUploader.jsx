@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { Paperclip } from 'lucide-react';
 import * as classes from './ImageUploader.module.scss';
 import UploadModal from './UploadModal';
-import WebSocketListener from './WebSocketListener'; // 💡 Новый компонент
+import WebSocketListener from './WebSocketListener'; 
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const MAX_ASPECT_RATIO = 5;
@@ -59,51 +59,66 @@ const ImageUploader = ({ onImageSelect, onUploadStart, onProcessingDone }) => {
         fileInputRef.current.value = '';
     };
 
-    const handleSend = async () => {
-        if (!selectedFile) return;
+   const handleSend = async () => {
+    if (!selectedFile) return;
 
-        try {
-            if (typeof onUploadStart === 'function') {
-                onUploadStart();
-            }
-
-            const presignedRes = await fetch(`${URLL}/core/prompt/s3/presigned-post`, {
-                method: "POST",
-                credentials: "include"
-            });
-
-            if (!presignedRes.ok) throw new Error("Failed to get presigned POST data");
-
-            const presignedData = await presignedRes.json();
-            const { url, fields } = presignedData;
-
-            const formData = new FormData();
-            Object.entries(fields).forEach(([key, value]) => formData.append(key, value));
-            formData.append("file", selectedFile);
-
-            const uploadRes = await fetch(`${URLL}/s3/user-prompts`, {
-                method: "POST",
-                body: formData
-            });
-
-            if (!uploadRes.ok) throw new Error("Failed to upload image to S3");
-
-            const notifyRes = await fetch(`${URLL}/core/prompt`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ "key_path": presignedData.fields.key }),
-                credentials: "include"
-            });
-
-            if (!notifyRes.ok) throw new Error("Failed to notify backend");
-
-            // запускаем WebSocket после успешной отправки
-            setWsActive(true);
-        } catch (err) {
-            setError(err.message);
-            console.error("Upload error:", err);
+    try {
+        if (typeof onUploadStart === 'function') {
+            onUploadStart();
         }
-    };
+
+        const presignedRes = await fetch(`${URLL}/core/prompt/s3/presigned-post`, {
+            method: "POST",
+            credentials: "include"
+        });
+
+        if (!presignedRes.ok) throw new Error("Failed to get presigned POST data");
+
+        const presignedData = await presignedRes.json();
+        const { url, fields, prompt_id } = presignedData;
+
+        const formData = new FormData();
+        Object.entries(fields).forEach(([key, value]) => formData.append(key, value));
+        formData.append("file", selectedFile);
+
+        const uploadRes = await fetch(`${URLL}/s3/user-prompts`, {
+            method: "POST",
+            body: formData
+        });
+
+        if (!uploadRes.ok) throw new Error("Failed to upload image to S3");
+
+        const notifyRes = await fetch(`${URLL}/core/prompt`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ "key_path": presignedData.fields.key }),
+            credentials: "include"
+        });
+
+        if (!notifyRes.ok) throw new Error("Failed to notify backend");
+
+        // Закрываем окно, уведомляем родителя
+        if (typeof onImageSelect === 'function') {
+            onImageSelect({
+                key: prompt_id,
+                id: "some-id",
+                user_id: 1,
+                prompt_id: "prompt_id",
+                raw_key: presignedData.fields.key,
+                status: "pending",
+                url: URL.createObjectURL(selectedFile), // временный URL
+                created_at: new Date().toISOString(),
+            });
+        }
+
+        handleClose();
+        setWsActive(true);
+    } catch (err) {
+        setError(err.message);
+        console.error("Upload error:", err);
+    }
+};
+
 
     const handleProcessingDone = () => {
         setWsActive(false);

@@ -12,6 +12,12 @@ const LibraryContent = () => {
   const URL = import.meta.env.VITE_API_BASE_URL;
   const URLLLLLL = URL + "/s3";
 
+  const handleImageSelect = (newPrompt) => {
+  if (!newPrompt) return; // ← Защита от null/undefined
+  setSelectedImage(newPrompt);
+  setPrompts((prev) => [newPrompt, ...prev]);
+};
+
   const fetchPromptsWithUrls = async () => {
     try {
       const response = await fetch(`${URL}/core/prompt`, {
@@ -46,7 +52,7 @@ const LibraryContent = () => {
 
       const body = {
         prompts: promptData.map((p) => ({
-          prompt_id: p.prompt_id,
+          prompt_id: p.prompt_id || p.id, // Handle both id and prompt_id
           status: p.status,
         })),
       };
@@ -70,13 +76,19 @@ const LibraryContent = () => {
 
       const urls = await urlResponse.json();
 
-      const promptsWithUrls = promptData.map((p) => {
-        const match = urls.find((u) => u.prompt_id === p.prompt_id);
+      const promptsWithUrls = promptData
+      .filter(p => p != null) // Фильтруем null и undefined
+      .map((p) => {
+      const match = urls.find((u) => u.prompt_id === (p.prompt_id || p.id));
         return {
           ...p,
           url: match ? match.url.replace("http://ship-minio:9000", URLLLLLL) : null,
+      //  наличие ID
+          id: p.id || p.prompt_id,
+          prompt_id: p.prompt_id || p.id
         };
       });
+
 
       setPrompts(promptsWithUrls);
     } catch (err) {
@@ -91,29 +103,20 @@ const LibraryContent = () => {
     fetchPromptsWithUrls();
   }, []);
 
-  const handleImageSelect = (file) => {
-    setSelectedImage(file);
-    console.log("Selected image:", file);
-  };
-
   const handleUploadStart = () => {
     console.log("Загрузка началась. Ждём завершения через WebSocket...");
   };
 
   const handleProcessingDone = async () => {
-    console.log("✅ Обработка изображения завершена. Загружаем обновлённый список...");
-
-    try {
-      await fetchPromptsWithUrls();
-      // 🔁 <-- Сюда можно вставить свой кастомный код отрисовки или действий после загрузки
-    } catch (error) {
-      console.error("Ошибка при обновлении после обработки:", error);
-    }
+    console.log("Обработка завершена, обновляем список...");
+    await fetchPromptsWithUrls();
   };
 
   if (loading) {
     return <div className={classes.loading}>Loading...</div>;
   }
+
+  console.log('Prompts before render:', prompts);
 
   return (
     <div className={classes.container}>
@@ -140,8 +143,9 @@ const LibraryContent = () => {
           </div>
           <div className={classes.grid}>
             {prompts.map((prompt) => (
+        
               <ModelCard
-                key={prompt.prompt_id}
+                key={prompt.id}  // Using id as key
                 id={prompt.id}
                 user_id={prompt.user_id}
                 prompt_id={prompt.prompt_id}
@@ -152,7 +156,8 @@ const LibraryContent = () => {
                 updated_at={prompt.updated_at}
                 url={prompt.url}
               />
-            ))}
+            ))
+            }
           </div>
         </>
       )}
