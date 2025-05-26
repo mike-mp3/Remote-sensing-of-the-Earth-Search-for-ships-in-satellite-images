@@ -5,6 +5,7 @@ from app.pkg.models import (
 )
 from app.pkg.utils.jwt import get_current_user_websocket
 from dependency_injector.wiring import Provide, inject
+import asyncio
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 
 router = APIRouter(prefix="/prompt", tags=["Prompt"])
@@ -20,6 +21,9 @@ async def refresh_prompt_status(
     await ws_manager.connect(user.id, websocket)
     try:
         while True:
-            pass
-    except WebSocketDisconnect:
+            data = await asyncio.wait_for(websocket.receive_text(), timeout=60)
+            if data == "ping":
+                await websocket.send_text("pong")
+
+    except (asyncio.TimeoutError, WebSocketDisconnect):
         ws_manager.disconnect(user.id, websocket)
