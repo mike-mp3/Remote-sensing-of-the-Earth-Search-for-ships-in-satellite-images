@@ -133,7 +133,7 @@ class PromptService:
     ):
         prompts = []
         for prompt in request.prompts:
-            if prompt.status in (PromptStatus.pending.value, PromptStatus.success.value):
+            if prompt.status in (PromptStatus.pending.value, PromptStatus.error.value):
                 link = self.s3_prompter_client.get_prompt_link(
                     user_id=active_user.id,
                     prompt_id=prompt.prompt_id,
