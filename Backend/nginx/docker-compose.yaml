@@ -1,0 +1,13 @@
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./cors_support.conf:/etc/nginx/cors_support.conf
+
+networks:
+  default:
+    name: shared-ship-network
+    external: true

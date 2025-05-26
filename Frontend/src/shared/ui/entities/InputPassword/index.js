@@ -1,0 +1,1 @@
+export {default as InputPassword} from "@/shared/ui/entities/InputPassword/ui/InputPassword";

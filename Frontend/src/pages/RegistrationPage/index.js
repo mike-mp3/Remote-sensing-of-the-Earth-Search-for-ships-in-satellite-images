@@ -1,0 +1,1 @@
+export {default as RegistrationPage} from "@/pages/RegistrationPage/ui/RegistrationPage"

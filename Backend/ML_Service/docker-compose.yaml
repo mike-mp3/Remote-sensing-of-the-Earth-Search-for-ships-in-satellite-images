@@ -1,0 +1,23 @@
+services:
+  ship__worker:
+    container_name: ${WORKER__HOST}
+    build:
+      context: .
+      dockerfile: docker/worker/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    command: [
+      "poetry", "run", "python", "app/internal/run.py",
+    ]
+    volumes:
+      # - ship__ml_model_data:${ML_MODEL__LOCAL_PATH_DIR}
+      - /Users/alexandr/all/python_proj/ships/Backend/ML_Service/ml_models:${ML_MODEL__LOCAL_PATH_DIR}
+
+networks:
+  default:
+    name: shared-ship-network
+    external: true
+
+#volumes:
+#  ship__ml_model_data:

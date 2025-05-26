@@ -1,0 +1,28 @@
+services:
+  ship__updater:
+    container_name: ${API__HOST}
+    build:
+      context: .
+      dockerfile: docker/api/Dockerfile
+
+    restart: unless-stopped
+
+    env_file:
+      - .env
+    ports:
+      - ${API__PORT}:5000
+    command: [
+      "poetry", "run", "uvicorn", "app:create_app",
+      "--host", "0.0.0.0",
+      "--port", "5000",
+      "--log-level", "debug",
+      "--factory",
+      "--reload",
+    ]
+    volumes:
+      - ./app:/usr/src/app/app
+
+networks:
+  default:
+    name: shared-ship-network
+    external: true
