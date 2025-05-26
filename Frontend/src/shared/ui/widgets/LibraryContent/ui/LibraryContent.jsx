@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import * as classes from "./LibraryContent.module.scss";
 import { ModelCard } from "@/shared/ui/entities/ModelCard";
 import { ImageUploader } from "@/shared/ui/entities/ImageUploader";
@@ -10,6 +10,7 @@ const LibraryContent = () => {
   const [selectedImage, setSelectedImage] = useState(null);
 
   const URL = import.meta.env.VITE_API_BASE_URL;
+  const WS_URL = import.meta.env.VITE_WS_URL;
   const URLLLLLL = URL + "/s3";
 
   const handleImageSelect = (newPrompt) => {
@@ -17,6 +18,74 @@ const LibraryContent = () => {
   setSelectedImage(newPrompt);
   setPrompts((prev) => [newPrompt, ...prev]);
 };
+
+  const wsRef = useRef(null);
+
+  // Открываем/закрываем WS при изменении списка prompts
+  useEffect(() => {
+    const hasPending = prompts.some(p => p.status === 'pending');
+    console.log('WS effect triggered, hasPending =', hasPending, wsRef.current);
+    console.log(WS_URL);
+
+    if (hasPending && !wsRef.current) {
+      const ws = new WebSocket(WS_URL);
+      ws.onopen = () => console.log('WS opened:', WS_URL);
+      ws.onmessage = async (e) => {
+        try {
+          const raw = e.data;
+          let msg = JSON.parse(raw);
+          if (typeof msg === 'string') {
+            msg = JSON.parse(msg);
+          }
+
+          console.log("STSTSTT, idididi", msg.status, msg.prompt_id);
+          
+          const body = { prompts: [{ prompt_id: msg.prompt_id, status: msg.status }] };
+
+          const res = await fetch(`${URL}/core/prompt/s3/presigned-get`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+            credentials: 'include',
+          });
+          if (!res.ok) throw new Error(`Presigned-get failed: ${res.status}`);
+          const urls = await res.json();
+          const match = urls.find(u => u.prompt_id === msg.prompt_id);
+          console.log(match);
+          const newUrl = match ? match.url.replace("http://ship-minio:9000", URLLLLLL) : null;
+          console.log(newUrl);
+          setPrompts(prev => {
+          const next = prev.map(p =>
+            p.prompt_id === msg.prompt_id
+              ? { ...p, status: msg.status, url: newUrl }
+              : p
+          );
+          console.log("New prompts after update:", next);
+          return next;
+        });
+          
+          console.log("ahahh", prompts);
+        } catch (err) {
+          console.error('WS message handling error:', err);
+        }
+      };
+      ws.onerror = e => console.error('WS error:', e);
+      ws.onclose = () => console.log('WS closed');
+      wsRef.current = ws;
+    }
+
+    if (!hasPending && wsRef.current) {
+      wsRef.current.close();
+      wsRef.current = null;
+    }
+
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close();
+        wsRef.current = null;
+      }
+    };
+  }, [prompts, URL, WS_URL]);
 
   const fetchPromptsWithUrls = async () => {
     try {
@@ -52,7 +121,7 @@ const LibraryContent = () => {
 
       const body = {
         prompts: promptData.map((p) => ({
-          prompt_id: p.prompt_id || p.id, // Handle both id and prompt_id
+          prompt_id: p.prompt_id,
           status: p.status,
         })),
       };
@@ -83,9 +152,8 @@ const LibraryContent = () => {
         return {
           ...p,
           url: match ? match.url.replace("http://ship-minio:9000", URLLLLLL) : null,
-      //  наличие ID
-          id: p.id || p.prompt_id,
-          prompt_id: p.prompt_id || p.id
+          id: p.id,
+          prompt_id: p.prompt_id
         };
       });
 
@@ -107,10 +175,6 @@ const LibraryContent = () => {
     console.log("Загрузка началась. Ждём завершения через WebSocket...");
   };
 
-  const handleProcessingDone = async () => {
-    console.log("Обработка завершена, обновляем список...");
-    await fetchPromptsWithUrls();
-  };
 
   if (loading) {
     return <div className={classes.loading}>Loading...</div>;
@@ -128,7 +192,6 @@ const LibraryContent = () => {
             <ImageUploader
               onImageSelect={handleImageSelect}
               onUploadStart={handleUploadStart}
-              onProcessingDone={handleProcessingDone}
             />
           </div>
         </div>
@@ -138,14 +201,13 @@ const LibraryContent = () => {
             <ImageUploader
               onImageSelect={handleImageSelect}
               onUploadStart={handleUploadStart}
-              onProcessingDone={handleProcessingDone}
             />
           </div>
           <div className={classes.grid}>
             {prompts.map((prompt) => (
         
               <ModelCard
-                key={prompt.id}  // Using id as key
+                key={`${prompt.id}-${prompt.status}`} // Using id as key
                 id={prompt.id}
                 user_id={prompt.user_id}
                 prompt_id={prompt.prompt_id}

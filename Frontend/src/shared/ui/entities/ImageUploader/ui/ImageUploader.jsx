@@ -2,170 +2,144 @@ import { useState, useRef } from 'react';
 import { Paperclip } from 'lucide-react';
 import * as classes from './ImageUploader.module.scss';
 import UploadModal from './UploadModal';
-import WebSocketListener from './WebSocketListener'; 
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const MAX_ASPECT_RATIO = 5;
-const URLL = import.meta.env.VITE_API_BASE_URL;
+const API_URL = import.meta.env.VITE_API_BASE_URL;
 
-const ImageUploader = ({ onImageSelect, onUploadStart, onProcessingDone }) => {
-    const [error, setError] = useState(null);
-    const [selectedFile, setSelectedFile] = useState(null);
-    const [wsActive, setWsActive] = useState(false); // флаг активности WebSocket
 
-    const fileInputRef = useRef(null);
+const ImageUploader = ({ onImageSelect, onUploadStart }) => {
+  const [error, setError] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const fileInputRef = useRef(null);
 
-    const validateImage = (file) => {
-        return new Promise((resolve, reject) => {
-            if (!file.type.startsWith('image/')) return reject('Unsupported image type');
-            if (file.size > MAX_FILE_SIZE) return reject('Image size exceeds 10MB limit');
+  // Проверка типа, размера и соотношения сторон
+  const validateImage = (file) =>
+    new Promise((resolve, reject) => {
+      if (!file.type.startsWith('image/')) return reject('Unsupported image type');
+      if (file.size > MAX_FILE_SIZE) return reject('Image size exceeds 10 MB');
 
-            const img = new Image();
-            img.onload = () => {
-                const aspectRatio = img.width / img.height;
-                if (aspectRatio > MAX_ASPECT_RATIO || aspectRatio < 1 / MAX_ASPECT_RATIO) {
-                    reject('Unsupported image aspect ratio');
-                } else {
-                    resolve(file);
-                }
-            };
-            img.onerror = () => reject('Failed to load image');
-            img.src = URL.createObjectURL(file);
-        });
-    };
-
-    const handleFileSelect = async (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        setError(null);
-        try {
-            const validatedFile = await validateImage(file);
-            setSelectedFile(validatedFile);
-        } catch (err) {
-            setError(err);
-            console.error('Image validation error:', err);
+      const img = new Image();
+      img.onload = () => {
+        const ratio = img.width / img.height;
+        if (ratio > MAX_ASPECT_RATIO || ratio < 1 / MAX_ASPECT_RATIO) {
+          reject('Unsupported image aspect ratio');
+        } else {
+          resolve(file);
         }
-    };
+      };
+      img.onerror = () => reject('Failed to load image');
+      img.src = URL.createObjectURL(file);
+    });
 
-    const handleClick = () => {
-        if (!selectedFile) {
-            fileInputRef.current?.click();
-        }
-    };
+  // При выборе файла в проводнике
+  const handleFileSelect = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setError(null);
+    try {
+      const valid = await validateImage(file);
+      setSelectedFile(valid);
+    } catch (err) {
+      setError(err);
+      console.error('Validation error:', err);
+    }
+  };
 
-    const handleClose = () => {
-        setSelectedFile(null);
-        fileInputRef.current.value = '';
-    };
+  // Программный клик по скрытому инпуту
+  const handleClick = () => {
+    fileInputRef.current?.click();
+  };
 
-   const handleSend = async () => {
+  // Сброс выбранного файла
+  const handleClose = () => {
+    setSelectedFile(null);
+    fileInputRef.current.value = '';
+  };
+
+  // Отправка файла на сервер
+  const handleSend = async () => {
     if (!selectedFile) return;
 
+    onUploadStart?.();
+
     try {
-        if (typeof onUploadStart === 'function') {
-            onUploadStart();
-        }
+      // 1) Получаем presigned POST данные
+      const presignedRes = await fetch(`${API_URL}/core/prompt/s3/presigned-post`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (!presignedRes.ok) throw new Error('Failed to get presigned data');
+      const { fields } = await presignedRes.json();
 
-        const presignedRes = await fetch(`${URLL}/core/prompt/s3/presigned-post`, {
-            method: "POST",
-            credentials: "include"
-        });
+      // 2) Загружаем на S3
+      const formData = new FormData();
+      Object.entries(fields).forEach(([k, v]) => formData.append(k, v));
+      formData.append('file', selectedFile);
+      const uploadRes = await fetch(`${API_URL}/s3/user-prompts`, {
+        method: 'POST',
+        body: formData,
+      });
+      if (!uploadRes.ok) throw new Error('Failed to upload to S3');
 
-        if (!presignedRes.ok) throw new Error("Failed to get presigned POST data");
+      // 3) Уведомляем backend, что можно начинать обработку
+      const notifyRes = await fetch(`${API_URL}/core/prompt`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key_path: fields.key }),
+        credentials: 'include',
+      });
+      if (!notifyRes.ok) throw new Error('Failed to notify backend');
+      const { id, prompt_id } = await notifyRes.json();
+      
+      // 4) Прокидываем новый prompt наверх с минимальным набором полей
+      onImageSelect({
+        id,
+        prompt_id: prompt_id,
+        status: 'pending',
+        url: URL.createObjectURL(selectedFile), // временный превью
+        created_at: new Date().toISOString(),
+        raw_key: fields.key,
+      });
 
-        const presignedData = await presignedRes.json();
-        const { url, fields, prompt_id } = presignedData;
-
-        const formData = new FormData();
-        Object.entries(fields).forEach(([key, value]) => formData.append(key, value));
-        formData.append("file", selectedFile);
-
-        const uploadRes = await fetch(`${URLL}/s3/user-prompts`, {
-            method: "POST",
-            body: formData
-        });
-
-        if (!uploadRes.ok) throw new Error("Failed to upload image to S3");
-
-        const notifyRes = await fetch(`${URLL}/core/prompt`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ "key_path": presignedData.fields.key }),
-            credentials: "include"
-        });
-
-        if (!notifyRes.ok) throw new Error("Failed to notify backend");
-
-        // Закрываем окно, уведомляем родителя
-        if (typeof onImageSelect === 'function') {
-            onImageSelect({
-                key: prompt_id,
-                id: "some-id",
-                user_id: 1,
-                prompt_id: "prompt_id",
-                raw_key: presignedData.fields.key,
-                status: "pending",
-                url: URL.createObjectURL(selectedFile), // временный URL
-                created_at: new Date().toISOString(),
-            });
-        }
-
-        handleClose();
-        setWsActive(true);
+      // 5) Закрываем модалку
+      handleClose();
     } catch (err) {
-        setError(err.message);
-        console.error("Upload error:", err);
+      setError(err.message);
+      console.error('Upload error:', err);
     }
-};
+  };
 
+  return (
+    <>
+      <div className={classes.uploader}>
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileSelect}
+          accept="image/*"
+          className={classes.hiddenInput}
+        />
+        <button
+          className={classes.uploadButton}
+          onClick={handleClick}
+          disabled={!!selectedFile}
+          title="Upload image"
+        >
+          <Paperclip size={24} />
+        </button>
+        {error && <div className={classes.error}>{error}</div>}
+      </div>
 
-    const handleProcessingDone = () => {
-        setWsActive(false);
-        handleClose();
-        if (typeof onImageSelect === 'function') {
-            onImageSelect(selectedFile);
-        }
-        if (typeof onProcessingDone === 'function') {
-            onProcessingDone();
-        }
-    };
-
-    return (
-        <>
-            <div className={classes.uploader}>
-                <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileSelect}
-                    accept="image/*"
-                    className={classes.hiddenInput}
-                />
-                <button
-                    className={classes.uploadButton}
-                    onClick={handleClick}
-                    title="Upload image"
-                    disabled={!!selectedFile}
-                >
-                    <Paperclip size={24} />
-                </button>
-                {error && <div className={classes.error}>{error}</div>}
-            </div>
-            {selectedFile && (
-                <UploadModal
-                    fileName={selectedFile.name}
-                    onClose={handleClose}
-                    onSend={handleSend}
-                />
-            )}
-            {wsActive && (
-                <WebSocketListener
-                    url={`ws://fd5c-89-191-234-252.ngrok-free.app/notifier/prompt/result`} // пример URL
-                      onClose={handleProcessingDone}
-                />
-            )}
-        </>
-    );
+      {selectedFile && (
+        <UploadModal
+          fileName={selectedFile.name}
+          onClose={handleClose}
+          onSend={handleSend}
+        />
+      )}
+    </>
+  );
 };
 
 export default ImageUploader;
