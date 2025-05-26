@@ -232,3 +232,10 @@ class JwtAuthBase(ABC):
             key=settings.JWT.REFRESH_TOKEN_NAME,
             httponly=True,
         )
+
+    @staticmethod
+    def unset_account_cookie(response: Response) -> None:
+        response.delete_cookie(
+            key=settings.JWT.ACCESS_TOKEN_NAME,
+            httponly=True,
+        )

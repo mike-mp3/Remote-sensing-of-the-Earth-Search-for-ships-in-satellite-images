@@ -131,6 +131,9 @@ async def create_new_token_pair(
 @with_errors(UnAuthorized)
 @inject
 async def logout(
+    response: Response,
+    access_util: JwtAccessCookie = Depends(Provide[JWT.access]),
+    refresh_util: JwtRefreshCookie = Depends(Provide[JWT.refresh]),
     auth_service: AuthService = Depends(Provide[Services.auth_service]),
     credentials: JwtAuthorizationCredentials = Security(refresh_security),
 ) -> None:
@@ -147,6 +150,8 @@ async def logout(
             refresh_token=refresh_token,
         ),
     )
+    access_util.unset_account_cookie(response=response)
+    refresh_util.unset_refresh_cookie(response=response)
 
 
 @router.get(
