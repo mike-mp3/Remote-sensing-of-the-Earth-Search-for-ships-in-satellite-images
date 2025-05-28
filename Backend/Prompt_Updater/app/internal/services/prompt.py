@@ -10,6 +10,7 @@ from app.pkg.models import (
     UpdatePromptStatusCommand,
 )
 from app.pkg.models.exceptions.repository import EmptyResult
+import asyncio
 
 logger = get_logger(__name__)
 
@@ -46,6 +47,7 @@ class PromptService:
 
         user_id = prompt.user_id
 
+        await asyncio.sleep(6)
         if self.ws_manager.is_user_connected(user_id):
             await self.ws_manager.send_personal_message(user_id, prompt)
 
@@ -63,5 +65,6 @@ class PromptService:
 
         user_id = prompt.user_id
 
+        await asyncio.sleep(6)
         if self.ws_manager.is_user_connected(user_id):
             await self.ws_manager.send_personal_message(user_id, prompt)
