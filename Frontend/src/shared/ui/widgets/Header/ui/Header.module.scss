@@ -2,6 +2,7 @@
     background-color: #232324;
     padding: 16px 0;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
 }
 
 .container {
@@ -30,10 +31,68 @@
     &:active {
         transform: scale(0.98);
     }
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .userInfo {
     color: #94a3b8;
     font-size: 16px;
     font-weight: 500;
-} 
+    margin-left: 16px;
+}
+
+.rightSection {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.exportForm {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 20px;
+    background-color: #2e2e30;
+    border-top: 1px solid #444;
+    flex-wrap: wrap;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.label {
+    color: #cbd5e1;
+    font-size: 14px;
+}
+
+.input {
+    padding: 6px 10px;
+    border: 1px solid #475569;
+    border-radius: 6px;
+    background-color: #1f1f21;
+    color: white;
+    font-size: 14px;
+}
+
+.notification {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #16a34a;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+    transition: opacity 0.3s ease-in-out;
+}

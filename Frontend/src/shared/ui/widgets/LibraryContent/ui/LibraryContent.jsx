@@ -10,7 +10,7 @@ const LibraryContent = () => {
   const [selectedImage, setSelectedImage] = useState(null);
 
   const URL = import.meta.env.VITE_API_BASE_URL;
-  const WS_URL = import.meta.env.VITE_WS_URL;
+  const WS_URL = import.meta.env.VITE_API_WS_URL;
   const URLLLLLL = URL + "/s3";
 
   const handleImageSelect = (newPrompt) => {
@@ -89,7 +89,7 @@ const LibraryContent = () => {
 
   const fetchPromptsWithUrls = async () => {
     try {
-      const response = await fetch(`${URL}/core/prompt`, {
+      const response = await fetch(`${URL}/core/prompt?size=50`, {
         headers: {
           "Content-Type": "application/json",
           "ngrok-skip-browser-warning": "true"
