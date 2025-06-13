@@ -1,4 +1,5 @@
 """``on_startup`` function will be called when server trying to start."""
+from app.internal.workers.background import background_worker
 
 
 async def on_startup() -> None:
@@ -11,6 +12,7 @@ async def on_startup() -> None:
     Returns:
         None
     """
+    await background_worker.start()
 
 
 async def on_shutdown() -> None:
@@ -20,3 +22,4 @@ async def on_shutdown() -> None:
     Returns:
         None
     """
+    await background_worker.stop()

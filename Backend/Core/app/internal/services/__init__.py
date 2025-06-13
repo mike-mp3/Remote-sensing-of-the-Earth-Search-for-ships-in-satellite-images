@@ -30,8 +30,8 @@ class Services(containers.DeclarativeContainer):
     user_service = providers.Factory(
         UserService,
         user_repository=repositories.user_repository,
-        email_tasks=celery.email_tasks,
         user_redis_repository=async_redis.user_repository,
+        email_client=clients.email.client,
     )
 
     auth_service = providers.Factory(
@@ -46,5 +46,5 @@ class Services(containers.DeclarativeContainer):
         prompt_repository=repositories.prompt_repository,
         producer=clients.rabbit_mq.producer,
         raw_queue_name=settings.RABBIT.RAW_PROMPTS_QUEUE_NAME,
-        prompt_tasks=celery.prompt_tasks,
+        email_client=clients.email.client,
     )

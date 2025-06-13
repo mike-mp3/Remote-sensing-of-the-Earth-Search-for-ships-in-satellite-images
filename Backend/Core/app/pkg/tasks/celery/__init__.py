@@ -8,4 +8,6 @@ __all__ = ["Celery", "EmailTasks", "PromptTasks"]
 
 class Celery(containers.DeclarativeContainer):
     email_tasks = providers.Factory(EmailTasks)
-    prompt_tasks = providers.Factory(PromptTasks)
+    prompt_tasks = providers.Factory(
+        PromptTasks
+    )

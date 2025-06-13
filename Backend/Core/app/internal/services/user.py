@@ -1,12 +1,14 @@
 from app.internal.repository.async_redis import UserAsyncRedisRepository
 from app.internal.repository.postgresql import UserRepository
 from app.internal.repository.repository import BaseRepository
+from app.internal.workers.background import background_worker
 from app.pkg import models
+from app.pkg.clients.email_client import EmailClient
 from app.pkg.logger import get_logger
 from app.pkg.models.exceptions import UserAlreadyExists
 from app.pkg.models.exceptions.repository import EmptyResult
 from app.pkg.models.exceptions.user import CodeNotFound, IncorrectCode, UserNotFound
-from app.pkg.tasks.celery.email import EmailTasks
+
 from app.pkg.utils.confirmation_code import generate_secure_code, verify_secure_code
 from app.pkg.utils.password import hash_password
 from pydantic import EmailStr, SecretBytes, SecretStr
@@ -19,17 +21,17 @@ class UserService:
 
     user_repository: UserRepository
     user_redis_repository: UserAsyncRedisRepository
-    email_tasks: EmailTasks
+    email_client: EmailClient
 
     def __init__(
         self,
         user_repository: BaseRepository,
         user_redis_repository: BaseRepository,
-        email_tasks: EmailTasks,
+        email_client: EmailClient,
     ):
         self.user_repository = user_repository
         self.user_redis_repository = user_redis_repository
-        self.email_tasks = email_tasks
+        self.email_client = email_client
 
     async def create_user(self, request: models.CreateUserRequest):
         user = None
@@ -98,9 +100,10 @@ class UserService:
                 confirmation_code=confirmation_code,
             ),
         )
-        self.email_tasks.send_confirmation_code.delay(
-            to_email=email,
-            confirmation_code=confirmation_code.get_secret_value(),
+        await background_worker.put(
+            self.email_client.send_confirmation,
+            email,
+            confirmation_code,
         )
         logger.debug(
             "Added email confirmation background task for user %s",

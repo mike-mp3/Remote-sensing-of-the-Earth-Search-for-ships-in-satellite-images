@@ -11,11 +11,7 @@ logger = get_logger(__name__)
 
 class EmailTasks:
     @staticmethod
-    @celery_app.task(name="send_confirmation_code", bind=True, max_retries=3)
-    @inject
-    @async_to_sync
     async def send_confirmation_code(
-        task,
         to_email: EmailStr,
         confirmation_code: str,
         email_client: EmailClient = Provide[Clients.email.client],
@@ -26,16 +22,18 @@ class EmailTasks:
                 confirmation_code=confirmation_code,
             )
         except Exception as exc:
-            if task.request.retries >= task.max_retries:
-                logger.info(
-                    "Sending email with confirmation code to %s failed: %s",
-                    to_email,
-                    exc,
-                )
-            else:
-                logger.error(
-                    "Resending email with confirmation code to %s failed: %s",
-                    to_email,
-                    exc,
-                )
-                task.retry(countdown=30, exc=exc)
+            logger.error(exc)
+            raise exc
+            # if task.request.retries >= task.max_retries:
+            #     logger.info(
+            #         "Sending email with confirmation code to %s failed: %s",
+            #         to_email,
+            #         exc,
+            #     )
+            # else:
+            #     logger.error(
+            #         "Resending email with confirmation code to %s failed: %s",
+            #         to_email,
+            #         exc,
+            #     )
+            #     task.retry(countdown=30, exc=exc)

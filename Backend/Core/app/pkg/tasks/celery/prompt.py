@@ -24,96 +24,96 @@ logger = get_logger(__name__)
 
 
 class PromptTasks:
-    @staticmethod
-    @inject
-    async def __fetch_prompts_data(
-        user_id: PositiveInt,
-        start_time: Optional[datetime] = None,
-        end_time: Optional[datetime] = None,
-        limit: Optional[PositiveInt] = None,
-        prompts_repository: PromptRepository = Provide[Repositories.prompt_repository],
-        s3_prompter_client: S3PrompterClient = Provide[Clients.s3.prompter],
-    ) -> DividedBinaryPrompt:
+    prompts_repository: PromptRepository
+    s3_prompter_client: S3PrompterClient
+    email_client: EmailClient
 
-        raw = []
-        results = []
-        prompts = await prompts_repository.read_with_filters(
-            cmd=ReadPromptWithFilters(
-                user_id=user_id,
-                status=PromptStatus.success.value,
-                start_time=start_time,
-                end_time=end_time,
-                limit=limit,
-            ),
-        )
-        for prompt in prompts:
-            raw_link = s3_prompter_client.get_prompt_link(
-                user_id=user_id,
-                prompt_id=prompt.prompt_id,
-                prompt_type=PromptObjectType.RAW.value,
-            )
-            raw_image = await s3_prompter_client.download_image(raw_link)
-
-            result_link = s3_prompter_client.get_prompt_link(
-                user_id=user_id,
-                prompt_id=prompt.prompt_id,
-                prompt_type=PromptObjectType.RESULT.value,
-            )
-            result_image = await s3_prompter_client.download_image(result_link)
-
-            if raw_image and result_image:
-                raw.append(BinaryPrompt(**prompt.to_dict(), data=raw_image))
-                results.append(BinaryPrompt(**prompt.to_dict(), data=result_image))
-
-        return DividedBinaryPrompt(raw=raw, results=results)
-
-    @staticmethod
-    @celery_app.task(name="generate_and_send_report", bind=True, max_retries=3)
-    @inject
-    @async_to_sync
-    async def generate_and_send_report(
-        task,
-        user_id: PositiveInt,
-        email: EmailStr,
-        start_time: Optional[datetime] = None,
-        end_time: Optional[datetime] = None,
-        limit: Optional[PositiveInt] = None,
-        email_client: EmailClient = Provide[Clients.email.client],
+    def __init__(
+        self,
+        prompts_repository: PromptRepository,
+        s3_prompter_client: S3PrompterClient,
+        email_client: EmailClient,
     ):
-        try:
-            prompts = await PromptTasks.__fetch_prompts_data(
-                user_id=user_id,
-                start_time=start_time,
-                end_time=end_time,
-                limit=limit,
-            )
-            report = generate_pdf(prompts.raw, prompts.results)
-            if not report:
-                raise ValueError("PDF is empty")
+        self.prompts_repository = prompts_repository
+        self.s3_prompter_client = s3_prompter_client
+        self.email_client = email_client
 
-            logger.error("Trying to send report to %s", email)
-            await email_client.send_report_about_prompts(
-                to_email=email,
-                file=report,
-            )
-            logger.error("Report was sent to %s", email)
-        except EmptyResult:
-            logger.error(
-                "Prompts not found for user %s:",
-                user_id,
-            )
-
-        except Exception as exc:
-            if task.request.retries >= task.max_retries:
-                logger.error(
-                    "Failed to generate report for user %s: %s",
-                    user_id,
-                    exc,
-                )
-            else:
-                logger.error(
-                    "Failed to generate report for user %s: %s",
-                    user_id,
-                    exc,
-                )
-                task.retry(countdown=30, exc=exc)
+    # async def __fetch_prompts_data(
+    #     self,
+    #     user_id: PositiveInt,
+    #     start_time: Optional[datetime] = None,
+    #     end_time: Optional[datetime] = None,
+    #     limit: Optional[PositiveInt] = None,
+    # ) -> DividedBinaryPrompt:
+    #
+    #     raw = []
+    #     results = []
+    #     prompts = await self.prompts_repository.read_with_filters(
+    #         cmd=ReadPromptWithFilters(
+    #             user_id=user_id,
+    #             status=PromptStatus.success.value,
+    #             start_time=start_time,
+    #             end_time=end_time,
+    #             limit=limit,
+    #         ),
+    #     )
+    #     for prompt in prompts:
+    #         raw_link = self.s3_prompter_client.get_prompt_link(
+    #             user_id=user_id,
+    #             prompt_id=prompt.prompt_id,
+    #             prompt_type=PromptObjectType.RAW.value,
+    #         )
+    #         raw_image = await self.s3_prompter_client.download_image(raw_link)
+    #
+    #         result_link = self.s3_prompter_client.get_prompt_link(
+    #             user_id=user_id,
+    #             prompt_id=prompt.prompt_id,
+    #             prompt_type=PromptObjectType.RESULT.value,
+    #         )
+    #         result_image = await self.s3_prompter_client.download_image(result_link)
+    #
+    #         if raw_image and result_image:
+    #             raw.append(BinaryPrompt(**prompt.to_dict(), data=raw_image))
+    #             results.append(BinaryPrompt(**prompt.to_dict(), data=result_image))
+    #
+    #     return DividedBinaryPrompt(raw=raw, results=results)
+    #
+    #
+    # async def generate_and_send_report(
+    #     self,
+    #     user_id: PositiveInt,
+    #     email: EmailStr,
+    #     start_time: Optional[datetime] = None,
+    #     end_time: Optional[datetime] = None,
+    #     limit: Optional[PositiveInt] = None,
+    # ):
+    #     try:
+    #         prompts = await self.__fetch_prompts_data(
+    #             user_id=user_id,
+    #             start_time=start_time,
+    #             end_time=end_time,
+    #             limit=limit,
+    #         )
+    #         report = generate_pdf(prompts.raw, prompts.results)
+    #         if not report:
+    #             raise ValueError("PDF is empty")
+    #
+    #         logger.error("Trying to send report to %s", email)
+    #         await self.email_client.send_report_about_prompts(
+    #             to_email=email,
+    #             file=report,
+    #         )
+    #         logger.error("Report was sent to %s", email)
+    #     except EmptyResult:
+    #         logger.error(
+    #             "Prompts not found for user %s:",
+    #             user_id,
+    #         )
+    #
+    #     except Exception as exc:
+    #         logger.error(
+    #             "Failed to generate report for user %s: %s",
+    #             user_id,
+    #             exc,
+    #         )
+    #         raise exc

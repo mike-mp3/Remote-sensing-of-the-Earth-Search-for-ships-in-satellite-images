@@ -1,6 +1,11 @@
+from datetime import datetime
+from typing import Optional
+
 from aio_pika.exceptions import AMQPConnectionError, ChannelClosed
 from app.internal.repository.postgresql import PromptRepository
 from app.internal.repository.repository import BaseRepository
+from app.internal.workers.background import background_worker
+from app.pkg.clients.email_client import EmailClient
 from app.pkg.clients.rabbitmq.producer import RabbitMQProducer
 from app.pkg.clients.s3 import S3PrompterClient
 from app.pkg.clients.s3.base_client import BaseS3AsyncClient
@@ -19,7 +24,7 @@ from app.pkg.models import (
     RawPromptMessage,
     ReadPromptCommand,
     ReadPromptPageCommand,
-    SendPromptReportRequest,
+    SendPromptReportRequest, BinaryPrompt, DividedBinaryPrompt, ReadPromptWithFilters,
 )
 from app.pkg.models.exceptions import (
     CannotProcessPrompt,
@@ -31,6 +36,9 @@ from app.pkg.models.exceptions import (
 )
 from app.pkg.models.exceptions.repository import EmptyResult, UniqueViolation
 from app.pkg.tasks.celery.prompt import PromptTasks
+from pydantic import PositiveInt, EmailStr
+
+from app.pkg.utils.pdf_generator import generate_pdf
 
 logger = get_logger(__name__)
 
@@ -40,7 +48,7 @@ class PromptService:
     prompt_repository: PromptRepository
     producer: RabbitMQProducer
     raw_queue_name: str
-    prompt_tasks: PromptTasks
+    email_client: EmailClient
 
     def __init__(
         self,
@@ -48,13 +56,13 @@ class PromptService:
         prompt_repository: BaseRepository,
         producer: RabbitMQProducer,
         raw_queue_name: str,
-        prompt_tasks: PromptTasks,
+        email_client: EmailClient,
     ):
         self.s3_prompter_client = s3_prompter_client
         self.prompt_repository = prompt_repository
         self.producer = producer
         self.raw_queue_name = raw_queue_name
-        self.prompt_tasks = prompt_tasks
+        self.email_client = email_client
 
     async def generate_presigned_post(
         self,
@@ -164,10 +172,90 @@ class PromptService:
         request: SendPromptReportRequest,
         active_user: ActiveUser,
     ):
-        self.prompt_tasks.generate_and_send_report.delay(
+        await background_worker.put(
+            self.generate_and_send_report_task,
             user_id=active_user.id,
             email=active_user.email,
             start_time=request.start_time,
             end_time=request.end_time,
             limit=request.limit,
         )
+
+    async def __fetch_prompts_data(
+        self,
+        user_id: PositiveInt,
+        start_time: Optional[datetime] = None,
+        end_time: Optional[datetime] = None,
+        limit: Optional[PositiveInt] = None,
+    ) -> DividedBinaryPrompt:
+
+        raw = []
+        results = []
+        prompts = await self.prompt_repository.read_with_filters(
+            cmd=ReadPromptWithFilters(
+                user_id=user_id,
+                status=PromptStatus.success.value,
+                start_time=start_time,
+                end_time=end_time,
+                limit=limit,
+            ),
+        )
+        for prompt in prompts:
+            raw_link = self.s3_prompter_client.get_prompt_link(
+                user_id=user_id,
+                prompt_id=prompt.prompt_id,
+                prompt_type=PromptObjectType.RAW.value,
+            )
+            raw_image = await self.s3_prompter_client.download_image(raw_link)
+
+            result_link = self.s3_prompter_client.get_prompt_link(
+                user_id=user_id,
+                prompt_id=prompt.prompt_id,
+                prompt_type=PromptObjectType.RESULT.value,
+            )
+            result_image = await self.s3_prompter_client.download_image(result_link)
+
+            if raw_image and result_image:
+                raw.append(BinaryPrompt(**prompt.to_dict(), data=raw_image))
+                results.append(BinaryPrompt(**prompt.to_dict(), data=result_image))
+
+        return DividedBinaryPrompt(raw=raw, results=results)
+
+    async def generate_and_send_report_task(
+        self,
+        user_id: PositiveInt,
+        email: EmailStr,
+        start_time: Optional[datetime] = None,
+        end_time: Optional[datetime] = None,
+        limit: Optional[PositiveInt] = None,
+    ):
+        try:
+            prompts = await self.__fetch_prompts_data(
+                user_id=user_id,
+                start_time=start_time,
+                end_time=end_time,
+                limit=limit,
+            )
+            report = generate_pdf(prompts.raw, prompts.results)
+            if not report:
+                raise ValueError("PDF is empty")
+
+            logger.error("Trying to send report to %s", email)
+            await self.email_client.send_report_about_prompts(
+                to_email=email,
+                file=report,
+            )
+            logger.error("Report was sent to %s", email)
+        except EmptyResult:
+            logger.error(
+                "Prompts not found for user %s:",
+                user_id,
+            )
+
+        except Exception as exc:
+            logger.error(
+                "Failed to generate report for user %s: %s",
+                user_id,
+                exc,
+            )
+            raise exc
