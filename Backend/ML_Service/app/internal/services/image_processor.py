@@ -37,20 +37,15 @@ class ImageProcessor:
         self.model_local_path = model_local_path
         self.raw_queue_name = raw_queue_name
         self.results_queue_name = results_queue_name
-        self.model = self._get_model()
-
-    def _get_model(self):
-        if os.path.exists(self.model_local_path):
-            return YOLO(self.model_local_path)
-        else:
-            raise FileNotFoundError("Model not found: %s", {self.model_local_path})
+        # Skip model loading for mock
+        self.model = None
 
     async def callback_handle_raw(self, data: RawPromptMessage):
         # Download raw image from S3
         raw_image = await self.s3_prompter_client.download_image(data.raw_key)
 
-        # Processing with ML model
-        result_image = self.__get_result(raw_image)
+        # Skip ML processing and just use the original image
+        result_image = self.__get_result_mock(raw_image)
 
         # S3 interaction
         link = self.s3_prompter_client.parse_path(data.raw_key)
@@ -72,14 +67,12 @@ class ImageProcessor:
             queue_name=self.results_queue_name,
         )
 
-    def __get_result(self, raw_image: bytes) -> bytes:
-        image_np = np.array(Image.open(io.BytesIO(raw_image)).convert("RGB"))
-
-        results = self.model.predict(image_np)
-        result_image = results[0].plot(show=False)
-        result_image_rgb = cv2.cvtColor(result_image, cv2.COLOR_BGR2RGB)
-
-        success, encoded_image = cv2.imencode(".png", result_image_rgb)
-        if not success:
-            raise Exception("Image encoding failed")
-        return encoded_image.tobytes()
+    def __get_result_mock(self, raw_image: bytes) -> bytes:
+        """Mock version that just returns the original image without processing"""
+        # Just verify it's a valid image and return as is
+        image = Image.open(io.BytesIO(raw_image)).convert("RGB")
+        
+        # Convert back to bytes in the same format as original processing
+        img_byte_arr = io.BytesIO()
+        image.save(img_byte_arr, format='PNG')
+        return img_byte_arr.getvalue()
